@@ -38,6 +38,7 @@
   letter-spacing: -0.02em;
   white-space: nowrap;
 }
+.brand-logo { flex: none; color: var(--text); }
 .brand-mark {
   width: 28px;
   height: 28px;

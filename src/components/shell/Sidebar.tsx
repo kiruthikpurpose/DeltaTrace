@@ -1,4 +1,5 @@
-import { ChevronsLeft, ChevronsRight, Activity } from 'lucide-react';
+import { ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { Logo } from '../ui/Logo';
 import { NavLink } from 'react-router-dom';
 import { NAV } from '../../routes';
 import { useSimStore } from '../../state/simStore';
@@ -13,9 +14,7 @@ export function Sidebar() {
   return (
     <aside className={`sidebar${mobileNav ? ' open' : ''}`} aria-label="Primary">
       <div className="brand">
-        <div className="brand-mark" aria-hidden>
-          <Activity size={18} color="var(--bg)" strokeWidth={2.6} />
-        </div>
+        <Logo size={32} className="brand-logo" />
         <span>DeltaTrace</span>
       </div>
       <nav className="nav" aria-label="Main navigation">

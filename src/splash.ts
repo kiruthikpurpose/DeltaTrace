@@ -1,4 +1,4 @@
-const MIN_MS = 3400;
+const MIN_MS = 4300;
 const KEY = 'deltatrace.splash';
 
 /** Dismisses the launch screen once the minimum time has passed and the first page is ready. */

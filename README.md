@@ -1,5 +1,10 @@
 <div align="center">
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/logo-dark.svg">
+  <img src="docs/images/logo-light.svg" alt="DeltaTrace logo" width="88">
+</picture>
+
 # DeltaTrace
 
 **Trust-Aware Alarm Grouping and Tuning for Pipelines**
