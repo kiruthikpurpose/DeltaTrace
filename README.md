@@ -54,7 +54,7 @@ flowchart LR
   R --> D[ Cleaner data]:::ok
   D --> T
   classDef trust fill:#14b8a6,stroke:#0f766e,color:#03201d
-  classDef group fill:#8b5cf6,stroke:#5b21b6,color:#fff
+  classDef group fill:#3a76ab,stroke:#24517a,color:#fff
   classDef tune fill:#f59e0b,stroke:#92400e,color:#1f1300
   classDef ok fill:#22c55e,stroke:#15803d,color:#04210f
   classDef neutral fill:#64748b,stroke:#334155,color:#fff
@@ -99,10 +99,10 @@ flowchart TB
   S -. " fail-open bypass: raw alarms unchanged" .-> OC
   classDef field fill:#334155,stroke:#94a3b8,color:#fff
   classDef comm fill:#0ea5e9,stroke:#075985,color:#fff
-  classDef cc fill:#4f6bff,stroke:#1e3a8a,color:#fff
-  classDef dt fill:#7c3aed,stroke:#4c1d95,color:#fff
+  classDef cc fill:#2c6ca3,stroke:#1f4f7a,color:#fff
+  classDef dt fill:#3a76ab,stroke:#24517a,color:#fff
   classDef trust fill:#14b8a6,stroke:#0f766e,color:#03201d
-  classDef group fill:#8b5cf6,stroke:#5b21b6,color:#fff
+  classDef group fill:#3a76ab,stroke:#24517a,color:#fff
   classDef tune fill:#f59e0b,stroke:#92400e,color:#1f1300
 ```
 
@@ -169,8 +169,8 @@ flowchart TD
   CL -->|otherwise| NR[ Needs review]:::nr
   PE --> OR[Origin estimate<br/>grouping aid, not a locator]:::group
   classDef warn fill:#f59e0b,color:#1f1300
-  classDef group fill:#8b5cf6,color:#fff
-  classDef di fill:#d946ef,color:#fff
+  classDef group fill:#3a76ab,color:#fff
+  classDef di fill:#9c4f92,color:#fff
   classDef pe fill:#3b82f6,color:#fff
   classDef nr fill:#94a3b8,color:#0f172a
 ```
@@ -192,7 +192,7 @@ flowchart LR
   classDef trust fill:#14b8a6,color:#03201d
   classDef bad fill:#ef4444,color:#fff
   classDef ok fill:#22c55e,color:#04210f
-  classDef group fill:#8b5cf6,color:#fff
+  classDef group fill:#3a76ab,color:#fff
 ```
 
 Objective: `J = 1·alarms + 2·falseAlarms + 0.05·meanDelay + 1e6·missed`. Turning trust gating **off** lets faulty-sensor samples contaminate the replay and can produce a worse recommendation.
@@ -219,11 +219,22 @@ Enforced in code, checked live in the UI, covered by tests.
 | **Incidents** | Filter/sort, class reasoning, position-time timeline with wavefront, member alarms, origin, dispositions |
 | **Trust Center** | Trust heatmap, sensor cards, predicted-vs-measured, neighbour graph, live formula, quick faults |
 | **Alarm Tuner** | Run replay, Pareto chart, gated vs contaminated, approve & write back, MOC change log, loop iterations |
-| **Write-back & Audit** | Dry-run tag feed, audit log, live rule compliance, CSV/JSON export |
+| **Write-back & Audit** | Dry-run tag feed, audit log, live rule compliance, CSV, JSON and PDF export |
 | **Benchmarks** | Scenarios S0–S8 × N seeds, charts, confusion matrix, experiments E1–E7, exports |
 | **Guided Demo** | 10-step narrated story with auto fault injection and presenter mode |
 | **How It Works** | 12 interactive sections driven by live data, with text alternatives |
 | **Settings** | Wave speed, tolerances, trust weights, thresholds, demotion rules, seed, theme |
+
+## Reports
+
+PDF reports are generated in the browser (no server, no external library) and downloaded as A4 documents with cover block, KPI tiles, tables, vector charts, page headers and page numbers:
+
+| Report | Where | Contents |
+|---|---|---|
+| Benchmark report | Benchmarks | Summary, S0-S8 table, peak and flood charts, confusion matrix, experiments E1-E7, method |
+| Operations and audit report | Write-back & Audit | KPIs, safety compliance, sensor trust, incidents, advisories, change records, audit trail, write-back log, configuration |
+| Incident report | Incident detail | Summary, classification basis, origin, member alarms, disposition, write-back |
+| Alarm tuning report | Alarm Tuner | Recommendations, Pareto charts, candidate tables, contamination check, approved changes |
 
 ## Quick start
 
@@ -249,7 +260,7 @@ flowchart LR
   s1[1 Normal]:::a --> s2[2 Pump trip<br/>flood]:::b --> s3[3 Grouping<br/>not merged]:::c --> s4[4 Leak km 87]:::c --> s5[5 Stuck PT-7]:::d --> s6[6 Replay + valve]:::d --> s7[7 Comms + leak]:::c --> s8[8 Tuning]:::e --> s9[9 Fail-open]:::b --> s10[10 Close loop]:::a
   classDef a fill:#22c55e,color:#04210f
   classDef b fill:#ef4444,color:#fff
-  classDef c fill:#8b5cf6,color:#fff
+  classDef c fill:#3a76ab,color:#fff
   classDef d fill:#14b8a6,color:#03201d
   classDef e fill:#f59e0b,color:#1f1300
 ```

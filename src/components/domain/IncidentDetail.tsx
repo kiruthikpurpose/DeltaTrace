@@ -1,10 +1,11 @@
-import { CheckCheck, Search, ThumbsDown, Wrench, Hammer } from 'lucide-react';
+import { CheckCheck, FileText, Search, ThumbsDown, Wrench, Hammer } from 'lucide-react';
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { CHANNELS, type Disposition, type Incident } from '../../engine';
 import { runner } from '../../state/runner';
 import { useLogStore } from '../../state/logStore';
 import { alarmId, fmt, incId, mmss } from '../../utils/format';
+import { incidentReport } from '../../utils/reports';
 import { ClassBadge } from '../ui/Badge';
 import { Card } from '../ui/Card';
 import { Table } from '../ui/Table';
@@ -39,6 +40,8 @@ export function IncidentDetail({ inc, compact }: { inc: Incident; compact?: bool
           <span className={`badge ${inc.status === 'open' ? 'ok' : 'neutral'}`}>{inc.status}</span>
           {inc.critical && <span className="badge bad">CRITICAL ALARM LEADS</span>}
           {disposition && <span className="badge trust">operator: {disposition.replace('-', ' ')}</span>}
+          <span className="grow" />
+          <button className="btn sm" onClick={() => incidentReport(inc, alarms, cfg)}><FileText size={13} /> PDF</button>
         </div>
         <p style={{ fontSize: 15, lineHeight: 1.45 }}>{inc.summary}</p>
       </div>

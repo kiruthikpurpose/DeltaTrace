@@ -165,7 +165,7 @@ export default function HowItWorks() {
 
   return (
     <div className="page hiw">
-      <PageHeader title="How It Works" purpose="DeltaTrace explained in plain words, with every diagram driven by the running simulation." info={['Scroll or use the sticky navigation.', 'Diagrams update live; try the sliders and buttons.', 'Every diagram has a text alternative for screen readers.']} />
+      <PageHeader title="How It Works" purpose="How the system works, with diagrams driven by the live simulation." info={['Scroll or use the sticky navigation.', 'Diagrams update live; try the sliders and buttons.', 'Every diagram has a text alternative for screen readers.']} />
       <nav className="hiw-nav" aria-label="Sections">
         {SECTIONS.map(([id, label]) => (
           <a key={id} href={`#${id}`} className={active === id ? 'on' : ''} aria-current={active === id ? 'true' : undefined} onClick={(e) => { e.preventDefault(); document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}>{label}</a>
@@ -191,7 +191,7 @@ export default function HowItWorks() {
 
       <Section id="architecture" title="System architecture" lead="DeltaTrace sits beside the existing system: read-only in, controlled write-back out. Click any block.">
         <div className="two-col arch-layout">
-          <Card flush><div style={{ padding: 8 }}><ArchitectureDiagram selected={arch} onSelect={setArch} failOpen={!snap.engineEnabled} /></div></Card>
+          <Card flush><div className="arch-scroll" style={{ padding: 8 }}><ArchitectureDiagram selected={arch} onSelect={setArch} failOpen={!snap.engineEnabled} /></div></Card>
           <Card title={arch ? ARCH_INFO[arch] ? arch.toUpperCase() : '' : 'Select a block'}>
             {arch && ARCH_INFO[arch] ? (
               <div className="stack">
@@ -202,7 +202,7 @@ export default function HowItWorks() {
               </div>
             ) : <p className="muted">Click a block in the diagram.</p>}
             <div className="hr" />
-            <p className="muted" style={{ fontSize: 13 }}>The dashed amber arrow is the <b>fail-open bypass</b>: if DeltaTrace is off or fails, raw alarms reach the operator console unchanged. The lock means DeltaTrace never issues control commands.</p>
+            <p className="muted" style={{ fontSize: 13 }}>The arrow from SCADA to the operator console is the <b>fail-open path</b>: if DeltaTrace is off or fails, raw alarms reach the console unchanged. The lock means DeltaTrace never issues control commands.</p>
           </Card>
         </div>
         <Alt>Architecture: field sensors and RTUs connect through communication links and industrial protocols to the central SCADA server, historian, GPS clock and operator console. A read-only gateway copies data into the DeltaTrace unit containing a pipeline map, trust engine, grouping and classification engine, replay tuner, audit log and write-back module. A write-back interface returns incidents, quality flags and approved settings to the central server. A fail-open bypass sends raw alarms straight to the operator console. DeltaTrace issues no control commands.</Alt>
@@ -217,14 +217,14 @@ export default function HowItWorks() {
             <Alt>Position–time plot with a cone showing which alarms are close enough in time to share an incident. Slower wave speeds make the cone wider.</Alt>
           </Card>
           <Card title="Delays between neighbouring sensors">
-            <table className="tbl" aria-label="Delays between neighbouring sensors">
+            <div className="table-wrap"><table className="tbl" aria-label="Delays between neighbouring sensors">
               <thead><tr><th>Pair</th><th className="r">Distance</th><th className="r">Delay at {c} m/s</th><th className="r">Window (+{snap.cfg.clockTol + 5} s)</th></tr></thead>
               <tbody>
                 {[[3, 4], [4, 5], [9, 10], [2, 6], [1, 9]].map(([a, b]) => (
                   <tr key={a + '-' + b}><td>{NODES[a].name} → {NODES[b].name}</td><td className="r num">{Math.abs(NODES[a].km - NODES[b].km)} km</td><td className="r num">{delay(a, b, c).toFixed(0)} s</td><td className="r num">≤ {(delay(a, b, c) + snap.cfg.clockTol + 5).toFixed(0)} s</td></tr>
                 ))}
               </tbody>
-            </table>
+            </table></div>
             <p className="muted" style={{ marginTop: 8 }}>20 km ÷ 1000 m/s = 20 s. Alarms more than {snap.cfg.hopLimit} hops apart are never merged, however close in time.</p>
           </Card>
         </div>
@@ -271,7 +271,7 @@ export default function HowItWorks() {
         <div className="two-col">
           <Card accent="group" title="Step-through" actions={<Segmented label="Step" value={gStep} onChange={setGStep} options={CONE_STEPS.map((_, i) => ({ id: i, label: String(i + 1) }))} />}>
             <p style={{ minHeight: 24 }}><b>{CONE_STEPS[gStep]}</b></p>
-            <DelayCone points={gStep >= 0 ? conePoints.slice(0, gStep === 0 ? 3 : conePoints.length) : []} anchor={gStep >= 1 ? refPt : { km: -50, t: -50 }} c={1000} tol={snap.cfg.clockTol + 5} />
+            <DelayCone points={gStep >= 0 ? conePoints.slice(0, gStep === 0 ? 3 : conePoints.length) : []} anchor={gStep >= 1 ? refPt : null} c={1000} tol={snap.cfg.clockTol + 5} />
             <div style={{ marginTop: 8 }}>
               <span className="muted">Corroboration</span>
               <div className="bar" style={{ height: 10 }}><i style={{ width: gStep >= 3 ? '88%' : '10%', background: 'var(--c-group)' }} /></div>

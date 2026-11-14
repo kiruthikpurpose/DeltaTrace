@@ -115,7 +115,7 @@ export default function Demo() {
     <div className={`page demo demo-focus-${started ? step.focus : 'none'}${presenter ? ' presenter-mode' : ''}`}>
       <PageHeader
         title="Guided Demo"
-        purpose="A seven-minute, hands-free story: ten steps, automatic fault injection, big captions. Press P for presenter mode and R for an emergency reset."
+        purpose="Ten-step walkthrough (about 7 minutes). P: presenter mode, R: emergency reset."
         info={['The demo drives the real Live Console below.', 'Auto-play advances every step; use the arrows to go back or skip.', 'Presenter mode hides the sidebar and enlarges text.']}
         actions={
           <>
@@ -160,6 +160,14 @@ export default function Demo() {
         )}
       </Card>
 
+      {started && (
+        <div className="demo-caption" role="status" aria-live="polite">
+          <span className="badge group">Step {i + 1} · {step.title}</span>
+          <p>{step.caption}</p>
+          {presenter && <span className="countdown mono">{left}s</span>}
+        </div>
+      )}
+
       <Console embedded />
 
       {started && (step.focus === 'tuner' || tune.phase !== 'idle') && (
@@ -198,13 +206,6 @@ export default function Demo() {
         </Card>
       )}
 
-      {started && (
-        <div className="demo-caption" role="status" aria-live="polite">
-          <span className="badge group">Step {i + 1} · {step.title}</span>
-          <p>{step.caption}</p>
-          {presenter && <span className="countdown mono">{left}s</span>}
-        </div>
-      )}
     </div>
   );
 }

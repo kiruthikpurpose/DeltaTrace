@@ -45,7 +45,7 @@ export default function Settings() {
   const props = { draft, setDraft };
   return (
     <div className="page">
-      <PageHeader title="Settings" purpose="Engine parameters. Changes apply to the live engine after you confirm; every field has a default to return to." info={['Wave speed and clock tolerance set the delay window: delay = distance ÷ wave speed + tolerance + scan interval.', 'Trust weights λ control how strongly each check lowers a sensor’s trust.', 'Demotion needs trust below the limit AND corroboration below the limit AND a non-critical alarm.']} actions={<><button className="btn" onClick={() => setDraft(cloneConfig(DEFAULT_CONFIG))}><RotateCcw size={14} /> Reset all settings</button><button className="btn primary" disabled={!dirty} onClick={() => setConfirm(true)}>Apply to live engine…</button></>} />
+      <PageHeader title="Settings" purpose="Engine parameters. Changes apply to the live engine after confirmation." info={['Wave speed and clock tolerance set the delay window: delay = distance ÷ wave speed + tolerance + scan interval.', 'Trust weights λ control how strongly each check lowers a sensor’s trust.', 'Demotion needs trust below the limit AND corroboration below the limit AND a non-critical alarm.']} actions={<><button className="btn" onClick={() => setDraft(cloneConfig(DEFAULT_CONFIG))}><RotateCcw size={14} /> Reset all settings</button><button className="btn primary" disabled={!dirty} onClick={() => setConfirm(true)}>Apply to live engine…</button></>} />
       <div className="settings-grid">
         <Card title="Pressure wave & grouping" accent="group">
           <div className="stack">

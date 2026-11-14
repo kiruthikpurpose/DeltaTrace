@@ -1,4 +1,4 @@
-import { Copy, Download, FlaskConical, Play } from 'lucide-react';
+import { Copy, Download, FileText, FlaskConical, Play } from 'lucide-react';
 import { useState } from 'react';
 import { EXPERIMENTS, runBenchmarks, runExperiment, type BenchResult, type ExperimentResult } from '../engine';
 import { PageHeader } from '../components/shell/PageHeader';
@@ -7,6 +7,7 @@ import { Table } from '../components/ui/Table';
 import { download, copyText } from '../utils/download';
 import { toCsv, toMarkdownTable } from '../utils/format';
 import { toast } from '../state/toastStore';
+import { benchmarkReport } from '../utils/reports';
 
 function GroupedBars({ rows, a, b, title, unit }: { rows: { id: string; a: number; b: number }[]; a: string; b: string; title: string; unit: string }) {
   const W = 620;
@@ -118,7 +119,7 @@ export default function Benchmarks() {
     <div className="page">
       <PageHeader
         title="Benchmarks"
-        purpose="Batch-run scenarios S0–S8 headlessly with the same engine, over several seeds, and compare the existing system with DeltaTrace."
+        purpose="Scenarios S0–S8 over several seeds: existing system against DeltaTrace."
         info={['Each run is a simulated 30-minute timeline; nothing is animated.', 'Critical alarms hidden must be 0 in every run.', 'Where DeltaTrace does not help (quiet scenarios, overlapping events), the table says so.', 'All results are simulated.']}
       />
       <Card title="Scenario benchmark" sub="Simulated results: not field measurements" accent="group" actions={
@@ -161,6 +162,7 @@ export default function Benchmarks() {
             </div>
             <Confusion m={res.confusion} />
             <div className="row">
+              <button className="btn primary" onClick={() => benchmarkReport(res, Object.values(exps))}><FileText size={14} /> PDF report</button>
               <button className="btn" onClick={() => download('deltatrace-benchmarks.json', JSON.stringify({ simulated: true, seeds: res.rows.map((r) => ({ scenario: r.id, seeds: r.seeds })), rows: res.rows, confusion: res.confusion }, null, 2))}><Download size={14} /> JSON</button>
               <button className="btn" onClick={() => download('deltatrace-benchmarks.csv', toCsv(flat!), 'text/csv')}><Download size={14} /> CSV</button>
               <button className="btn" onClick={async () => toast((await copyText(toMarkdownTable(flat!))) ? 'Markdown table copied' : 'Copy failed', 'ok')}><Copy size={14} /> Copy as Markdown table</button>

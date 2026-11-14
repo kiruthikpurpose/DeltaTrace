@@ -31,6 +31,7 @@ export function AppShell() {
   const presenter = useUiStore((s) => s.presenter);
   const theme = useUiStore((s) => s.theme);
   const shortcuts = useUiStore((s) => s.shortcutsOpen);
+  const mobileNav = useUiStore((s) => s.mobileNav);
   const loc = useLocation();
   const nav = useNavigate();
   const replaying = useSimStore((s) => s.replaying);
@@ -41,6 +42,9 @@ export function AppShell() {
   useEffect(() => {
     runner.start();
   }, []);
+  useEffect(() => {
+    useUiStore.getState().set({ mobileNav: false });
+  }, [loc.pathname]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -70,6 +74,7 @@ export function AppShell() {
 
   return (
     <div className={clsx('app', collapsed && 'collapsed', presenter && 'presenter')}>
+      {mobileNav && <div className="overlay nav-overlay" onClick={() => useUiStore.getState().set({ mobileNav: false })} aria-hidden />}
       <a href="#main" className="skip-link">Skip to content</a>
       <Sidebar />
       <div className="main">
@@ -82,9 +87,12 @@ export function AppShell() {
             </Suspense>
           </ErrorBoundary>
         </main>
+        <footer className="sim-label" role="note">
+          <span>Simulated data — demonstration only</span>
+          <span>DeltaTrace Live</span>
+        </footer>
       </div>
-      <div className="sim-label" role="note">Simulated data — demonstration only</div>
-      <FaultDrawer />
+            <FaultDrawer />
       <CommandPalette />
       <ToastHost />
       <Modal open={shortcuts} onClose={() => useUiStore.getState().set({ shortcutsOpen: false })} title="Keyboard shortcuts" footer={<button className="btn primary" onClick={() => useUiStore.getState().set({ shortcutsOpen: false })}>Close</button>}>

@@ -1,4 +1,4 @@
-import { Play, ShieldCheck, Check } from 'lucide-react';
+import { Play, ShieldCheck, Check, FileText } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { TUNER_CLASSES, evaluateSetting, generateTraining, runTuner, settingOf, trainingFromSim, concatTraining, type TrainingSet, type TunerClassId, type TunerResult, type ChangeProposal } from '../engine';
 import { ChangeLog } from '../components/domain/ChangeLog';
@@ -13,6 +13,8 @@ import { LoopDiagram } from '../components/viz/LoopDiagram';
 import { runner } from '../state/runner';
 import { useSimStore } from '../state/simStore';
 import { toast } from '../state/toastStore';
+import { tunerReport } from '../utils/reports';
+import { useLogStore } from '../state/logStore';
 import { runLoopIterations, type LoopIteration } from '../engine/experiments';
 
 type Sel = TunerClassId | 'all';
@@ -32,6 +34,7 @@ export default function Tuner() {
   const [loopBusy, setLoopBusy] = useState(false);
   const tsRef = useRef<TrainingSet | null>(null);
   const [preBase, setPreBase] = useState<{ raw: number } | null>(null);
+  const changes = useLogStore((s) => s.changeLog);
   const classes = sel === 'all' ? TUNER_CLASSES.map((c) => c.id) : [sel];
   const shown = sel === 'all' ? 'roc' : sel;
   const res = results[shown];
@@ -93,7 +96,7 @@ export default function Tuner() {
     <div className="page">
       <PageHeader
         title="Alarm Tuner"
-        purpose="Replay candidate thresholds, deadbands and delays on stored data from trusted sensors only, then approve the best safe setting."
+        purpose="Replay candidate settings on trusted history and approve the best safe one."
         info={['Run replay tests up to 175 settings per alarm class on 6 hours of history.', 'Grey crosses would miss a real event, so they are rejected. The green star is the best safe setting.', 'Approving writes the setting to the live simulation immediately and records a Management-of-Change entry.']}
       />
       <div className="row" style={{ justifyContent: 'space-between' }}>
@@ -101,6 +104,7 @@ export default function Tuner() {
         <div className="row">
           <Toggle checked={gate} onChange={setGate} label={<>Trust gating <b>{gate ? 'ON' : 'OFF'}</b></>} />
           <Toggle checked={useLive} onChange={setUseLive} label="Add live recorded buffer" />
+          <button className="btn" disabled={Object.keys(results).length === 0} onClick={() => tunerReport({ results, contam, clean, gate, hours: tsRef.current?.hours ?? 6, cfg: runner.sim.cfg, changes })}><FileText size={15} /> PDF report</button>
           <button className="btn tune big" onClick={run} disabled={busy}>
             <Play size={16} /> {busy ? 'Replaying…' : 'Run replay'}
           </button>
@@ -137,7 +141,7 @@ export default function Tuner() {
           )}
           {!busy && res && <ParetoChart candidates={res.candidates} current={res.current} />}
           {!busy && !res && <div className="empty"><b style={{ color: 'var(--text)' }}>No replay yet</b>Press “Run replay” to evaluate the candidate grid (&lt; 3 s).</div>}
-          {res && !busy && <p className="muted" style={{ fontSize: 12 }}>Replay took {res.ms.toFixed(0)} ms for {res.candidates.length} candidates. <span style={{ color: 'var(--ok-ink)' }}>● Pareto front</span> · ✕ rejected (would miss a real event) · <span style={{ color: 'var(--brand)' }}>● current</span> · ★ recommended</p>}
+          {res && !busy && <p className="muted" style={{ fontSize: 12 }}>Replay took {res.ms.toFixed(0)} ms for {res.candidates.length} candidates.</p>}
         </Card>
       </div>
 

@@ -1,4 +1,4 @@
-import { Download, Lock } from 'lucide-react';
+import { Download, FileText, Lock } from 'lucide-react';
 import { AuditLog } from '../components/domain/AuditLog';
 import { SafetyRuleList } from '../components/domain/SafetyRules';
 import { WriteBackFeed } from '../components/domain/WriteBackFeed';
@@ -8,20 +8,24 @@ import { runner } from '../state/runner';
 import { useSimStore } from '../state/simStore';
 import { download } from '../utils/download';
 import { toCsv } from '../utils/format';
+import { sessionReport } from '../utils/reports';
+import { useLogStore } from '../state/logStore';
 
 export default function Writeback() {
   const snap = useSimStore((s) => s.snap)!;
   const book = runner.sim.book;
+  const changes = useLogStore((s) => s.changeLog);
   const exportCsv = () => download('deltatrace-audit.csv', toCsv(book.audit.map((a) => ({ id: a.id, sim_time_s: a.t, actor: a.actor, action: a.action, reason: a.reason, ref: a.ref ?? '' }))), 'text/csv');
   const exportJson = () => download('deltatrace-audit.json', JSON.stringify({ simulated: true, seed: snap.seed, audit: book.audit, writes: book.writes }, null, 2));
   return (
     <div className="page">
       <PageHeader
         title="Write-back & Audit"
-        purpose="Everything DeltaTrace writes back to the control system (dry run) and every decision it makes, with who and why."
+        purpose="Dry-run write-backs and every engine decision, with actor and reason."
         info={['Only three kinds of writes exist: incident records, derived data-quality flags and operator-approved alarm parameters.', 'The audit log records every grouping decision, demotion, class change, approval, revert and fail-open event.']}
         actions={
           <>
+            <button className="btn primary" onClick={() => sessionReport({ snap, incidents: runner.sim.agg.all().sort((a, b) => a.openedAt - b.openedAt), advisories: runner.sim.agg.advisories, audit: book.audit, writes: book.writes, changes, alarms: runner.sim.agg.alarms })}><FileText size={14} /> PDF report</button>
             <button className="btn" onClick={exportCsv}><Download size={14} /> Export CSV</button>
             <button className="btn" onClick={exportJson}><Download size={14} /> Export JSON</button>
           </>

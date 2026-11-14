@@ -7,10 +7,11 @@ import { readTheme, TRUST_COLOR } from '../../utils/colors';
 import { fmt } from '../../utils/format';
 
 const W = 1200;
-const H = 345;
+const HALO = { stroke: 'var(--bg-elev-1)', strokeWidth: 4, paintOrder: 'stroke', strokeLinejoin: 'round' } as const;
+const H = 385;
 const X0 = 60;
 const KMX = 5.4;
-const PY = 160;
+const PY = 190;
 export const xOf = (km: number) => X0 + km * KMX;
 
 function NodeIcon({ kind, x, y, tripped, closed }: { kind: string; x: number; y: number; tripped?: boolean; closed?: boolean }) {
@@ -246,16 +247,18 @@ export function PipelineSchematic({ snap, explain, showTruth, selectedIncident }
 
         {/* incident envelopes */}
         {snap.openIncidents.map((inc) => {
-          const lo = inc.origin ? Math.max(0, inc.origin.km - 12) : NODE_KM[inc.segment[0]];
-          const hiKm = Math.max(...(inc.channels.length ? inc.channels : [0]).map((c) => CHANNELS[c].km), lo);
-          const loKm = Math.min(...(inc.channels.length ? inc.channels : [0]).map((c) => CHANNELS[c].km), lo);
-          const x1 = xOf(loKm) - 22;
-          const x2 = xOf(hiKm) + 22;
+          const cols = inc.channels.length ? inc.channels.map((c) => CHANNELS[c].km) : [NODE_KM[inc.segment[0]]];
+          const lo = inc.origin ? Math.min(inc.origin.km, ...cols) : Math.min(...cols);
+          const hi = Math.max(...cols);
+          const x1 = xOf(lo) - 24;
+          const x2 = xOf(hi) + 24;
           const col = inc.cls === 'process-event' ? 'var(--c-group)' : inc.cls === 'data-integrity' ? 'var(--k-integrity)' : 'var(--k-fault)';
+          const label = `INC-${String(inc.id).padStart(3, '0')} · ${inc.alarmIds.length} alarms`;
           return (
-            <g key={inc.id} opacity={0.95}>
-              <rect x={x1} y={26} width={x2 - x1} height={PY + 24} rx={14} fill={col} opacity={0.1} stroke={col} strokeDasharray="5 4" strokeWidth={1.5} />
-              <text x={x1 + 8} y={42} fontSize={12} fontWeight={700} fill={col} stroke="var(--bg-elev-1)" strokeWidth={3.5} paintOrder="stroke" strokeLinejoin="round">INC-{String(inc.id).padStart(3, '0')} · {inc.alarmIds.length} alarms</text>
+            <g key={inc.id}>
+              <rect x={x1} y={PY - 122} width={x2 - x1} height={PY - 122 > 0 ? 122 + 58 : 180} rx={4} fill={col} opacity={0.07} stroke={col} strokeWidth={1.2} />
+              <rect x={x1} y={PY - 140} width={Math.max(120, label.length * 6.6 + 14)} height={18} rx={3} fill={col} />
+              <text x={x1 + 7} y={PY - 127} fontSize={11} fontWeight={600} fill="#fff">{label}</text>
             </g>
           );
         })}
@@ -270,7 +273,7 @@ export function PipelineSchematic({ snap, explain, showTruth, selectedIncident }
               <animateTransform attributeName="transform" type="translate" values="0,12;0,34;0,12" dur="1.2s" repeatCount="indefinite" />
             </path>
             <circle r={6} fill="var(--bad)" />
-            <text y={-20} textAnchor="middle" fontSize={11} fontWeight={700} fill="var(--bad-ink)">LEAK {f.km} km</text>
+            <text y={-22} textAnchor="middle" fontSize={11} fontWeight={600} fill="var(--bad-ink)" {...HALO}>Leak at km {f.km}</text>
           </g>
         ))}
         {showTruth &&
@@ -284,48 +287,49 @@ export function PipelineSchematic({ snap, explain, showTruth, selectedIncident }
         {/* origin markers */}
         {snap.openIncidents.filter((i) => i.origin).map((i) => {
           const o = i.origin!;
+          const y = PY - 160;
           return (
             <g key={`o${i.id}`}>
-              <line x1={xOf(o.lo)} x2={xOf(o.hi)} y1={PY - 124} y2={PY - 124} stroke="var(--c-group)" strokeWidth={3} />
-              <path d={`M${xOf(o.lo)},${PY - 130} v12 M${xOf(o.hi)},${PY - 130} v12`} stroke="var(--c-group)" strokeWidth={2} />
-              <g transform={`translate(${xOf(o.km)},${PY - 124})`}>
-                <circle r={9} fill="none" stroke="var(--c-group)" strokeWidth={2}>
-                  <animate attributeName="r" values="7;14;7" dur="1.6s" repeatCount="indefinite" />
-                </circle>
-                <path d="M-14,0 H14 M0,-14 V14" stroke="var(--c-group)" strokeWidth={2} />
-              </g>
-              <text x={xOf(o.km)} y={PY - 142} textAnchor="middle" fontSize={11.5} fontWeight={700} fill="var(--c-group)" stroke="var(--bg-elev-1)" strokeWidth={3.5} paintOrder="stroke" strokeLinejoin="round">origin ≈ km {fmt(o.km, 0)} ±{fmt((o.hi - o.lo) / 2, 0)}</text>
+              <line x1={xOf(o.lo)} x2={xOf(o.hi)} y1={y} y2={y} stroke="var(--c-group)" strokeWidth={2.5} />
+              <path d={`M${xOf(o.lo)},${y - 5} v10 M${xOf(o.hi)},${y - 5} v10`} stroke="var(--c-group)" strokeWidth={2} />
+              <path d={`M${xOf(o.km)},${y - 10} v20 M${xOf(o.km) - 10},${y} h20`} stroke="var(--c-group)" strokeWidth={2} />
+              <text x={xOf(o.km)} y={y - 16} textAnchor="middle" fontSize={11.5} fontWeight={600} fill="var(--text)" {...HALO}>Origin estimate: km {fmt(o.km, 0)} ± {fmt((o.hi - o.lo) / 2, 0)}</text>
             </g>
           );
         })}
 
-        {/* explain overlay */}
+        {/* explain overlay: orthogonal brackets with the expected delay on each */}
         {explain &&
           alarmedKm.slice(0, -1).map((p, i) => {
             const q = alarmedKm[i + 1];
             if (hops(p.node, q.node) > 3) return null;
             const x1 = xOf(NODE_KM[p.node]);
             const x2 = xOf(NODE_KM[q.node]);
-            const km = Math.abs(NODE_KM[q.node] - NODE_KM[p.node]);
             const d = delay(p.node, q.node, snap.cfg.waveSpeed);
             const obs = Math.abs(q.t - p.t);
             const ok = obs <= d + snap.cfg.clockTol + snap.cfg.scanInterval;
-            const my = PY - 104 - (i % 2) * 18;
+            const y = PY - 76;
+            const col = ok ? 'var(--c-group)' : 'var(--bad)';
+            const label = `${fmt(d, 0)} s`;
             return (
               <g key={`e${i}`}>
-                <path d={`M${x1},${PY - 28} Q${(x1 + x2) / 2},${my - 20} ${x2},${PY - 28}`} fill="none" stroke={ok ? 'var(--c-group)' : 'var(--bad)'} strokeWidth={2} strokeDasharray="5 4" style={{ animation: 'dash-flow 1s linear infinite' }} />
-                <text x={(x1 + x2) / 2} y={my - 6} textAnchor="middle" fontSize={10.5} fill="var(--text)" fontWeight={600} stroke="var(--bg-elev-1)" strokeWidth={3.5} paintOrder="stroke" strokeLinejoin="round">
-                  {km} km ÷ {snap.cfg.waveSpeed} m/s = {fmt(d, 0)} s
-                </text>
-                <text x={(x1 + x2) / 2} y={my + 6} textAnchor="middle" fontSize={10} fill="var(--text-muted)" stroke="var(--bg-elev-1)" strokeWidth={3.5} paintOrder="stroke" strokeLinejoin="round">observed Δ {fmt(obs, 0)} s {ok ? '✓ merged' : '✗'}</text>
+                <path d={`M${x1 + 4},${y + 8} V${y} H${x2 - 4} V${y + 8}`} fill="none" stroke={col} strokeWidth={1.5} />
+                <rect x={(x1 + x2) / 2 - 20} y={y - 8} width={40} height={16} rx={3} fill="var(--bg-elev-1)" stroke={col} />
+                <text x={(x1 + x2) / 2} y={y + 0.5} textAnchor="middle" dominantBaseline="central" fontSize={10.5} fontWeight={600} fill="var(--text)" fontFamily="var(--mono)">{label}</text>
               </g>
             );
           })}
         {explain && notMerged && (
           <g>
-            <path d={`M${xOf(NODE_KM[notMerged.a])},${PY - 30} Q${(xOf(NODE_KM[notMerged.a]) + xOf(NODE_KM[notMerged.b])) / 2},${PY - 150} ${xOf(NODE_KM[notMerged.b])},${PY - 30}`} fill="none" stroke="var(--bad)" strokeWidth={2} strokeDasharray="3 5" />
-            <text x={(xOf(NODE_KM[notMerged.a]) + xOf(NODE_KM[notMerged.b])) / 2} y={PY - 110} textAnchor="middle" fontSize={12} fontWeight={700} fill="var(--bad-ink)">✗ not merged: {notMerged.km} km apart</text>
+            <path d={`M${xOf(NODE_KM[notMerged.a])},${PY - 106} V${PY - 114} H${xOf(NODE_KM[notMerged.b])} V${PY - 106}`} fill="none" stroke="var(--bad)" strokeWidth={1.5} strokeDasharray="5 4" />
+            <rect x={(xOf(NODE_KM[notMerged.a]) + xOf(NODE_KM[notMerged.b])) / 2 - 78} y={PY - 122} width={156} height={16} rx={3} fill="var(--bg-elev-1)" stroke="var(--bad)" />
+            <text x={(xOf(NODE_KM[notMerged.a]) + xOf(NODE_KM[notMerged.b])) / 2} y={PY - 113.5} textAnchor="middle" dominantBaseline="central" fontSize={10.5} fontWeight={600} fill="var(--bad-ink)">Not merged: {notMerged.km} km apart</text>
           </g>
+        )}
+        {explain && (
+          <text x={W / 2} y={H - 8} textAnchor="middle" fontSize={11} fill="var(--text-muted)">
+            Merge window = distance ÷ wave speed + tolerance. Example: 20 km ÷ {snap.cfg.waveSpeed} m/s = {fmt(20000 / snap.cfg.waveSpeed, 0)} s (+{snap.cfg.clockTol + snap.cfg.scanInterval} s).
+          </text>
         )}
 
         {/* nodes */}
@@ -344,7 +348,7 @@ export function PipelineSchematic({ snap, explain, showTruth, selectedIncident }
               <circle cx={x + 17} cy={PY - 70} r={2.6} fill="var(--ok)" style={{ animation: `blink 1.6s ${(n.id % 6) * 0.25}s infinite` }} />
               {/* alarm badge */}
               {al && (
-                <g transform={`translate(${x},${PY - 92})`}>
+                <g transform={`translate(${x},${PY - 96})`}>
                   <circle r={10} fill={al.crit ? 'var(--bad)' : 'var(--warn)'} style={{ animation: 'pulse-ring 1.3s infinite', color: al.crit ? 'var(--bad)' : 'var(--warn)' }} />
                   <text textAnchor="middle" dominantBaseline="central" fontSize={11} fontWeight={800} fill="#fff">{al.n}</text>
                 </g>

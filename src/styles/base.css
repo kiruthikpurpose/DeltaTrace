@@ -13,8 +13,8 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font);
-  font-size: var(--fs-14);
-  line-height: 1.5;
+  font-size: 13px;
+  line-height: 1.45;
   -webkit-font-smoothing: antialiased;
 }
 h1,
@@ -111,7 +111,6 @@ textarea {
 @keyframes flash { 0% { background: var(--group-soft); } 100% { background: transparent; } }
 @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
 @keyframes spin { to { transform: rotate(360deg); } }
-@keyframes glow-bad { 0%, 100% { filter: drop-shadow(0 0 2px var(--bad)); } 50% { filter: drop-shadow(0 0 9px var(--bad)); } }
 @keyframes dash-flow { to { stroke-dashoffset: -24; } }
 
 @media (prefers-reduced-motion: reduce) {

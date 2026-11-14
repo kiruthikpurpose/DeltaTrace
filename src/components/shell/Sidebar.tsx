@@ -7,10 +7,11 @@ import { useUiStore } from '../../state/uiStore';
 export function Sidebar() {
   const collapsed = useUiStore((s) => s.sidebarCollapsed);
   const toggle = useUiStore((s) => s.toggleSidebar);
+  const mobileNav = useUiStore((s) => s.mobileNav);
   const engineOn = useSimStore((s) => s.snap?.engineEnabled ?? true);
   const groups = [...new Set(NAV.map((n) => n.group))];
   return (
-    <aside className="sidebar" aria-label="Primary">
+    <aside className={`sidebar${mobileNav ? ' open' : ''}`} aria-label="Primary">
       <div className="brand">
         <div className="brand-mark" aria-hidden>
           <Activity size={18} color="#fff" strokeWidth={2.6} />

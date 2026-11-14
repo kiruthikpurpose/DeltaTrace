@@ -8,8 +8,8 @@
   grid-template-columns: var(--sidebar-w-collapsed) 1fr;
 }
 .app.presenter {
-  grid-template-columns: 0 1fr;
-  font-size: 16px;
+  grid-template-columns: minmax(0, 1fr);
+  font-size: 15px;
 }
 .app.presenter .sidebar {
   display: none;
@@ -39,14 +39,13 @@
   white-space: nowrap;
 }
 .brand-mark {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   flex: none;
-  border-radius: 9px;
-  background: linear-gradient(135deg, var(--brand), var(--c-group));
+  border-radius: 6px;
+  background: var(--text);
   display: grid;
   place-items: center;
-  box-shadow: var(--glow);
 }
 .nav {
   display: flex;
@@ -75,7 +74,7 @@
   align-items: center;
   gap: 12px;
   padding: 9px 10px;
-  border-radius: 10px;
+  border-radius: 6px;
   color: var(--text-muted);
   font-weight: 500;
   white-space: nowrap;
@@ -94,10 +93,9 @@
   content: '';
   position: absolute;
   left: -12px;
-  top: 8px;
-  bottom: 8px;
-  width: 4px;
-  border-radius: 0 4px 4px 0;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
   background: var(--brand);
 }
 .nav-link svg {
@@ -120,7 +118,7 @@
   align-items: center;
   gap: 8px;
   padding: 6px 10px;
-  border-radius: 999px;
+  border-radius: 4px;
   font-weight: 600;
   font-size: 12px;
   border: 1px solid transparent;
@@ -161,8 +159,7 @@
   align-items: center;
   gap: 10px;
   padding: 8px var(--s4);
-  background: color-mix(in srgb, var(--bg) 88%, transparent);
-  backdrop-filter: blur(10px);
+  background: var(--bg-elev-1);
   border-bottom: 1px solid var(--border);
   flex-wrap: wrap;
 }
@@ -187,8 +184,8 @@
   gap: 6px;
   padding: 4px;
   border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--bg-elev-1);
+  border-radius: 6px;
+  background: var(--bg-elev-2);
 }
 .sim-clock {
   font-family: var(--mono);
@@ -213,25 +210,18 @@
   margin: 0 auto;
   animation: fade-in var(--t-med) var(--ease);
 }
+
 .sim-label {
-  position: fixed;
-  left: calc(var(--sidebar-w) + 12px);
-  bottom: 8px;
-  z-index: 12;
+  margin-top: auto;
+  padding: 14px var(--s5);
   font-size: 11px;
   color: var(--text-muted);
-  background: color-mix(in srgb, var(--bg-elev-1) 90%, transparent);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 3px 10px;
-  pointer-events: none;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
 }
-.collapsed .sim-label {
-  left: calc(var(--sidebar-w-collapsed) + 12px);
-}
-.presenter .sim-label {
-  left: 12px;
-}
+.btn.menu-btn { display: none; }
 
 .toast-host {
   position: fixed;
@@ -251,7 +241,7 @@
   background: var(--bg-elev-1);
   border: 1px solid var(--border);
   border-left: 4px solid var(--brand);
-  border-radius: 10px;
+  border-radius: 6px;
   box-shadow: var(--shadow-2);
   animation: slide-in var(--t-med) var(--ease);
 }
@@ -262,24 +252,21 @@
 .toast.trust { border-left-color: var(--c-trust); }
 
 @media (max-width: 1100px) {
-  .app {
-    grid-template-columns: var(--sidebar-w-collapsed) 1fr;
+  .page { padding: var(--s4); }
+}
+@media (max-width: 820px) {
+  .app, .app.collapsed { grid-template-columns: minmax(0, 1fr); }
+  .sidebar {
+    position: fixed; left: 0; top: 0; bottom: 0; width: 260px; transform: translateX(-102%);
+    transition: transform var(--t-med) var(--ease); box-shadow: var(--shadow-2); z-index: 140;
   }
-  .nav-link span,
-  .brand span,
-  .side-foot .label,
-  .engine-pill .label {
-    display: none;
-  }
-  .nav-group {
-    visibility: hidden;
-    height: 8px;
-    padding: 4px 0;
-  }
-  .sim-label {
-    left: calc(var(--sidebar-w-collapsed) + 12px);
-  }
-  .page {
-    padding: var(--s4);
-  }
+  .sidebar.open { transform: none; }
+  .nav-link span, .brand span, .side-foot .label, .engine-pill .label { display: inline !important; }
+  .collapsed .nav-group { visibility: visible; height: auto; padding: 14px 10px 4px; }
+  .btn.menu-btn { display: inline-flex; }
+  .topbar { padding: 8px 12px; gap: 8px; }
+  .sim-clock { min-width: 0; padding: 0 4px; }
+  .live-chips { display: none; }
+  .page { padding: 12px; gap: 16px; }
+  .toast-host { left: 12px; right: 12px; max-width: none; bottom: 8px; }
 }

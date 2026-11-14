@@ -53,7 +53,7 @@ export default function Console({ embedded }: { embedded?: boolean } = {}) {
       {!embedded && (
         <PageHeader
         title="Live Console"
-        purpose="The existing alarm view on the left, the DeltaTrace operator view on the right, fed by the same simulated pipeline in real time."
+        purpose="Existing alarm list (left) against the DeltaTrace operator view (right), live."
         info={['Top: the 200 km pipeline. Rings under each sensor show trust; blue rings are pressure waves.', 'Left: every raw alarm the existing system raises.', 'Right: the same alarms grouped into incidents, classified and ranked. Nothing is deleted.', 'Inject faults with the button, the F key or keys 1–9.']}
         actions={
           <>
@@ -71,8 +71,11 @@ export default function Console({ embedded }: { embedded?: boolean } = {}) {
       )}
 
       <Card flush className="hero-card" label="Animated pipeline schematic">
-        <div style={{ padding: '8px 12px 4px' }}>
+        <div className="schematic-hint muted">Swipe sideways to pan the pipeline</div>
+        <div className="schematic-scroll">
+          <div style={{ padding: '8px 12px 4px' }}>
           <PipelineSchematic snap={snap} explain={ui.explain} showTruth={ui.showTruth} selectedIncident={open} />
+          </div>
         </div>
       </Card>
 

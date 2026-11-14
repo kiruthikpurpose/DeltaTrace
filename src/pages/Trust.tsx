@@ -71,7 +71,7 @@ export default function Trust() {
     <div className="page">
       <PageHeader
         title="Trust Center"
-        purpose="Every sensor gets a live trust score from four checks: neighbour agreement, mass balance, signal behaviour and communication health."
+        purpose="Live trust score per sensor from four checks: neighbours, mass balance, signal, communications."
         info={['Green = GOOD (≥ 0.7), amber = UNCERTAIN, red hatched = BAD (< 0.4).', 'A real event seen by several neighbours does not lower trust: the engine widens its tolerance instead.', 'Once BAD, a sensor needs T ≥ 0.55 for 3 scans in a row to recover (hysteresis).']}
       />
       <Card title="Trust heatmap" sub="15 channels × last 10 minutes · click a row to select · hatched = BAD" accent="trust">

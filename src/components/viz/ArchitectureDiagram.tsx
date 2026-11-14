@@ -9,87 +9,92 @@ export interface ArchBlock {
   group: 'field' | 'comm' | 'control' | 'dt';
 }
 export const ARCH_BLOCKS: ArchBlock[] = [
-  { id: 'pipeline', label: 'Pipeline & sensors', sub: 'PT / FT every ~20 km', x: 20, y: 70, w: 200, h: 70, group: 'field' },
-  { id: 'rtu', label: 'RTUs / PLCs', sub: 'sample · timestamp · quality', x: 20, y: 190, w: 200, h: 70, group: 'field' },
-  { id: 'comm', label: 'Communication', sub: 'radio · satellite · cellular', x: 270, y: 70, w: 190, h: 70, group: 'comm' },
-  { id: 'proto', label: 'Protocols', sub: 'Modbus · DNP3 · IEC 104 · OPC UA', x: 270, y: 190, w: 190, h: 70, group: 'comm' },
-  { id: 'scada', label: 'Central server / SCADA', sub: 'reads sensors, raises alarms', x: 510, y: 70, w: 210, h: 70, group: 'control' },
-  { id: 'historian', label: 'Historian', sub: 'stored time series', x: 510, y: 190, w: 100, h: 60, group: 'control' },
-  { id: 'gps', label: 'GPS time', sub: 'common clock', x: 620, y: 190, w: 100, h: 60, group: 'control' },
-  { id: 'console', label: 'Operator console', sub: 'sees the alarm list', x: 510, y: 300, w: 210, h: 70, group: 'control' },
-  { id: 'gateway', label: 'Read-only gateway', sub: 'data diode: in only', x: 770, y: 70, w: 190, h: 60, group: 'dt' },
-  { id: 'map', label: 'Pipeline map', sub: 'topology · delays', x: 770, y: 170, w: 130, h: 56, group: 'dt' },
-  { id: 'trust', label: 'Trust engine', sub: 'innovation 1', x: 910, y: 170, w: 130, h: 56, group: 'dt' },
-  { id: 'group', label: 'Grouping & classification', sub: 'innovation 2', x: 770, y: 240, w: 270, h: 56, group: 'dt' },
-  { id: 'tuner', label: 'Replay tuner', sub: 'innovation 3', x: 770, y: 310, w: 130, h: 56, group: 'dt' },
-  { id: 'audit', label: 'Audit log', sub: 'every decision', x: 910, y: 310, w: 130, h: 56, group: 'dt' },
-  { id: 'wb', label: 'Write-back module', sub: 'incidents · flags · approved settings', x: 770, y: 380, w: 270, h: 56, group: 'dt' },
-  { id: 'wbif', label: 'Write-back interface', sub: 'controlled, dry-run, no commands', x: 770, y: 470, w: 270, h: 56, group: 'dt' },
+  { id: 'pipeline', label: 'Pipeline and sensors', sub: '12 pressure, 3 flow channels', x: 24, y: 70, w: 180, h: 60, group: 'field' },
+  { id: 'rtu', label: 'RTUs / PLCs', sub: 'sample, timestamp, quality', x: 24, y: 190, w: 180, h: 60, group: 'field' },
+  { id: 'comm', label: 'Communication', sub: 'radio, satellite, cellular', x: 254, y: 190, w: 190, h: 60, group: 'comm' },
+  { id: 'proto', label: 'Protocols', sub: 'Modbus, DNP3, IEC 104, OPC UA', x: 254, y: 70, w: 190, h: 60, group: 'comm' },
+  { id: 'scada', label: 'Central server / SCADA', sub: 'historian, GPS time, alarms', x: 484, y: 190, w: 220, h: 60, group: 'control' },
+  { id: 'console', label: 'Operator console', sub: 'alarm list or incidents', x: 484, y: 70, w: 220, h: 60, group: 'control' },
+  { id: 'gateway', label: 'Read-only gateway', sub: 'data in only', x: 764, y: 70, w: 276, h: 52, group: 'dt' },
+  { id: 'map', label: 'Pipeline map', sub: 'topology, delays', x: 764, y: 152, w: 132, h: 52, group: 'dt' },
+  { id: 'trust', label: 'Trust engine', sub: 'function 1', x: 908, y: 152, w: 132, h: 52, group: 'dt' },
+  { id: 'group', label: 'Grouping and classification', sub: 'function 2', x: 764, y: 234, w: 276, h: 52, group: 'dt' },
+  { id: 'tuner', label: 'Replay tuner', sub: 'function 3', x: 764, y: 316, w: 132, h: 52, group: 'dt' },
+  { id: 'audit', label: 'Audit log', sub: 'every decision', x: 908, y: 316, w: 132, h: 52, group: 'dt' },
+  { id: 'wb', label: 'Write-back module', sub: 'incidents, flags, approved settings', x: 764, y: 398, w: 276, h: 52, group: 'dt' },
+  { id: 'wbif', label: 'Write-back interface', sub: 'controlled, dry run, no commands', x: 764, y: 480, w: 276, h: 52, group: 'dt' },
 ];
 
 const ARROWS: { id: string; d: string; dash?: boolean; color?: string }[] = [
-  { id: 'a1', d: 'M120,140 V190' },
-  { id: 'a2', d: 'M220,225 H270' },
-  { id: 'a3', d: 'M365,190 V140' },
-  { id: 'a4', d: 'M460,105 H510' },
-  { id: 'a5', d: 'M615,140 V190', color: 'var(--text-muted)' },
-  { id: 'a6', d: 'M720,105 H770', color: 'var(--c-trust)' },
-  { id: 'a7', d: 'M865,130 V170', color: 'var(--c-trust)' },
-  { id: 'a8', d: 'M975,226 V240', color: 'var(--c-group)' },
-  { id: 'a9', d: 'M905,296 V310', color: 'var(--c-tune)' },
-  { id: 'a10', d: 'M905,366 V380', color: 'var(--brand)' },
-  { id: 'a11', d: 'M905,436 V470', color: 'var(--brand)' },
-  { id: 'a12', d: 'M770,498 H660 Q600,498 600,440 V400 L615,370', color: 'var(--brand)' },
-  { id: 'bypass', d: 'M615,140 H640 Q640,215 640,270 V300', dash: true, color: 'var(--warn)' },
+  { id: 'a1', d: 'M114,130 V190' },
+  { id: 'a2', d: 'M204,220 H254' },
+  { id: 'a3', d: 'M444,220 H484' },
+  { id: 'a3b', d: 'M349,190 V130', color: 'var(--text-muted)' },
+  { id: 'a4', d: 'M594,190 V130', dash: true, color: 'var(--warn)' },
+  { id: 'a5', d: 'M704,212 H734 V96 H764', color: 'var(--c-trust)' },
+  { id: 'a6', d: 'M830,122 V152', color: 'var(--c-trust)' },
+  { id: 'a7', d: 'M974,122 V152', color: 'var(--c-trust)' },
+  { id: 'a8', d: 'M830,204 V234', color: 'var(--c-group)' },
+  { id: 'a9', d: 'M974,204 V234', color: 'var(--c-group)' },
+  { id: 'a10', d: 'M830,286 V316', color: 'var(--c-tune)' },
+  { id: 'a11', d: 'M974,286 V316', color: 'var(--c-group)' },
+  { id: 'a12', d: 'M830,368 V398', color: 'var(--c-tune)' },
+  { id: 'a13', d: 'M974,368 V398', color: 'var(--c-group)' },
+  { id: 'a14', d: 'M902,450 V480', color: 'var(--brand)' },
+  { id: 'a15', d: 'M764,506 H620 Q594,506 594,480 V250', color: 'var(--brand)' },
 ];
-const GROUP_COLOR = { field: 'var(--text-muted)', comm: 'var(--info)', control: 'var(--brand)', dt: 'var(--c-group)' };
+const GROUP_COLOR = { field: 'var(--text-muted)', comm: 'var(--text-muted)', control: 'var(--brand)', dt: 'var(--c-group)' };
 
 export function ArchitectureDiagram({ selected, onSelect, failOpen }: { selected: string | null; onSelect: (id: string) => void; failOpen?: boolean }) {
   return (
-    <svg viewBox="0 0 1080 560" width="100%" role="group" aria-label="System architecture diagram. Field level to communication to control centre; a read-only gateway feeds the DeltaTrace unit; a controlled write-back interface returns incidents, quality flags and approved settings. A fail-open bypass lets raw alarms reach the operator console unchanged.">
+    <svg viewBox="0 0 1064 560" width="100%" role="group" aria-label="System architecture diagram. Field sensors and RTUs connect through communication links and protocols to the central SCADA server and operator console. A read-only gateway feeds the DeltaTrace unit, whose write-back interface returns incidents, quality flags and approved settings to the central server. When the engine is off, the SCADA alarm list reaches the console unchanged." style={{ minWidth: 720 }}>
       <defs>
         <marker id="arh" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
           <path d="M0,0 L8,4 L0,8 z" fill="context-stroke" />
         </marker>
       </defs>
       {[
-        ['Field level', 10, 220, 'field'],
-        ['Communication', 260, 210, 'comm'],
-        ['Control centre', 500, 230, 'control'],
-        ['DeltaTrace unit', 760, 290, 'dt'],
-      ].map(([t, x, w, g]) => (
+        ['FIELD', 10, 232, 28, 250, 'field'],
+        ['COMMUNICATION', 240, 218, 28, 250, 'comm'],
+        ['CONTROL CENTRE', 470, 248, 28, 250, 'control'],
+        ['DELTATRACE UNIT', 750, 304, 28, 520, 'dt'],
+      ].map(([t, x, w, y, h, g]) => (
         <g key={String(t)}>
-          <rect x={Number(x)} y={28} width={Number(w)} height={t === 'DeltaTrace unit' ? 510 : 360} rx={16} fill="none" stroke={GROUP_COLOR[g as keyof typeof GROUP_COLOR]} strokeDasharray="4 5" opacity={0.6} />
-          <text x={Number(x) + 12} y={46} fontSize={12} fontWeight={800} fill={GROUP_COLOR[g as keyof typeof GROUP_COLOR]} letterSpacing="0.06em">{String(t).toUpperCase()}</text>
+          <rect x={Number(x)} y={Number(y)} width={Number(w)} height={Number(h)} rx={6} fill="var(--bg-elev-2)" stroke="var(--border)" />
+          <text x={Number(x) + 12} y={Number(y) + 18} fontSize={11} fontWeight={700} fill={GROUP_COLOR[g as keyof typeof GROUP_COLOR]} letterSpacing="0.08em">{String(t)}</text>
         </g>
       ))}
       {ARROWS.map((a) => (
-        <g key={a.id} opacity={a.id === 'bypass' && !failOpen ? 0.55 : 1}>
-          <path id={`arch-${a.id}`} d={a.d} fill="none" stroke={a.color ?? 'var(--brand)'} strokeWidth={a.dash ? 2.5 : 2} strokeDasharray={a.dash ? '7 5' : undefined} markerEnd="url(#arh)" />
-          {(!a.dash || failOpen) && [0, 1].map((k) => (
-            <circle key={k} r={3.6} fill={a.color ?? 'var(--brand)'}>
-              <animateMotion dur={a.dash ? '2.2s' : '2.6s'} begin={`${k * 1.3}s`} repeatCount="indefinite" path={a.d} />
+        <g key={a.id}>
+          <path d={a.d} fill="none" stroke={a.id === 'a4' && !failOpen ? 'var(--text-muted)' : a.color ?? 'var(--brand)'} strokeWidth={1.8} strokeDasharray={a.dash && failOpen ? '6 4' : undefined} markerEnd="url(#arh)" />
+          {a.id !== 'a3b' && [0].map((k) => (
+            <circle key={k} r={3} fill={a.color ?? 'var(--brand)'}>
+              <animateMotion dur="3s" begin={`${(a.id.length % 3) * 0.7}s`} repeatCount="indefinite" path={a.d} />
             </circle>
           ))}
         </g>
       ))}
-      <text x={652} y={290} fontSize={10.5} fontWeight={700} fill="var(--warn-ink)">fail-open bypass</text>
+      <text x={602} y={166} fontSize={10.5} fill="var(--text-muted)">alarm list{failOpen ? ' (fail-open: unchanged)' : ''}</text>
+      <text x={602} y={300} fontSize={10.5} fill="var(--text-muted)">operator-approved write-back</text>
       {ARCH_BLOCKS.map((b) => {
         const sel = selected === b.id;
-        const col = GROUP_COLOR[b.group];
         return (
           <g key={b.id} role="button" tabIndex={0} aria-label={`${b.label}: ${b.sub ?? ''}`} aria-pressed={sel} onClick={() => onSelect(b.id)} onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onSelect(b.id))} style={{ cursor: 'pointer' }}>
-            <rect x={b.x} y={b.y} width={b.w} height={b.h} rx={12} fill={sel ? 'var(--brand-soft)' : 'var(--bg-elev-1)'} stroke={sel ? 'var(--brand)' : col} strokeWidth={sel ? 3 : 1.8} />
-            <text x={b.x + b.w / 2} y={b.y + b.h / 2 - 4} textAnchor="middle" fontSize={b.w < 140 ? 11.5 : 13} fontWeight={700} fill="var(--text)">{b.label}</text>
-            <text x={b.x + b.w / 2} y={b.y + b.h / 2 + 13} textAnchor="middle" fontSize={b.w < 140 ? 9 : 10} fill="var(--text-muted)">{b.sub}</text>
+            <rect x={b.x} y={b.y} width={b.w} height={b.h} rx={5} fill={sel ? 'var(--brand-soft)' : 'var(--bg-elev-1)'} stroke={sel ? 'var(--brand)' : 'var(--border-strong)'} strokeWidth={sel ? 2 : 1} />
+            <text x={b.x + b.w / 2} y={b.y + b.h / 2 - 3} textAnchor="middle" fontSize={12.5} fontWeight={600} fill="var(--text)">{b.label}</text>
+            <text x={b.x + b.w / 2} y={b.y + b.h / 2 + 13} textAnchor="middle" fontSize={10.5} fill="var(--text-muted)">{b.sub}</text>
           </g>
         );
       })}
-      <g transform="translate(1010,495)">
-        <rect x={-14} y={-4} width={28} height={22} rx={5} fill="var(--bad)" />
-        <path d="M-8,-4 v-6 a8,8 0 0 1 16,0 v6" fill="none" stroke="var(--bad)" strokeWidth={3} />
-        <text y={36} textAnchor="middle" fontSize={9.5} fontWeight={700} fill="var(--bad-ink)">NO CONTROL</text>
-        <text y={47} textAnchor="middle" fontSize={9.5} fontWeight={700} fill="var(--bad-ink)">COMMANDS</text>
+      <g transform="translate(1010,506)" aria-hidden>
+        <rect x={-8} y={-2} width={16} height={12} rx={2} fill="var(--bad)" />
+        <path d="M-4,-2 v-3 a4,4 0 0 1 8,0 v3" fill="none" stroke="var(--bad)" strokeWidth={2} />
+      </g>
+      <g transform="translate(478,330)">
+        <line x1={0} x2={28} y1={0} y2={0} stroke="var(--brand)" strokeWidth={1.8} />
+        <text x={36} y={4} fontSize={11} fill="var(--text-muted)">data flow</text>
+        <line x1={0} x2={28} y1={22} y2={22} stroke="var(--warn)" strokeWidth={1.8} strokeDasharray="6 4" />
+        <text x={36} y={26} fontSize={11} fill="var(--text-muted)">fail-open path</text>
       </g>
     </svg>
   );

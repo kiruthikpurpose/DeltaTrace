@@ -17,6 +17,7 @@ interface UiState {
   selectedIncident: number | null;
   selectedChannel: number;
   presenter: boolean;
+  mobileNav: boolean;
   explain: boolean;
   showTruth: boolean;
   chartWindow: 60 | 300 | 600;
@@ -36,6 +37,7 @@ export const useUiStore = create<UiState>((set, get) => ({
   selectedIncident: null,
   selectedChannel: 5,
   presenter: false,
+  mobileNav: false,
   explain: false,
   showTruth: false,
   chartWindow: 300,

@@ -1,150 +1,51 @@
-/* DeltaTrace design tokens — light and dark themes */
+/* DeltaTrace design tokens.
+   Neutral gray base (ISA-101 style): colour is reserved for state and alarms. */
 :root {
   --font: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
-
-  --brand: #4f6bff;
-  --brand-ink: #3b53d9;
-  --c-trust: #14b8a6;
-  --c-group: #8b5cf6;
-  --c-tune: #f59e0b;
-  --ok: #22c55e;
-  --warn: #f59e0b;
-  --bad: #ef4444;
-  --info: #38bdf8;
-
-  --k-process: #3b82f6;
-  --k-fault: #f59e0b;
-  --k-integrity: #d946ef;
-  --k-review: #94a3b8;
-
-  --fs-12: 12px;
-  --fs-14: 14px;
-  --fs-16: 16px;
-  --fs-20: 20px;
-  --fs-28: 28px;
-  --fs-40: 40px;
-
-  --s1: 4px;
-  --s2: 8px;
-  --s3: 12px;
-  --s4: 16px;
-  --s5: 24px;
-  --s6: 32px;
-  --r1: 8px;
-  --r2: 12px;
-  --r3: 20px;
-
+  --fs-12: 12px; --fs-14: 14px; --fs-16: 16px; --fs-20: 20px; --fs-28: 28px; --fs-40: 40px;
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px;
+  --r1: 4px; --r2: 6px; --r3: 8px;
   --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
-  --t-fast: 150ms;
-  --t-med: 220ms;
-
-  --sidebar-w: 248px;
-  --sidebar-w-collapsed: 68px;
-  --topbar-h: 60px;
+  --t-fast: 120ms; --t-med: 180ms;
+  --sidebar-w: 232px; --sidebar-w-collapsed: 60px; --topbar-h: 52px;
+  --shadow-1: none; --shadow-2: 0 6px 20px rgba(0, 0, 0, 0.18); --glow: none;
 }
-
 :root,
 :root[data-theme='light'] {
   color-scheme: light;
-  --bg: #f6f8fc;
-  --bg-elev-1: #ffffff;
-  --bg-elev-2: #eef2fa;
-  --bg-elev-3: #e4eaf6;
-  --border: #d9e0ee;
-  --border-strong: #b8c3da;
-  --text: #0f1b33;
-  --text-muted: #51607f;
-  --brand-soft: #e6ebff;
-  --shadow-1: 0 1px 2px rgba(16, 32, 72, 0.06), 0 1px 3px rgba(16, 32, 72, 0.05);
-  --shadow-2: 0 8px 24px rgba(16, 32, 72, 0.12), 0 2px 6px rgba(16, 32, 72, 0.06);
-  --glow: 0 0 0 rgba(0, 0, 0, 0);
-  --pipe: #c4cee3;
-  --pipe-inner: #e6ecf8;
-  --trust-soft: #ccfbf1;
-  --group-soft: #ede9fe;
-  --tune-soft: #fef3c7;
-  --ok-soft: #dcfce7;
-  --warn-soft: #fef3c7;
-  --bad-soft: #fee2e2;
-  --info-soft: #e0f2fe;
-  --ok-ink: #15803d;
-  --warn-ink: #b45309;
-  --bad-ink: #b91c1c;
-  --trust-ink: #0f766e;
-  --group-ink: #6d28d9;
-  --tune-ink: #b45309;
-  --chart-grid: rgba(15, 27, 51, 0.08);
-  --chart-axis: #51607f;
-  --overlay: rgba(15, 27, 51, 0.38);
+  --bg: #e6e9ec; --bg-elev-1: #f7f8f9; --bg-elev-2: #eef0f2; --bg-elev-3: #dfe3e7;
+  --border: #c9cfd5; --border-strong: #aab2ba;
+  --text: #1c2228; --text-muted: #56626d;
+  --brand: #2c6ca3; --brand-ink: #235a8a; --brand-soft: #dbe7f2;
+  --c-trust: #23857b; --c-group: #3a76ab; --c-tune: #a9741a;
+  --ok: #2b9467; --warn: #d28a00; --bad: #d13438; --info: #2b86b3;
+  --k-process: #3a76ab; --k-fault: #b97d12; --k-integrity: #9c4f92; --k-review: #6f7c88;
+  --ok-ink: #1f7550; --warn-ink: #8f5c00; --bad-ink: #b02025; --trust-ink: #1b6b62; --group-ink: #2d6190; --tune-ink: #85570f;
+  --pipe: #b4bcc4; --pipe-inner: #d8dde2;
+  --chart-grid: rgba(28, 34, 40, 0.1); --chart-axis: #56626d;
+  --overlay: rgba(20, 26, 32, 0.45);
 }
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-    color-scheme: dark;
-    --bg: #0b1220;
-    --bg-elev-1: #111a2e;
-    --bg-elev-2: #18233d;
-    --bg-elev-3: #20304f;
-    --border: #25345a;
-    --border-strong: #3a4d7c;
-    --text: #e8eefc;
-    --text-muted: #9bacd0;
-    --brand-soft: #1b2a63;
-    --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
-    --shadow-2: 0 10px 30px rgba(0, 0, 0, 0.55);
-    --glow: 0 0 18px rgba(79, 107, 255, 0.35);
-    --pipe: #2a3b63;
-    --pipe-inner: #162243;
-    --trust-soft: #0f3a3a;
-    --group-soft: #2a1f5c;
-    --tune-soft: #3d2c0a;
-    --ok-soft: #0f3320;
-    --warn-soft: #3d2c0a;
-    --bad-soft: #3f1414;
-    --info-soft: #0c3247;
-    --ok-ink: #4ade80;
-    --warn-ink: #fbbf24;
-    --bad-ink: #f87171;
-    --trust-ink: #2dd4bf;
-    --group-ink: #a78bfa;
-    --tune-ink: #fbbf24;
-    --chart-grid: rgba(232, 238, 252, 0.09);
-    --chart-axis: #9bacd0;
-    --overlay: rgba(2, 6, 16, 0.6);
-  }
-}
-
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --bg: #0b1220;
-  --bg-elev-1: #111a2e;
-  --bg-elev-2: #18233d;
-  --bg-elev-3: #20304f;
-  --border: #25345a;
-  --border-strong: #3a4d7c;
-  --text: #e8eefc;
-  --text-muted: #9bacd0;
-  --brand-soft: #1b2a63;
-  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-2: 0 10px 30px rgba(0, 0, 0, 0.55);
-  --glow: 0 0 18px rgba(79, 107, 255, 0.35);
-  --pipe: #2a3b63;
-  --pipe-inner: #162243;
-  --trust-soft: #0f3a3a;
-  --group-soft: #2a1f5c;
-  --tune-soft: #3d2c0a;
-  --ok-soft: #0f3320;
-  --warn-soft: #3d2c0a;
-  --bad-soft: #3f1414;
-  --info-soft: #0c3247;
-  --ok-ink: #4ade80;
-  --warn-ink: #fbbf24;
-  --bad-ink: #f87171;
-  --trust-ink: #2dd4bf;
-  --group-ink: #a78bfa;
-  --tune-ink: #fbbf24;
-  --chart-grid: rgba(232, 238, 252, 0.09);
-  --chart-axis: #9bacd0;
-  --overlay: rgba(2, 6, 16, 0.6);
+  --bg: #15181c; --bg-elev-1: #1d2126; --bg-elev-2: #252a30; --bg-elev-3: #2f353c;
+  --border: #343b43; --border-strong: #48515b;
+  --text: #e3e6e9; --text-muted: #94a0ab;
+  --brand: #5b9fd6; --brand-ink: #4a8cc2; --brand-soft: #1f2f3e;
+  --c-trust: #3fb0a2; --c-group: #6aa4d8; --c-tune: #d6a14a;
+  --ok: #46b583; --warn: #e0a030; --bad: #ee5a5e; --info: #52aedb;
+  --k-process: #6aa4d8; --k-fault: #e0a030; --k-integrity: #c47dba; --k-review: #8b97a3;
+  --ok-ink: #6fd0a2; --warn-ink: #efbc5c; --bad-ink: #f58a8d; --trust-ink: #67cdc0; --group-ink: #8fbbe6; --tune-ink: #e6b865;
+  --pipe: #3a424b; --pipe-inner: #232930;
+  --chart-grid: rgba(227, 230, 233, 0.09); --chart-axis: #94a0ab;
+  --overlay: rgba(0, 0, 0, 0.6);
+}
+:root {
+  --trust-soft: color-mix(in srgb, var(--c-trust) 14%, var(--bg-elev-1));
+  --group-soft: color-mix(in srgb, var(--c-group) 14%, var(--bg-elev-1));
+  --tune-soft: color-mix(in srgb, var(--c-tune) 16%, var(--bg-elev-1));
+  --ok-soft: color-mix(in srgb, var(--ok) 14%, var(--bg-elev-1));
+  --warn-soft: color-mix(in srgb, var(--warn) 16%, var(--bg-elev-1));
+  --bad-soft: color-mix(in srgb, var(--bad) 14%, var(--bg-elev-1));
+  --info-soft: color-mix(in srgb, var(--info) 14%, var(--bg-elev-1));
 }

@@ -1,4 +1,4 @@
-import { Moon, Pause, Play, RotateCcw, Sun, Zap, Command, Dice5 } from 'lucide-react';
+import { Menu, Moon, Pause, Play, RotateCcw, Sun, Zap, Command, Dice5 } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { NAV } from '../../routes';
 import { runner } from '../../state/runner';
@@ -25,6 +25,9 @@ export function TopBar() {
   const active = snap.faults.filter((f) => f.started).length;
   return (
     <header className="topbar" role="banner">
+      <button className="btn icon ghost menu-btn" aria-label="Open navigation" onClick={() => useUiStore.getState().set({ mobileNav: true })}>
+        <Menu size={18} />
+      </button>
       <div className="crumb">
         <small>DeltaTrace Live › {item?.group ?? ''}</small>
         <b>{item?.title ?? 'Not found'}</b>

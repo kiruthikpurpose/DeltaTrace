@@ -42,7 +42,7 @@ export default function Incidents() {
     <div className="page">
       <PageHeader
         title="Incidents"
-        purpose="Alarms grouped by pressure-wave delay, weighted by sensor trust, classified and ranked. Every raw alarm stays linked to its incident."
+        purpose="Alarms grouped by pressure-wave delay, classified and ranked. Every raw alarm stays linked."
         info={['Pick an incident to see why it was classified that way.', 'The timeline shows alarms by position and time; alarms on the dashed wavefront corroborate each other.', 'Operator dispositions become labels that feed the tuner.']}
       />
       <div className="row" style={{ justifyContent: 'space-between' }}>

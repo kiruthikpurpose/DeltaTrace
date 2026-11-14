@@ -71,21 +71,18 @@ export default function Overview() {
     <div className="page">
       <section className="hero" aria-labelledby="hero-title">
         <div className="hero-copy">
-          <span className="badge group">Simulated pipeline · live demonstration</span>
+          <span className="badge neutral">200 km pipeline · live simulation</span>
           <h1 id="hero-title">Fewer alarms. Clearer incidents. Safer settings.</h1>
           <p>
-            A pipeline event sends a pressure wave past many sensors, so one problem becomes dozens of alarms, and some sensors simply lie. DeltaTrace sits beside the existing control system and adds three connected ideas:
-            <b style={{ color: 'var(--trust-ink)' }}> a trust score for every sensor</b>,
-            <b style={{ color: 'var(--group-ink)' }}> grouping of alarms by pressure-wave delay</b>, and
-            <b style={{ color: 'var(--tune-ink)' }}> alarm settings tuned only on trusted data</b>.
+            One pipeline event sends a pressure wave past many sensors and becomes dozens of alarms; some sensors also report wrong values. DeltaTrace runs beside the existing control system and adds three functions:
+            <b> a trust score for every sensor</b>,
+            <b> grouping of alarms by pressure-wave delay</b>, and
+            <b> alarm settings tuned only on trusted data</b>.
           </p>
           <div className="row">
             <button className="btn primary big" onClick={() => nav('/console')}>Open Live Console <ArrowRight size={18} /></button>
             <button className="btn big" onClick={() => nav('/demo')}><PlayCircle size={18} /> Start Guided Demo</button>
           </div>
-        </div>
-        <div className="hero-loop" aria-hidden>
-          <LoopDiagram size={300} labels={false} />
         </div>
       </section>
 
