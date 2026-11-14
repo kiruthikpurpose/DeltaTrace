@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 890 270" width="890" height="270" role="img" aria-label="Alarm grouping and classification decision flow" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+<title>Alarm grouping and classification decision flow</title>
+<defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#6e7781"/></marker>
+<marker id="ac" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#0969da"/></marker></defs>
+<rect x="10" y="100" width="130" height="56" rx="6" fill="#f6f8fa" stroke="#d0d7de" stroke-width="1.2"/>
+<text x="75" y="125" text-anchor="middle" font-size="13" font-weight="600" fill="#1f2328">Raw alarm</text>
+<text x="75" y="141" text-anchor="middle" font-size="11" fill="#59636e">always retained</text>
+<rect x="190" y="100" width="210" height="56" rx="6" fill="#ddf4ff" stroke="#0969da" stroke-width="1.2"/>
+<text x="295" y="125" text-anchor="middle" font-size="13" font-weight="600" fill="#1f2328">Demotion test</text>
+<text x="295" y="141" text-anchor="middle" font-size="11" fill="#59636e">low trust, no corroboration, not critical</text>
+<rect x="450" y="20" width="210" height="50" rx="6" fill="#f6f8fa" stroke="#d0d7de" stroke-width="1.2"/>
+<text x="555" y="42" text-anchor="middle" font-size="13" font-weight="600" fill="#1f2328">Instrument advisory</text>
+<text x="555" y="58" text-anchor="middle" font-size="11" fill="#59636e">visible, retrievable</text>
+<rect x="450" y="130" width="210" height="50" rx="6" fill="#ddf4ff" stroke="#0969da" stroke-width="1.2"/>
+<text x="555" y="152" text-anchor="middle" font-size="13" font-weight="600" fill="#1f2328">Link by delay window</text>
+<text x="555" y="168" text-anchor="middle" font-size="11" fill="#59636e">hops &lt;= 3, |dt| &lt;= d/c + tolerance</text>
+<rect x="710" y="10" width="160" height="46" rx="6" fill="#f6f8fa" stroke="#d0d7de" stroke-width="1.2"/>
+<text x="790" y="30" text-anchor="middle" font-size="13" font-weight="600" fill="#1f2328">Data integrity</text>
+<text x="790" y="46" text-anchor="middle" font-size="11" fill="#59636e">stale, replay, flat-line</text>
+<rect x="710" y="66" width="160" height="46" rx="6" fill="#f6f8fa" stroke="#d0d7de" stroke-width="1.2"/>
+<text x="790" y="86" text-anchor="middle" font-size="13" font-weight="600" fill="#1f2328">Process event</text>
+<text x="790" y="102" text-anchor="middle" font-size="11" fill="#59636e">corroboration >= 0.6</text>
+<rect x="710" y="122" width="160" height="46" rx="6" fill="#f6f8fa" stroke="#d0d7de" stroke-width="1.2"/>
+<text x="790" y="142" text-anchor="middle" font-size="13" font-weight="600" fill="#1f2328">Instrument fault</text>
+<text x="790" y="158" text-anchor="middle" font-size="11" fill="#59636e">one channel, &lt; 0.2</text>
+<rect x="710" y="178" width="160" height="46" rx="6" fill="#f6f8fa" stroke="#d0d7de" stroke-width="1.2"/>
+<text x="790" y="198" text-anchor="middle" font-size="13" font-weight="600" fill="#1f2328">Needs review</text>
+<text x="790" y="214" text-anchor="middle" font-size="11" fill="#59636e">otherwise</text>
+<path d="M140,128 H190" fill="none" stroke="#6e7781" stroke-width="1.5"  marker-end="url(#a)"/>
+<path d="M400,115 H425 V45 H450" fill="none" stroke="#0969da" stroke-width="1.5"  marker-end="url(#ac)"/>
+<path d="M400,141 H425 V155 H450" fill="none" stroke="#0969da" stroke-width="1.5"  marker-end="url(#ac)"/>
+<text x="428" y="100" text-anchor="start" font-size="11" fill="#59636e">yes</text>
+<text x="428" y="178" text-anchor="start" font-size="11" fill="#59636e">no</text>
+<path d="M660,155 H685 V33 H710" fill="none" stroke="#6e7781" stroke-width="1.5"  marker-end="url(#a)"/>
+<path d="M685,89 H710" fill="none" stroke="#6e7781" stroke-width="1.5"  marker-end="url(#a)"/>
+<path d="M685,145 H710" fill="none" stroke="#6e7781" stroke-width="1.5"  marker-end="url(#a)"/>
+<path d="M685,155 V201 H710" fill="none" stroke="#6e7781" stroke-width="1.5"  marker-end="url(#a)"/>
+<text x="790" y="250" text-anchor="middle" font-size="11" fill="#59636e">First matching rule wins</text>
+</svg>

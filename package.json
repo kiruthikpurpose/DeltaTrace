@@ -9,7 +9,10 @@
     "preview": "vite preview",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src tests --ext .ts,.tsx"
+    "lint": "eslint src tests --ext .ts,.tsx",
+    "check:bundle": "node scripts/check-bundle.mjs",
+    "diagrams": "node scripts/build-diagrams.mjs",
+    "ci": "npm run typecheck && npm run lint && npm test && npm run build && npm run check:bundle"
   },
   "dependencies": {
     "clsx": "^2.1.1",
@@ -32,5 +35,14 @@
     "typescript-eslint": "^8.15.0",
     "vite": "^5.4.11",
     "vitest": "^2.1.5"
+  },
+  "license": "Apache-2.0",
+  "description": "DeltaTrace Live: sensor trust scoring, delay-based alarm grouping and trust-gated alarm tuning for pipeline control rooms",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kiruthikpurpose/DeltaTrace.git"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }

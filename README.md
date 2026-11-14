@@ -1,343 +1,220 @@
 <div align="center">
 
-#  DeltaTrace Live
+# DeltaTrace Live
 
-### Fewer alarms. Clearer incidents. Safer settings.
+**Sensor trust, delay-based alarm grouping and safer alarm settings for pipeline control rooms.**
 
-An in-browser control-room application showing how a software layer reduces alarm floods on an oil and gas pipeline.
-
-![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white&style=for-the-badge)
-![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white&style=for-the-badge)
-![Vite](https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white&style=for-the-badge)
-![Tests](https://img.shields.io/badge/tests-51%20passing-22C55E?style=for-the-badge)
-![Bundle](https://img.shields.io/badge/initial%20JS-~87%20kB%20gzip-14B8A6?style=for-the-badge)
-![Network](https://img.shields.io/badge/runtime%20network-none-8B5CF6?style=for-the-badge)
-
-** Trust Engine &nbsp;·&nbsp;  Delay-Based Grouping &nbsp;·&nbsp;  Trust-Gated Replay Tuner**
+[![CI](https://github.com/kiruthikpurpose/DeltaTrace/actions/workflows/ci.yml/badge.svg)](https://github.com/kiruthikpurpose/DeltaTrace/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)
+![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6.svg)
 
 </div>
 
----
+<p align="center">
+  <img src="docs/images/console.png" alt="Live console: pipeline schematic, raw alarm list and DeltaTrace incident view" width="900">
+</p>
+
+DeltaTrace sits beside an existing SCADA system. It reads sensor data and alarms, scores how far each sensor can be trusted, groups related alarms into single incidents, and proposes safer alarm settings. It writes back only incident records, data-quality flags and operator-approved parameters. It never issues control commands.
+
+This repository is a complete browser application with a built-in process simulator, so every feature can be exercised without a plant connection.
 
 ## Contents
 
-1. [The problem](#the-problem) · 2. [The idea](#the-idea) · 3. [Architecture](#architecture) · 4. [The three innovations](#the-three-innovations) · 5. [Safety rules](#safety-rules) · 6. [Pages](#pages) · 7. [Quick start](#quick-start) · 8. [Demo script](#the-7-minute-demo) · 9. [Shortcuts](#keyboard-shortcuts) · 10. [Results](#results) · 11. [Assumptions](#assumptions) · 12. [Limits](#honest-limitations) · 13. [Project layout](#project-layout)
+[Why](#why) · [Functions](#functions) · [Architecture](#architecture) · [Alarm decisions](#alarm-decisions) · [Safety rules](#safety-rules) · [Screens](#screens) · [Getting started](#getting-started) · [Testing and CI](#testing-and-ci) · [Deployment](#deployment) · [Reports](#reports) · [Project layout](#project-layout) · [Configuration](#configuration) · [Limitations](#limitations) · [Contributing](#contributing) · [License](#license)
 
----
+## Why
 
-## The problem
+A long pipeline is monitored by sensors every ~20 km, and the control system raises an alarm at every limit crossing. Two problems follow:
 
-A 200 km pipeline is watched by sensors about every 20 km. The existing control system (SCADA) raises an alarm whenever a reading crosses a limit. Two things go wrong:
+- **One event, many alarms.** A leak or pump trip sends a pressure wave past many sensors in turn, producing dozens of alarms within minutes.
+- **Some alarms are not real.** Sensors freeze, drift, spike, replay old data, go offline or are tampered with, and hand-set alarm limits drift back toward flooding.
 
-```mermaid
-flowchart LR
-  E([ One event<br/>leak / pump trip]):::bad --> W[Pressure wave<br/>passes sensor after sensor]:::info
-  W --> F[ Dozens of alarms<br/>in minutes = alarm flood]:::bad
-  L([ Lying sensor<br/>frozen · drift · spike · replay · offline]):::warn --> X[ False alarms &<br/>missed real ones]:::warn
-  F --> O[ Operator overload]:::bad
-  X --> O
-  classDef bad fill:#ef4444,stroke:#991b1b,color:#fff
-  classDef info fill:#38bdf8,stroke:#0369a1,color:#00253a
-  classDef warn fill:#f59e0b,stroke:#92400e,color:#1f1300
-```
+## Functions
 
-## The idea
+| Function | What it does | Page |
+|---|---|---|
+| **Trust engine** | Scores every channel from 0 to 1 using neighbour agreement, mass balance, signal behaviour and communication health. | Trust Center |
+| **Delay-based grouping** | Merges alarms whose time gaps fit the pressure-wave travel time between sensors, classifies the incident, ranks it and estimates an origin. | Live Console, Incidents |
+| **Trust-gated replay tuner** | Replays candidate thresholds, deadbands and delays on stored data from trusted sensors only and recommends the best safe setting for approval. | Alarm Tuner |
 
-**DeltaTrace** sits *beside* the existing system (read-only in, controlled write-back out) and adds three connected innovations. Together they form a **closed loop**:
-
-```mermaid
-flowchart LR
-  T[ 1 · Trust<br/>score every sensor]:::trust --> G[ 2 · Grouping<br/>alarms → incidents]:::group
-  G --> L[ Labelled events]:::neutral
-  L --> U[ 3 · Tuning<br/>safe alarm settings]:::tune
-  U --> R[ Fewer false alarms]:::ok
-  R --> D[ Cleaner data]:::ok
-  D --> T
-  classDef trust fill:#14b8a6,stroke:#0f766e,color:#03201d
-  classDef group fill:#3a76ab,stroke:#24517a,color:#fff
-  classDef tune fill:#f59e0b,stroke:#92400e,color:#1f1300
-  classDef ok fill:#22c55e,stroke:#15803d,color:#04210f
-  classDef neutral fill:#64748b,stroke:#334155,color:#fff
-```
+The three feed each other: trust improves grouping, grouping produces labelled events, labelled events improve tuning, and tuning reduces false alarms, which cleans the data trust relies on.
 
 ## Architecture
 
-```mermaid
-flowchart TB
-  subgraph FIELD[" Field level"]
-    P[Pipeline + 15 channels<br/>12 PT · 3 FT]:::field --> RTU[RTUs / PLCs<br/>sample · timestamp · quality]:::field
-  end
-  subgraph COMM[" Communication"]
-    C[Radio · Satellite · Cellular<br/>Modbus · DNP3 · IEC 104 · OPC UA]:::comm
-  end
-  subgraph CC[" Control centre"]
-    S[Central server / SCADA]:::cc
-    H[(Historian)]:::cc
-    GPS[GPS time]:::cc
-    OC[Operator console]:::cc
-  end
-  subgraph DT[" DeltaTrace unit"]
-    GW[ Read-only gateway]:::dt
-    TR[Trust engine]:::trust
-    GR[Grouping &<br/>classification]:::group
-    TU[Replay tuner]:::tune
-    AU[(Audit log)]:::dt
-    WB[Write-back module]:::dt
-  end
-  RTU --> C --> S
-  S --- H
-  S --- GPS
-  S --> OC
-  S ==>|copy of tags & alarms| GW
-  GW --> TR --> GR
-  H -.history.-> TU
-  TR --> TU
-  GR --> AU
-  GR --> WB
-  TU --> WB
-  WB ==>|incident records · quality flags · approved settings| S
-  S -. " fail-open bypass: raw alarms unchanged" .-> OC
-  classDef field fill:#334155,stroke:#94a3b8,color:#fff
-  classDef comm fill:#0ea5e9,stroke:#075985,color:#fff
-  classDef cc fill:#2c6ca3,stroke:#1f4f7a,color:#fff
-  classDef dt fill:#3a76ab,stroke:#24517a,color:#fff
-  classDef trust fill:#14b8a6,stroke:#0f766e,color:#03201d
-  classDef group fill:#3a76ab,stroke:#24517a,color:#fff
-  classDef tune fill:#f59e0b,stroke:#92400e,color:#1f1300
-```
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/architecture-dark.svg">
+    <img src="docs/images/architecture-light.svg" alt="System architecture: field, communication and control centre feed a read-only gateway into the DeltaTrace unit, which writes approved results back to the SCADA server" width="900">
+  </picture>
+</p>
 
-### Data flow per 5-second scan
+DeltaTrace is a read-only consumer of SCADA data. Its write-back module returns incident records, quality flags and approved settings to the SCADA server through a controlled interface. If DeltaTrace is switched off or fails, SCADA alarms reach the operator console unchanged (fail-open).
 
-```mermaid
-sequenceDiagram
-  autonumber
-  participant Proc as  Process + faults
-  participant RTU as  RTU sampling
-  participant Trust as  Trust engine
-  participant Scada as  SCADA baseline
-  participant Agg as  Aggregator
-  participant Log as  Write-back & audit
-  Proc->>RTU: true values → faulty / skewed measurements
-  RTU->>Trust: held values, age, quality
-  Trust-->>Agg: trust T, class, likely fault
-  RTU->>Scada: limits, rate-of-change, flow balance
-  Scada->>Agg: raw alarms (always retained)
-  Agg->>Agg: link by delay · classify · rank · demote?
-  Agg->>Log: incident tags, quality flags, audit entries
-  Log-->>Scada: dry-run write-back (never control commands)
-```
+### Processing per scan
 
-## The three innovations
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/scan-flow-dark.svg">
+    <img src="docs/images/scan-flow-light.svg" alt="Seven processing stages of one scan: sample, SCADA alarms, trust, group, classify, safety rules, write-back" width="900">
+  </picture>
+</p>
 
-### 1 · Trust Engine
+## Alarm decisions
 
-Every channel gets a live score from four checks:
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/decision-flow-dark.svg">
+    <img src="docs/images/decision-flow-light.svg" alt="Decision flow for a raw alarm: demotion test, then delay-window linking, then classification" width="760">
+  </picture>
+</p>
 
-```mermaid
-flowchart LR
-  A[Neighbour residual z<br/>vs ±2-hop pipeline neighbours]:::trust --> M
-  B[Mass balance M<br/>FT-in − FT-del − FT-out]:::trust --> M
-  C[Signal behaviour S<br/>flat-line · spike · replay]:::trust --> M
-  D[Comms C<br/>age · quality code]:::trust --> M
-  M["T = exp(−(0.15·z² + 1.0·S + 0.8·C + 0.5·M))"]:::calc --> K{Class}
-  K -->|≥ 0.7| G[ GOOD]:::ok
-  K -->|0.4 – 0.7| U[ UNCERTAIN]:::warn
-  K -->|< 0.4| BAD[ BAD<br/>leave only at T ≥ 0.55 for 3 scans]:::bad
-  classDef trust fill:#14b8a6,stroke:#0f766e,color:#03201d
-  classDef calc fill:#0f172a,stroke:#14b8a6,color:#5eead4
-  classDef ok fill:#22c55e,color:#04210f
-  classDef warn fill:#f59e0b,color:#1f1300
-  classDef bad fill:#ef4444,color:#fff
-```
+| Class | Rule (first match wins) |
+|---|---|
+| Data integrity | Two or more channels stale or bad with a communications cause, or a replayed or flat-lined channel while neighbours change |
+| Process event | Trust-weighted corroboration >= 0.6 |
+| Instrument fault | One channel (or only low-trust channels) and corroboration < 0.2 |
+| Needs review | Everything else |
 
-A real transient seen by several neighbours **widens the tolerance** instead of punishing healthy sensors.
-
-### 2 · Delay-Based Incident Grouping
-
-Two alarms join one incident if `hops ≤ 3` **and** `|Δt| ≤ distance ÷ wave speed + clock tolerance + scan interval`.
-Example: 20 km ÷ 1000 m/s = **20 s** (+10 s). Two simultaneous alarms 150 km apart are **not** merged.
-
-```mermaid
-flowchart TD
-  S([New raw alarm]) --> Q{Trust &lt; 0.4 AND<br/>corroboration &lt; 0.2 AND<br/>not safety-critical?}
-  Q -->|yes| ADV[ Instrument Advisory<br/>visible &amp; retrievable]:::warn
-  Q -->|no| LNK[Link by delay window<br/>union-find over open alarms]:::group
-  LNK --> CL{Classify<br/>first match wins}
-  CL -->|"≥2 stale / replay / flat-line"| DI[ Data-integrity anomaly]:::di
-  CL -->|"corroboration ≥ 0.6"| PE[ Process event]:::pe
-  CL -->|"one channel, corr &lt; 0.2"| IF[ Instrument fault]:::warn
-  CL -->|otherwise| NR[ Needs review]:::nr
-  PE --> OR[Origin estimate<br/>grouping aid, not a locator]:::group
-  classDef warn fill:#f59e0b,color:#1f1300
-  classDef group fill:#3a76ab,color:#fff
-  classDef di fill:#9c4f92,color:#fff
-  classDef pe fill:#3b82f6,color:#fff
-  classDef nr fill:#94a3b8,color:#0f172a
-```
-
-Score `S = Σ severity · Tᵝ · (1 + γ·Corr)` ranks incidents; safety-critical alarms always lead the headline.
-
-### 3 · Trust-Gated Replay Tuner
-
-```mermaid
-flowchart LR
-  H[(6 h stored history<br/>+ labelled events)]:::tune --> TG[Trust gate<br/>T ≥ 0.6 only]:::trust
-  TG --> CG[≤175 candidates / class<br/>threshold × deadband × on-delay]:::tune
-  CG --> RP[Replay]:::tune --> MS[Measure alarms · false alarms<br/>delay · missed]:::tune
-  MS --> PF{Missed = 0 and<br/>delay ≤ +20 s?}
-  PF -->|no| X[ Rejected]:::bad
-  PF -->|yes| PR[ Pareto front →<br/>recommended setting]:::ok
-  PR --> AP[ Operator approves]:::group --> WB[Write-back + MOC record<br/>revertible]:::ok
-  classDef tune fill:#f59e0b,stroke:#92400e,color:#1f1300
-  classDef trust fill:#14b8a6,color:#03201d
-  classDef bad fill:#ef4444,color:#fff
-  classDef ok fill:#22c55e,color:#04210f
-  classDef group fill:#3a76ab,color:#fff
-```
-
-Objective: `J = 1·alarms + 2·falseAlarms + 0.05·meanDelay + 1e6·missed`. Turning trust gating **off** lets faulty-sensor samples contaminate the replay and can produce a worse recommendation.
+Two alarms are linked when they are within 3 hops and their time difference is at most `distance / wave speed + clock tolerance + scan interval`. For example 20 km at 1000 m/s gives 20 s (plus 10 s). Comms and no-change alarms describe the instrument, so they only group with their own kind.
 
 ## Safety rules
 
-Enforced in code, checked live in the UI, covered by tests.
+Enforced in code, checked live in the UI and covered by `tests/safety.test.ts`.
 
-| # | Rule |
-|---|---|
-| 1 | Safety-critical alarms are **never hidden**; they lead the incident headline. |
-| 2 | Low trust alone **never silently deletes** an alarm; it becomes a visible Instrument Advisory. |
-| 3 | A **corroborated** alarm is never demoted because one source has low trust. |
-| 4 | **Every raw alarm is retained** and linked to its incident or advisory. |
-| 5 | **Fail-open:** engine OFF ⇒ raw alarms pass through unchanged. |
-| 6 | DeltaTrace **never issues control commands** (only incident records, quality flags, operator-approved parameters; dry-run here). |
+1. Safety-critical alarms are never hidden and lead the incident headline.
+2. Low trust alone never deletes an alarm; it becomes a visible, retrievable Instrument Advisory.
+3. A corroborated alarm is never demoted because one source has low trust.
+4. Every raw alarm is retained and linked to its incident or advisory.
+5. With the engine off, raw alarms pass through unchanged.
+6. No control commands are ever issued. Write-backs are limited to incident records, quality flags and operator-approved parameters, and are dry-run in this build.
 
-## Pages
+## Screens
 
-| Page | What it shows |
-|---|---|
-| **Overview** | Hero, three innovation cards with live numbers, before/after tickers, loop diagram, safety rules |
-| **Live Console** | Animated pipeline, raw-alarm view vs DeltaTrace view, flood gauge, strip charts, explain overlay, replay last 5 min |
-| **Incidents** | Filter/sort, class reasoning, position-time timeline with wavefront, member alarms, origin, dispositions |
-| **Trust Center** | Trust heatmap, sensor cards, predicted-vs-measured, neighbour graph, live formula, quick faults |
-| **Alarm Tuner** | Run replay, Pareto chart, gated vs contaminated, approve & write back, MOC change log, loop iterations |
-| **Write-back & Audit** | Dry-run tag feed, audit log, live rule compliance, CSV, JSON and PDF export |
-| **Benchmarks** | Scenarios S0–S8 × N seeds, charts, confusion matrix, experiments E1–E7, exports |
-| **Guided Demo** | 10-step narrated story with auto fault injection and presenter mode |
-| **How It Works** | 12 interactive sections driven by live data, with text alternatives |
-| **Settings** | Wave speed, tolerances, trust weights, thresholds, demotion rules, seed, theme |
+<table>
+  <tr>
+    <td width="50%"><img src="docs/images/incidents.png" alt="Incident detail with classification reasons, timeline and member alarms"><br><sub>Incident detail: classification basis, position-time timeline, member alarms</sub></td>
+    <td width="50%"><img src="docs/images/trust.png" alt="Trust center with heatmap and sensor cards"><br><sub>Trust Center: heatmap, sensor cards, neighbour graph</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/images/tuner.png" alt="Alarm tuner Pareto chart of candidate settings"><br><sub>Alarm Tuner: Pareto front of candidate settings</sub></td>
+    <td width="50%"><img src="docs/images/benchmarks.png" alt="Benchmark results for scenarios S0 to S8"><br><sub>Benchmarks: scenarios S0 to S8, existing system against DeltaTrace</sub></td>
+  </tr>
+</table>
 
-## Interface notes
+## Getting started
 
-- **Palette:** neutral gray surfaces in the ISA-101 tradition; colour is reserved for alarm priority, trust state and incident class. All text and state colours meet WCAG AA contrast in both themes.
-- **Responsive:** sidebar becomes an off-canvas menu below 820 px; below 720 px the pipeline is shown as a node list instead of a diagram. Verified at 320, 390, 600, 768, 1024 and 1440 px with no horizontal overflow.
-- **Accessibility:** dialogs trap and restore focus, canvases and diagrams have text alternatives, motion respects `prefers-reduced-motion`.
-
-## Reports
-
-PDF reports are generated in the browser (no server, no external library) and downloaded as A4 documents with cover block, KPI tiles, tables, vector charts, page headers and page numbers:
-
-| Report | Where | Contents |
-|---|---|---|
-| Benchmark report | Benchmarks | Summary, S0-S8 table, peak and flood charts, confusion matrix, experiments E1-E7, method |
-| Operations and audit report | Write-back & Audit | KPIs, safety compliance, sensor trust, incidents, advisories, change records, audit trail, write-back log, configuration |
-| Incident report | Incident detail | Summary, classification basis, origin, member alarms, disposition, write-back |
-| Alarm tuning report | Alarm Tuner | Recommendations, Pareto charts, candidate tables, contamination check, approved changes |
-
-## Quick start
+Requires Node 18 or newer.
 
 ```bash
-npm i
-npm run dev          # http://localhost:5173
-npm test             # 52 tests: engine, safety, scenarios, tuner, persistence, UI smoke
-npm run typecheck
-npm run lint
-npm run build        # → dist/
-npm run preview
+git clone https://github.com/kiruthikpurpose/DeltaTrace.git
+cd DeltaTrace
+npm ci
+npm run dev        # http://localhost:5173
 ```
 
-Requires Node 18+. No backend, no accounts, no analytics, no external fonts/CDNs. Works offline.
+Open **Guided Demo** for a ten-step walkthrough, or press `F` anywhere to inject a fault.
 
-### ▲ Deploy to Vercel
-Import the repo → framework preset **Vite** → build `npm run build` → output `dist`. `vercel.json` already has the SPA rewrite and immutable asset caching.
+| Script | Purpose |
+|---|---|
+| `npm run dev` | Development server |
+| `npm run build` | Typecheck and production build to `dist/` |
+| `npm run preview` | Serve the production build |
+| `npm test` | Run the test suite |
+| `npm run typecheck` | TypeScript strict check |
+| `npm run lint` | ESLint |
+| `npm run check:bundle` | Fail if initial JavaScript exceeds 400 kB gzip |
+| `npm run ci` | Everything CI runs, in order |
+| `npm run diagrams` | Regenerate the README diagrams |
 
-## The 7-minute demo
-
-```mermaid
-flowchart LR
-  s1[1 Normal]:::a --> s2[2 Pump trip<br/>flood]:::b --> s3[3 Grouping<br/>not merged]:::c --> s4[4 Leak km 87]:::c --> s5[5 Stuck PT-7]:::d --> s6[6 Replay + valve]:::d --> s7[7 Comms + leak]:::c --> s8[8 Tuning]:::e --> s9[9 Fail-open]:::b --> s10[10 Close loop]:::a
-  classDef a fill:#22c55e,color:#04210f
-  classDef b fill:#ef4444,color:#fff
-  classDef c fill:#3a76ab,color:#fff
-  classDef d fill:#14b8a6,color:#03201d
-  classDef e fill:#f59e0b,color:#1f1300
-```
-
-Open **Guided Demo → Start**. Auto-play, skip/back, presenter mode (`P`) and emergency reset (`R`) are built in.
-
-## ⌨ Keyboard shortcuts
+### Keyboard shortcuts
 
 | Key | Action |
 |---|---|
 | `Space` | Play / pause |
 | `F` | Fault injector |
-| `1`–`9` | Quick faults: pump trip · leak km 87 · freeze PT-7 · replay PT-3 · false injection PT-9 · comms outage · comms + leak · valve closure · batch interface |
+| `1` to `9` | Quick faults (pump trip, leak, frozen sensor, replay, false injection, comms outage, comms plus leak, valve closure, batch interface) |
 | `Ctrl/Cmd + K` | Command palette |
-| `P` | Presenter mode |
-| `R` | Emergency reset (presenter / demo) |
+| `P` / `R` | Presenter mode / emergency reset |
 | `?` | Shortcut help |
 
-## Results
+## Testing and CI
 
-5 seeds each, headless, 30-minute timelines:
+The suite has 52 tests: engine unit and property tests (trust, grouping, classification, origin, tuner, metrics), scenario tests S0 to S8, safety invariants across many seeds, persistence, and UI smoke tests.
 
-| Scenario | Peak alarms / 10 min | % time in flood | Operator items | Critical hidden |
-|---|---|---|---|---|
-| S1 Pump trip cascade | 52.8 → **1.0** | 37% → 0% | 53 → 1.0 | **0** |
-| S2 Small leak | 16.8 → **1.0** | 33% → 0% | 17 → 1.2 | **0** |
-| S4 Spoofed transmitter | 28.0 → **2.0** | 35% → 0% | 28 → 2.0 | **0** |
-| S6 Comms outage + leak | 15.0 → **2.0** | 32% → 0% | 15 → 2.0 | **0** |
-| S8 Mixed stress | 80.4 → **2.8** | 52% → 0% | 82 → 3.0 | **0** |
+GitHub Actions (`.github/workflows/ci.yml`) runs on every push to `main` and every pull request, on Node 18, 20 and 22:
 
-Class accuracy 100% on matched incidents; leak origin within ±6 km. Run **Benchmarks** in the app for the full S0–S8 table and experiments E1–E7.
+`npm ci` → typecheck → lint → test → build → bundle budget check.
 
-## Assumptions
+Run the same sequence locally with `npm run ci`.
 
-- Built at the repo root (no nested folder). Recharts is not used; all charts are hand-written SVG/canvas.
-- **Baseline floods by design:** transients include water-hammer ringing (amp 0.9, period 12 s, decay 40 s) and leak amplitudes are 1.6× the spec's starting values (1.0 / 2.4 / 4.8 bar).
-- Flow lag = distance ÷ 1.2 m/s clipped to 90 s so it is visible in a demo.
-- The "existing system" also raises *no-change* and *communications* alarms, otherwise frozen/dead sensors would be silent.
-- Replay detection emits a DeltaTrace-derived `DQ` alarm (not counted as raw) that opens a data-integrity incident.
-- Operator items = incidents opened + advisories created (+ pass-through alarms when the engine is off).
-- Default clock tolerance 5 s, scan 5 s ⇒ link window = delay + 10 s.
-- Tuner: 6 h seeded training history (8 labelled events, many sensor faults), generated once (~1.5 s) and cached; recommendations must miss no event the current setting catches, add ≤ 20 s delay and not raise alarm load.
+## Deployment
 
-## Honest limitations
+The build is a static site.
 
-- Trust weights and thresholds are defaults and require calibration for a specific line.
-- **Wave speed must be known or estimated;** a wrong value shifts every delay window.
-- **The origin estimate is a grouping aid, not a leak locator.**
-- **Overlapping events merge** when they coincide in time and place (e.g. S8 trip + nearby leak; two medium leaks whose wave tails overlap).
-- **Quiet scenarios** (S0, S7) give DeltaTrace nothing to reduce; S7 still yields one false incident.
-- **Clock skew** is tolerated only up to the configured tolerance (experiment E4).
-- **Slow drift** is noticed only after the residual grows (~2 min).
-- **Flow corroboration is coarse:** two moving pressure sensors anywhere count.
-- **Tuner gating** clearly helped only the rate-of-change class on this history (experiment E5).
-- Operator approval is always required for any setting change.
+- **Vercel:** import the repository, preset *Vite*, build command `npm run build`, output directory `dist`. `vercel.json` already contains the single-page-app rewrite and immutable asset caching.
+- **Any static host:** serve `dist/` and rewrite unknown paths to `index.html`.
+
+The application makes no network requests at runtime and works offline.
+
+## Reports
+
+PDF reports are generated in the browser, without a server or external library.
+
+| Report | Where | Contents |
+|---|---|---|
+| Benchmark | Benchmarks | Summary, scenario table, charts, confusion matrix, experiments, method |
+| Operations and audit | Write-back and Audit | KPIs, safety compliance, sensor trust, incidents, advisories, change records, audit trail, configuration |
+| Incident | Incident detail | Summary, classification basis, origin, member alarms, write-back |
+| Alarm tuning | Alarm Tuner | Recommendations, Pareto charts, candidate tables, contamination check |
 
 ## Project layout
 
 ```text
-PLAN.md · README.md · vercel.json · vite.config.ts
 src/
-  engine/      pure, seeded simulation + the 3 innovations (no React)
-               rng · topology · process · faults · scada · trust · aggregator · classifier
-               origin · tuner · metrics · scenarios · experiments · simulation
-  state/       zustand stores · SimulationRunner tick loop · persistence
-  components/  shell · ui kit · viz (SVG/canvas) · domain widgets
-  pages/       Overview · Console · Incidents · Trust · Tuner · Writeback
-               Benchmarks · Demo · HowItWorks · Settings
-  styles/      tokens.css (light + dark) · base · shell · components · pages
-tests/         vitest: engine, safety properties, scenarios, tuner, persistence, app smoke
+  engine/       Pure TypeScript simulation and the three functions (no React, seeded RNG)
+  state/        Zustand stores, the simulation runner, persistence
+  components/   Shell, UI kit, SVG and canvas visuals, domain widgets
+  pages/        One module per route
+  styles/       Design tokens (light and dark) and component styles
+  utils/        Formatting, PDF writer, report builders, accessibility helpers
+tests/          Vitest suites
+scripts/        Diagram generator, bundle-size check
+docs/           README images and architecture notes
 ```
 
----
+More detail: [docs/architecture.md](docs/architecture.md).
 
+## Configuration
+
+Defaults live in `src/engine/config.ts` and can be changed on the Settings page.
+
+| Parameter | Default |
+|---|---|
+| Wave speed | 1000 m/s |
+| Clock tolerance / scan interval | 5 s / 5 s |
+| Hop limit | 3 |
+| Trust weights (residual, signal, comms, balance) | 0.15 / 1.0 / 0.8 / 0.5 |
+| Trust classes | GOOD >= 0.7, BAD < 0.4 |
+| Process / fault corroboration | 0.6 / 0.2 |
+| Demotion (trust, corroboration) | < 0.4 and < 0.2 |
+| Incident quiet time | 120 s |
+
+The simulation is reproducible: the same seed, configuration and injection timeline give the same run. The seed is shown in the top bar.
+
+## Limitations
+
+- Trust weights and thresholds are defaults and need calibration for a specific line.
+- Wave speed must be known or estimated; a wrong value shifts every delay window.
+- The origin estimate is a grouping aid, not a leak locator.
+- Events that overlap in both time and place can merge into one incident.
+- Where baseline alarm load is already low, there is little to reduce.
+- Operator approval is always required before a setting change.
+
+## Contributing
+
+Contributions are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) and the [Code of Conduct](CODE_OF_CONDUCT.md). Report vulnerabilities as described in [SECURITY.md](SECURITY.md). Changes are tracked in [CHANGELOG.md](CHANGELOG.md).
+
+## License
+
+Licensed under the [Apache License, Version 2.0](LICENSE). See [NOTICE](NOTICE).

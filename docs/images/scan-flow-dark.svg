@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1050 150" width="1050" height="150" role="img" aria-label="Processing stages of one scan" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+<title>Processing stages of one scan</title>
+<defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#8b949e"/></marker>
+<marker id="ac" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#58a6ff"/></marker></defs>
+<rect x="10" y="40" width="124" height="60" rx="6" fill="#161b22" stroke="#30363d" stroke-width="1.2"/>
+<text x="72" y="67" text-anchor="middle" font-size="13" font-weight="600" fill="#e6edf3">Sample</text>
+<text x="72" y="83" text-anchor="middle" font-size="11" fill="#8d96a0">15 channels</text>
+<text x="22" y="34" font-size="11" font-weight="600" fill="#8d96a0">1</text>
+<path d="M134,70 H154" fill="none" stroke="#8b949e" stroke-width="1.5"  marker-end="url(#a)"/>
+<rect x="154" y="40" width="124" height="60" rx="6" fill="#161b22" stroke="#30363d" stroke-width="1.2"/>
+<text x="216" y="67" text-anchor="middle" font-size="13" font-weight="600" fill="#e6edf3">SCADA alarms</text>
+<text x="216" y="83" text-anchor="middle" font-size="11" fill="#8d96a0">limits, rate, balance</text>
+<text x="166" y="34" font-size="11" font-weight="600" fill="#8d96a0">2</text>
+<path d="M278,70 H298" fill="none" stroke="#8b949e" stroke-width="1.5"  marker-end="url(#a)"/>
+<rect x="298" y="40" width="124" height="60" rx="6" fill="#10243e" stroke="#58a6ff" stroke-width="1.2"/>
+<text x="360" y="67" text-anchor="middle" font-size="13" font-weight="600" fill="#e6edf3">Trust</text>
+<text x="360" y="83" text-anchor="middle" font-size="11" fill="#8d96a0">score per channel</text>
+<text x="310" y="34" font-size="11" font-weight="600" fill="#8d96a0">3</text>
+<path d="M422,70 H442" fill="none" stroke="#8b949e" stroke-width="1.5"  marker-end="url(#a)"/>
+<rect x="442" y="40" width="124" height="60" rx="6" fill="#10243e" stroke="#58a6ff" stroke-width="1.2"/>
+<text x="504" y="67" text-anchor="middle" font-size="13" font-weight="600" fill="#e6edf3">Group</text>
+<text x="504" y="83" text-anchor="middle" font-size="11" fill="#8d96a0">delay window</text>
+<text x="454" y="34" font-size="11" font-weight="600" fill="#8d96a0">4</text>
+<path d="M566,70 H586" fill="none" stroke="#8b949e" stroke-width="1.5"  marker-end="url(#a)"/>
+<rect x="586" y="40" width="124" height="60" rx="6" fill="#10243e" stroke="#58a6ff" stroke-width="1.2"/>
+<text x="648" y="67" text-anchor="middle" font-size="13" font-weight="600" fill="#e6edf3">Classify</text>
+<text x="648" y="83" text-anchor="middle" font-size="11" fill="#8d96a0">rank, origin</text>
+<text x="598" y="34" font-size="11" font-weight="600" fill="#8d96a0">5</text>
+<path d="M710,70 H730" fill="none" stroke="#8b949e" stroke-width="1.5"  marker-end="url(#a)"/>
+<rect x="730" y="40" width="124" height="60" rx="6" fill="#10243e" stroke="#58a6ff" stroke-width="1.2"/>
+<text x="792" y="67" text-anchor="middle" font-size="13" font-weight="600" fill="#e6edf3">Safety rules</text>
+<text x="792" y="83" text-anchor="middle" font-size="11" fill="#8d96a0">demote, headline</text>
+<text x="742" y="34" font-size="11" font-weight="600" fill="#8d96a0">6</text>
+<path d="M854,70 H874" fill="none" stroke="#8b949e" stroke-width="1.5"  marker-end="url(#a)"/>
+<rect x="874" y="40" width="124" height="60" rx="6" fill="#161b22" stroke="#30363d" stroke-width="1.2"/>
+<text x="936" y="67" text-anchor="middle" font-size="13" font-weight="600" fill="#e6edf3">Write-back</text>
+<text x="936" y="83" text-anchor="middle" font-size="11" fill="#8d96a0">audit, KPIs</text>
+<text x="886" y="34" font-size="11" font-weight="600" fill="#8d96a0">7</text>
+<text x="520" y="130" text-anchor="middle" font-size="11" fill="#8d96a0">One scan every 5 simulated seconds. Highlighted stages are DeltaTrace.</text>
+</svg>
