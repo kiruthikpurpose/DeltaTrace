@@ -12,8 +12,6 @@ import { useConfigStore } from '../state/configStore';
 import { useLogStore } from '../state/logStore';
 import { useUiStore } from '../state/uiStore';
 import { toast } from '../state/toastStore';
-import { load, save } from '../state/persist';
-import { Toggle } from '../components/ui/Toggle';
 
 type NumKey = Exclude<{ [K in keyof Config]: Config[K] extends number ? K : never }[keyof Config], never>;
 
@@ -35,7 +33,6 @@ export default function Settings() {
   const [confirm, setConfirm] = useState(false);
   const [wipe, setWipe] = useState(false);
   const theme = useUiStore((s) => s.theme);
-  const [sound, setSound] = useState(() => load<string>('sound', 'on') !== 'off');
   const seed = useConfigStore((s) => s.seed);
   const dirty = JSON.stringify({ ...draft, engineEnabled: 0 }) !== JSON.stringify({ ...live, engineEnabled: 0 });
   const apply = () => {
@@ -93,7 +90,6 @@ export default function Settings() {
                 <span className="muted">Resets the simulation when changed.</span>
               </div>
             </div>
-            <Toggle checked={sound} onChange={(v) => { setSound(v); save('sound', v ? 'on' : 'off'); }} label="Launch sound (plays with the intro animation)" />
             <div className="hr" />
             <button className="btn danger" style={{ alignSelf: 'flex-start' }} onClick={() => setWipe(true)}>Clear saved data…</button>
             <p className="muted" style={{ fontSize: 12 }}>Saved data lives only in this browser (localStorage, namespaced <code>deltatrace.v1.*</code>): theme, sidebar, config, change log, dispositions. The app works fully if storage is unavailable.</p>

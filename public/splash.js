@@ -1,39 +1,38 @@
 /* DeltaTrace launch screen (always dark).
    Alarms scatter across the screen, converge into streams, pass the trust lens and end as one
-   incident. The drawing then simplifies into the product mark and docks into the sidebar logo.
+   incident. The drawing simplifies into the product mark, which flies into the sidebar logo
+   (the topbar logo on phones) while the wordmark travels with it and becomes the sidebar text.
    Self-contained so it starts before the application bundle loads. */
 (function () {
   var sp = document.getElementById('splash');
   if (!sp) return;
   var KEY = 'deltatrace.splash';
-  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var root = document.documentElement;
-  function mark() { try { sessionStorage.setItem(KEY, '1'); } catch (e) {} }
-  function remove() { sp.remove(); root.classList.remove('splash-on'); mark(); }
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function remove() {
+    try { sessionStorage.setItem(KEY, '1'); } catch (e) {}
+    sp.remove(); root.classList.remove('splash-on');
+    window.dispatchEvent(new Event('deltatrace:splash-done'));
+  }
   if (reduce) { remove(); return; }
 
-  var soundPref = true;
-  try { soundPref = localStorage.getItem('deltatrace.v1.sound') !== '"off"'; } catch (e) {}
-  var AC = window.AudioContext || window.webkitAudioContext;
-  var actx = null, engine = null;
-  function cue(n, when) { if (engine) { try { engine.cue(n, when); } catch (e) {} } }
   var NS = 'http://www.w3.org/2000/svg';
   var W = window.innerWidth, H = window.innerHeight;
-  var S = Math.min(W, H) / 1024 * 0.66;
+  var S = Math.min(W, H * 1.15) / 1024 * 0.66;
   var EASE = 'cubic-bezier(.65,0,.35,1)', OUT = 'cubic-bezier(.16,1,.3,1)';
   var K = 1.35, timers = [], ready = false, reachedDock = false, done = false;
   function T(ms, fn) { timers.push(setTimeout(fn, ms / K)); }
   function el(tag, attrs, parent) { var e = document.createElementNS(NS, tag); for (var k in attrs) e.setAttribute(k, attrs[k]); (parent || svg).appendChild(e); return e; }
 
-  var svg = document.createElementNS(NS, 'svg');
-  svg.setAttribute('class', 'sp-svg');
-  sp.appendChild(svg);
+  var bgLayer = document.createElement('div'); bgLayer.className = 'sp-bg'; sp.appendChild(bgLayer);
+  var svg = document.createElementNS(NS, 'svg'); svg.setAttribute('class', 'sp-svg'); sp.appendChild(svg);
   var name = document.createElement('div'); name.className = 'sp-name'; name.innerHTML = '<span class="sp-nt"><span style="font-weight:600">Delta</span><span class="l">Trace</span></span>';
   var sub = document.createElement('div'); sub.className = 'sp-sub'; sub.textContent = 'Trust-aware alarm grouping and tuning for pipelines';
   var credit = document.createElement('div'); credit.className = 'sp-credit'; credit.textContent = 'Created by Kiruthik';
   sp.appendChild(name); sp.appendChild(sub); sp.appendChild(credit);
-  var fs = Math.max(40, Math.min(W, H) * 0.064);
-  name.style.fontSize = fs + 'px'; sub.style.fontSize = Math.max(14, Math.min(W, H) * 0.021) + 'px';
+  var fs = Math.max(34, Math.min(W, H * 1.15) * 0.064);
+  name.style.fontSize = fs + 'px'; sub.style.fontSize = Math.max(13, Math.min(W, H * 1.15) * 0.021) + 'px';
+  sub.style.padding = '0 24px'; sub.style.boxSizing = 'border-box';
 
   var defs = el('defs', {});
   function grad(id, c0, c1, o0) { var g = el('linearGradient', { id: id, gradientUnits: 'userSpaceOnUse', x1: 126, y1: 0, x2: 690, y2: 0 }, defs); el('stop', { offset: 0, 'stop-color': c0, 'stop-opacity': o0 }, g); el('stop', { offset: 0.6, 'stop-color': c0 }, g); el('stop', { offset: 1, 'stop-color': c1 }, g); }
@@ -75,8 +74,7 @@
   var nodeRing = el('circle', { cx: NX, cy: 520, r: 54, fill: 'none', stroke: 'rgba(255,255,255,.5)', 'stroke-width': 5, opacity: 0 }, grp); nodeRing.style.transition = 'opacity .8s';
   var node = el('circle', { cx: NX, cy: 520, r: 0, fill: '#fff' }, grp); node.style.transition = 'r .7s ' + OUT + ', fill .9s';
 
-  // scattered alarm dots (screen space)
-  var dots = [], N = Math.max(50, Math.min(110, Math.round(W * H / 16000)));
+  var dots = [], N = Math.max(46, Math.min(110, Math.round(W * H / 16000)));
   for (var d = 0; d < N; d++) {
     var x = Math.random() * W, y = Math.random() * H;
     var c = el('circle', { cx: x, cy: y, r: 1.8 + Math.random() * 2.8, fill: d < 7 ? '#e0a030' : '#6c7580', opacity: 0 }, field);
@@ -84,105 +82,79 @@
   }
   function toScreen(x, y) { return [CX + (x - 520) * S, CY + (y - 520) * S]; }
 
-  var started = false;
-  function start(withSound) {
-    if (started) return; started = true;
-    if (engine) cue('start');
-    T(150, function () { cue('scatter'); dots.forEach(function (c, i) { setTimeout(function () { c.style.opacity = i < 7 ? 0.95 : 0.5; }, Math.random() * 450); }); });
-    T(1100, function () {
-      cue('converge');
-      dots.forEach(function (c, i) {
-        c.style.transition = 'transform 1.4s ' + EASE + ', opacity 1.2s';
-        var t = i < 7 ? toScreen(126, ys[i]) : toScreen(MX, 520);
-        c.style.transform = 'translate(' + (t[0] - c._x) + 'px,' + (t[1] - c._y) + 'px)';
-        if (i >= 7) c.style.opacity = 0;
-      });
+  // --- timeline
+  var SIMPLE = 0.5, markTop = CY - H * 0.07; // simplified mark scale and vertical centre
+  T(150, function () { dots.forEach(function (c, i) { setTimeout(function () { c.style.opacity = i < 7 ? 0.95 : 0.5; }, Math.random() * 450); }); });
+  T(1100, function () {
+    dots.forEach(function (c, i) {
+      c.style.transition = 'transform 1.4s ' + EASE + ', opacity 1.2s';
+      var t = i < 7 ? toScreen(126, ys[i]) : toScreen(MX, 520);
+      c.style.transform = 'translate(' + (t[0] - c._x) + 'px,' + (t[1] - c._y) + 'px)';
+      if (i >= 7) c.style.opacity = 0;
     });
-    T(2250, function () { cue('streams'); dots.slice(0, 7).forEach(function (c) { c.style.opacity = 0; }); anchors.forEach(function (a) { a.setAttribute('opacity', 1); }); rib.forEach(function (p) { p.style.strokeDashoffset = 0; }); });
-    T(2900, function () { cue('lens'); lens.setAttribute('opacity', 1); lens.style.transform = 'scale(1)'; track.setAttribute('opacity', 1); prog.style.strokeDashoffset = 0; ticks.setAttribute('opacity', 1); });
-    T(3500, function () { cue('node'); bandL.style.strokeDashoffset = 0; bandGlow.setAttribute('opacity', 0.8); bandGlow.style.strokeDashoffset = 0; node.setAttribute('r', 34); halo.setAttribute('opacity', 0.9); nodeRing.setAttribute('opacity', 1); });
-    T(4300, function () {
-      cue('settle');
-      var sc = S * 0.5; place(sc, CX - 520 * sc, CY - 520 * sc - H * 0.07);
-      anchors.forEach(function (a) { a.setAttribute('opacity', 0); });
-      [0, 2, 4, 6].forEach(function (i) { rib[i].setAttribute('opacity', 0); });
-      rib.forEach(function (p) { p.setAttribute('stroke', '#e3e6e9'); p.setAttribute('stroke-width', 30); });
-      ticks.setAttribute('opacity', 0); track.setAttribute('opacity', 0); halo.setAttribute('opacity', 0); bandGlow.setAttribute('opacity', 0);
-      lensFill.setAttribute('fill', 'rgba(0,0,0,0)'); lensRim.setAttribute('stroke', '#94a0ab'); lensRim.setAttribute('stroke-width', 14);
-      prog.setAttribute('stroke', '#5b9fd6'); prog.setAttribute('stroke-width', 26);
-      bandL.setAttribute('stroke', '#e3e6e9'); bandL.setAttribute('stroke-width', 30); node.setAttribute('fill', '#5b9fd6'); nodeRing.setAttribute('opacity', 0);
-      var bottom = CY - H * 0.07 + (804 - 520) * S * 0.5;
-      name.style.top = (bottom + H * 0.045) + 'px';
-      T(700, function () { cue('name'); name.classList.add('on'); });
-      T(1200, function () { cue('sub'); sub.style.top = (parseFloat(name.style.top) + fs * 1.3) + 'px'; sub.classList.add('on'); credit.classList.add('on'); });
-    });
-    T(6900, function () { reachedDock = true; tryDock(); });
-
-
-    setTimeout(function () { sp.addEventListener('click', onPointer, { once: true }); window.addEventListener('keydown', onKey); }, 600);
-  }
+  });
+  T(2250, function () { dots.slice(0, 7).forEach(function (c) { c.style.opacity = 0; }); anchors.forEach(function (a) { a.setAttribute('opacity', 1); }); rib.forEach(function (p) { p.style.strokeDashoffset = 0; }); });
+  T(2900, function () { lens.setAttribute('opacity', 1); lens.style.transform = 'scale(1)'; track.setAttribute('opacity', 1); prog.style.strokeDashoffset = 0; ticks.setAttribute('opacity', 1); });
+  T(3500, function () { bandL.style.strokeDashoffset = 0; bandGlow.setAttribute('opacity', 0.8); bandGlow.style.strokeDashoffset = 0; node.setAttribute('r', 34); halo.setAttribute('opacity', 0.9); nodeRing.setAttribute('opacity', 1); });
+  T(4300, function () {
+    var sc = S * SIMPLE; place(sc, CX - 520 * sc, markTop - 520 * sc);
+    anchors.forEach(function (a) { a.setAttribute('opacity', 0); });
+    [0, 2, 4, 6].forEach(function (i) { rib[i].setAttribute('opacity', 0); });
+    rib.forEach(function (p) { p.setAttribute('stroke', '#e3e6e9'); p.setAttribute('stroke-width', 30); });
+    ticks.setAttribute('opacity', 0); track.setAttribute('opacity', 0); halo.setAttribute('opacity', 0); bandGlow.setAttribute('opacity', 0);
+    lensFill.setAttribute('fill', 'rgba(0,0,0,0)'); lensRim.setAttribute('stroke', '#94a0ab'); lensRim.setAttribute('stroke-width', 14);
+    prog.setAttribute('stroke', '#5b9fd6'); prog.setAttribute('stroke-width', 26);
+    bandL.setAttribute('stroke', '#e3e6e9'); bandL.setAttribute('stroke-width', 30); node.setAttribute('fill', '#5b9fd6'); nodeRing.setAttribute('opacity', 0);
+    var bottom = markTop + (804 - 520) * sc;
+    name.style.top = (bottom + H * 0.045) + 'px';
+    T(700, function () { name.classList.add('on'); });
+    T(1200, function () { sub.style.top = (parseFloat(name.style.top) + fs * 1.3) + 'px'; sub.classList.add('on'); credit.classList.add('on'); });
+  });
+  T(6900, function () { reachedDock = true; tryDock(); });
 
   function cssVar(n) { return getComputedStyle(root).getPropertyValue(n).trim(); }
+  function visibleRect(id) {
+    var e = document.getElementById(id), r = e && e.getBoundingClientRect();
+    return r && r.width > 8 && r.height > 4 && r.left >= 0 && r.right <= W + 1 && r.top >= 0 && r.top < H ? r : null;
+  }
   function fadeOut() {
     if (done) return; done = true;
-    sp.style.transition = 'opacity .7s cubic-bezier(.32,.72,0,1), transform .7s cubic-bezier(.32,.72,0,1)';
-    sp.style.opacity = 0; sp.style.transform = 'scale(1.03)';
+    sp.style.transition = 'opacity .7s cubic-bezier(.32,.72,0,1)'; sp.style.opacity = 0;
     root.classList.remove('splash-on'); setTimeout(remove, 760);
   }
+  var MARK = '<svg viewBox="100 300 830 440" width="100%" height="100%" fill="none" stroke-linecap="round" stroke-linejoin="round"><g class="fr" stroke="#e3e6e9" stroke-width="30"><path d="M126,332 C320,332 380,520 560,520 L690,520"/><path d="M126,520 C320,520 380,520 560,520 L690,520"/><path d="M126,708 C320,708 380,520 560,520 L690,520"/></g><circle class="fm" cx="650" cy="520" r="168" stroke="#94a0ab" stroke-width="14"/><path class="fb" d="M498.3 392.7 A198 198 0 1 1 651.4 718.0" stroke="#5b9fd6" stroke-width="26"/><path class="fr2" d="M530,520 H884" stroke="#e3e6e9" stroke-width="30"/><circle class="fn" cx="884" cy="520" r="34" fill="#5b9fd6" stroke="none"/></svg>';
   function tryDock() {
     if (done || !ready || !reachedDock) return;
-    var slot = document.getElementById('brand-logo');
-    var r = slot && slot.getBoundingClientRect();
-    if (!r || r.width < 8 || r.left < 0 || r.left > W) { fadeOut(); return; }
+    var r = visibleRect('brand-logo') || visibleRect('brand-logo-m');
+    if (!r) { fadeOut(); return; }
     done = true;
-    var sc = r.width / 830, tx = r.left - 100 * sc, ty = r.top - 300 * sc;
-    // land in the colours of the active theme
+    // 1. hand the mark over to its own compositor layer at exactly its current screen position
+    var sc0 = S * SIMPLE, ox = CX - 520 * sc0, oy = markTop - 520 * sc0;
+    var fly = document.createElement('div'); fly.className = 'sp-fly';
+    fly.style.left = (ox + 100 * sc0) + 'px'; fly.style.top = (oy + 300 * sc0) + 'px'; fly.style.width = (830 * sc0) + 'px'; fly.style.height = (440 * sc0) + 'px';
+    fly.innerHTML = MARK; sp.appendChild(fly);
+    rootG.style.visibility = 'hidden'; field.style.visibility = 'hidden';
     var ink = cssVar('--text'), muted = cssVar('--text-muted'), brand = cssVar('--brand');
-    rib.forEach(function (p) { p.setAttribute('stroke', ink); });
-    bandL.setAttribute('stroke', ink); lensRim.setAttribute('stroke', muted); prog.setAttribute('stroke', brand); node.setAttribute('fill', brand);
-    rootG.style.transition = 'transform 1.25s cubic-bezier(.65,0,.35,1)'; place(sc, tx, ty);
-    cue('dockStart');
-    // the wordmark travels with the mark and becomes the sidebar text
-    var nt = name.querySelector('.sp-nt'), tn = document.getElementById('brand-name'), cr = nt.getBoundingClientRect(), tr = tn && tn.getBoundingClientRect();
-    if (tr && tr.width > 8) {
-      var ns = tr.width / cr.width, nx = tr.left - cr.left, ny = tr.top + tr.height / 2 - cr.top - ns * cr.height / 2;
-      name.style.transition = 'none'; nt.style.transition = 'transform 1.25s cubic-bezier(.65,0,.35,1)'; nt.style.transform = 'translate(' + nx + 'px,' + ny + 'px) scale(' + ns + ')';
-    } else { name.classList.add('off'); }
-    sub.classList.add('off'); credit.classList.add('off');
-    setTimeout(function () { cue("land"); }, 1235);
-    setTimeout(function () { sp.style.background = 'transparent'; field.style.opacity = 0; }, 350);
-    setTimeout(function () { root.classList.remove('splash-on'); }, 1245);
-    setTimeout(remove, 1300);
+    var sc = r.width / (830 * sc0);
+    // two frames later so the colour transitions and the flight start from the painted state
+    requestAnimationFrame(function () { requestAnimationFrame(function () {
+      fly.style.transform = 'translate(' + (r.left - (ox + 100 * sc0)) + 'px,' + (r.top - (oy + 300 * sc0)) + 'px) scale(' + sc + ')';
+      fly.querySelector('.fr').setAttribute('stroke', ink); fly.querySelector('.fr2').setAttribute('stroke', ink);
+      fly.querySelector('.fm').setAttribute('stroke', muted); fly.querySelector('.fb').setAttribute('stroke', brand); fly.querySelector('.fn').setAttribute('fill', brand);
+      // wordmark travels with it and lands as the sidebar text
+      var nt = name.querySelector('.sp-nt'), cr = nt.getBoundingClientRect(), tn = visibleRect('brand-name');
+      if (tn) {
+        var ns = tn.width / cr.width, nx = tn.left - cr.left, ny = tn.top + tn.height / 2 - cr.top - ns * cr.height / 2;
+        name.style.transition = 'none'; nt.style.transition = 'transform 1.25s cubic-bezier(.65,0,.35,1)'; nt.style.transform = 'translate(' + nx + 'px,' + ny + 'px) scale(' + ns + ')';
+      } else { name.classList.add('off'); }
+      sub.classList.add('off'); credit.classList.add('off');
+      bgLayer.style.opacity = 0;                                   // reveal the app behind
+      setTimeout(function () { root.classList.remove('splash-on'); }, 1000);   // real logo fades in under the flying one
+      setTimeout(function () { fly.style.opacity = 0; name.style.opacity = 0; name.style.transition = 'opacity .25s'; }, 1080);
+      setTimeout(remove, 1420);
+    }); });
   }
-  // skip: any click or key
-  function skip() { timers.forEach(clearTimeout); if (engine) cue('skip'); fadeOut(); }
-  function onKey(e) { if (done) return; if (e.key === 'Escape') { skip(); return; } if (unlock()) return; skip(); }
-  function onPointer() { if (done) return; if (unlock()) { sp.addEventListener('click', onPointer, { once: true }); return; } skip(); }
+  function skip() { timers.forEach(clearTimeout); fadeOut(); }
+  setTimeout(function () { sp.addEventListener('click', skip, { once: true }); window.addEventListener('keydown', function () { if (!done) skip(); }, { once: true }); }, 600);
   window.__deltaSplash = { ready: function () { ready = true; tryDock(); } };
-
-  // --- boot: start at once; try to play sound automatically, unlock on the first gesture if the browser blocks it
-  var t0 = performance.now(), locked = false;
-  function arm() {
-    if (engine || !actx || actx.state !== 'running') return;
-    engine = window.DeltaAudio.Engine(actx);
-    if (hint) { hint.remove(); hint = null; }
-    cue(performance.now() - t0 < 500 ? 'start' : 'sub'); // a small acknowledgement when sound joins late
-  }
-  var hint = null;
-  if (soundPref && AC && window.DeltaAudio) {
-    try {
-      actx = new AC();
-      actx.addEventListener('statechange', arm);
-      actx.resume().then(arm, function () {});
-      setTimeout(function () {
-        if (engine || done) return;
-        locked = true; // browser blocked autoplay: wait quietly for the first click or key
-        hint = document.createElement('div'); hint.className = 'sp-hint';
-        hint.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M16 9.5a4 4 0 0 1 0 5"/></svg>Click or press a key for sound';
-        sp.appendChild(hint);
-      }, 1200);
-    } catch (e) { actx = null; }
-  }
-  function unlock() { if (!locked || engine || !actx) return false; locked = false; actx.resume().then(arm, function () {}); return true; }
-  start(true);
 })();

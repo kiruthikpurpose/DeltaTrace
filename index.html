@@ -13,23 +13,23 @@
     <meta name="color-scheme" content="light dark" />
     <script>try{var t=localStorage.getItem("deltatrace.v1.theme");t=t?JSON.parse(t):(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");document.documentElement.dataset.theme=t}catch(e){}</script>
     <style>
-      #splash{position:fixed;inset:0;z-index:1000;background:#14171b;color:#e8eaed;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;overflow:hidden;transition:background .8s ease}
+      #splash{position:fixed;inset:0;z-index:1000;color:#e8eaed;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;overflow:hidden}
+      .sp-bg{position:absolute;inset:0;background:#14171b;transition:opacity .9s ease}
+      .sp-fly{position:fixed;transform-origin:0 0;will-change:transform,opacity;transition:transform 1.25s cubic-bezier(.65,0,.35,1),opacity .3s ease;pointer-events:none}
+      .sp-fly path,.sp-fly circle,.sp-fly g{transition:stroke .9s ease,fill .9s ease}
       .sp-svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
       .sp-name{position:absolute;left:0;right:0;text-align:center;font-weight:600;letter-spacing:-.035em;opacity:0;filter:blur(8px);transform:translateY(10px);transition:opacity 1s cubic-bezier(.16,1,.3,1),transform 1s cubic-bezier(.16,1,.3,1),filter 1s}
-      .sp-nt{display:inline-block;transform-origin:0 0}.sp-name .l{font-weight:300}.sp-name.on{opacity:1;filter:none;transform:none}.sp-name.off{opacity:0;transition-duration:.45s}
+      .sp-nt{display:inline-block;transform-origin:0 0;will-change:transform}.sp-name .l{font-weight:300}.sp-name.on{opacity:1;filter:none;transform:none}.sp-name.off{opacity:0;transition-duration:.45s}
       .sp-sub{position:absolute;left:0;right:0;text-align:center;color:#8d949c;opacity:0;transition:opacity 1s}.sp-sub.on{opacity:1}.sp-sub.off{opacity:0;transition-duration:.45s}
       .sp-credit{position:absolute;bottom:34px;left:0;right:0;text-align:center;font-size:12px;letter-spacing:.04em;color:#8d949c;opacity:0;transition:opacity 1s}.sp-credit.on{opacity:1}.sp-credit.off{opacity:0;transition-duration:.4s}
-      .sp-hint{position:absolute;bottom:62px;left:0;right:0;display:flex;gap:7px;align-items:center;justify-content:center;font-size:12px;letter-spacing:.02em;color:#6c7580;opacity:0;animation:sph 1s ease forwards}
-      @keyframes sph{to{opacity:1}}
       .splash-on body{overflow:hidden}
-      .splash-on #brand-logo{visibility:hidden}
-      .splash-on #brand-name{visibility:hidden}
+      .splash-on #brand-logo,.splash-on #brand-logo-m,.splash-on #brand-name{opacity:0}
+      #brand-logo,#brand-logo-m,#brand-name{transition:opacity .3s ease}
     </style>
   </head>
   <body>
     <div id="splash" aria-hidden="true"></div>
     <script>try{if(sessionStorage.getItem("deltatrace.splash")){document.getElementById("splash").remove()}else{document.documentElement.classList.add("splash-on")}}catch(e){}</script>
-    <script src="/splash-audio.js"></script>
     <script src="/splash.js"></script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>

@@ -53,8 +53,11 @@ export class SimulationRunner {
   start() {
     if (this.started) return;
     this.started = true;
-    this.last = performance.now();
-    raf(this.loop);
+    const go = () => { this.last = performance.now(); raf(this.loop); };
+    if (typeof document !== 'undefined' && document.documentElement.classList.contains('splash-on')) {
+      window.addEventListener('deltatrace:splash-done', go, { once: true });
+      setTimeout(() => { if (this.last === 0) go(); }, 12000);
+    } else go();
   }
 
   private loop = (ts: number) => {

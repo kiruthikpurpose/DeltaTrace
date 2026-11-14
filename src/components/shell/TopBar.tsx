@@ -28,6 +28,7 @@ export function TopBar() {
       <button className="btn icon ghost menu-btn" aria-label="Open navigation" onClick={() => useUiStore.getState().set({ mobileNav: true })}>
         <Menu size={18} />
       </button>
+      <svg id="brand-logo-m" className="brand-logo-m" viewBox="100 300 830 440" height={22} aria-hidden fill="none" strokeLinecap="round"><g stroke="var(--text)" strokeWidth={30}><path d="M126,332 C320,332 380,520 560,520 L690,520" /><path d="M126,520 H690" /><path d="M126,708 C320,708 380,520 560,520 L690,520" /><path d="M530,520 H884" /></g><circle cx={650} cy={520} r={168} stroke="var(--text-muted)" strokeWidth={14} /><path d="M498.3 392.7 A198 198 0 1 1 651.4 718.0" stroke="var(--brand)" strokeWidth={26} /><circle cx={884} cy={520} r={34} fill="var(--brand)" /></svg>
       <div className="crumb">
         <small>DeltaTrace Live › {item?.group ?? ''}</small>
         <b>{item?.title ?? 'Not found'}</b>

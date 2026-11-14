@@ -232,7 +232,6 @@ export function PipelineSchematic({ snap, explain, showTruth, selectedIncident }
   return (
     <div ref={wrap} style={{ position: 'relative', width: '100%' }} onMouseLeave={() => setTip(null)}>
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" role="img" aria-label={desc} style={{ display: 'block' }}>
-        <title>{desc}</title>
         {/* pipe */}
         <rect x={X0 - 8} y={PY - 13} width={KMX * 200 + 16} height={26} rx={13} fill="var(--pipe)" />
         <rect x={X0 - 4} y={PY - 9} width={KMX * 200 + 8} height={18} rx={9} fill="var(--pipe-inner)" />
@@ -362,7 +361,7 @@ export function PipelineSchematic({ snap, explain, showTruth, selectedIncident }
               <text x={x} y={PY + 104} textAnchor="middle" fontSize={11} fontWeight={600} fill="var(--text)" fontFamily="var(--mono)">PT-{n.id}</text>
               {st.likelyFault && st.cls !== 'GOOD' && (
                 <g transform={`translate(${x},${PY + 120})`}>
-                  <rect x={-24} y={-8} width={48} height={15} rx={7.5} fill={st.cls === 'BAD' ? 'var(--bad-soft)' : 'var(--warn-soft)'} stroke={st.cls === 'BAD' ? 'var(--bad)' : 'var(--warn)'} />
+                  <rect x={-(st.likelyFault.length * 3 + 8)} y={-8} width={st.likelyFault.length * 6 + 16} height={15} rx={7.5} fill={st.cls === 'BAD' ? 'var(--bad-soft)' : 'var(--warn-soft)'} stroke={st.cls === 'BAD' ? 'var(--bad)' : 'var(--warn)'} />
                   <text textAnchor="middle" dominantBaseline="central" fontSize={9} fontWeight={800} fill={st.cls === 'BAD' ? 'var(--bad-ink)' : 'var(--warn-ink)'}>{st.likelyFault.toUpperCase()}</text>
                 </g>
               )}
@@ -375,7 +374,7 @@ export function PipelineSchematic({ snap, explain, showTruth, selectedIncident }
           const x = xOf(CHANNELS[ch].km);
           return (
             <g key={ch} transform={`translate(${x + (ch === 12 ? 30 : ch === 14 ? -30 : 0)},${PY + 150})`}>
-              <rect x={-30} y={-9} width={60} height={18} rx={9} fill="var(--bg-elev-1)" stroke={TRUST_COLOR[st.cls]} strokeWidth={2} />
+              <rect x={-((CHANNELS[ch].tag.length + 4) * 3.2 + 10)} y={-9} width={(CHANNELS[ch].tag.length + 4) * 6.4 + 20} height={18} rx={9} fill="var(--bg-elev-1)" stroke={TRUST_COLOR[st.cls]} strokeWidth={2} />
               <text textAnchor="middle" dominantBaseline="central" fontSize={10} fontFamily="var(--mono)" fontWeight={700} fill="var(--text)">{CHANNELS[ch].tag} {(st.T * 100).toFixed(0)}</text>
             </g>
           );

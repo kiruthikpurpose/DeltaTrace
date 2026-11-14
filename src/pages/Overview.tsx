@@ -9,15 +9,14 @@ import { useSimStore } from '../state/simStore';
 
 function TrustIllustration() {
   return (
-    <svg viewBox="0 0 120 70" width="120" height="70" role="img" aria-label="A trust ring filling up">
-      <circle cx="35" cy="35" r="24" fill="none" stroke="var(--bg-elev-3)" strokeWidth="8" />
-      <circle cx="35" cy="35" r="24" fill="none" stroke="var(--c-trust)" strokeWidth="8" strokeLinecap="round" strokeDasharray="0 151" transform="rotate(-90 35 35)">
-        <animate attributeName="stroke-dasharray" values="0 151;135 151;135 151;0 151" keyTimes="0;0.5;0.85;1" dur="5s" repeatCount="indefinite" />
-      </circle>
+    <svg viewBox="0 0 120 70" width="120" height="70" role="img" aria-label="Three sensor trust bars filling">
       {[0, 1, 2].map((i) => (
-        <circle key={i} cx={85 + (i % 2) * 14} cy={16 + i * 19} r="6" fill="var(--c-trust)" opacity="0.8">
-          <animate attributeName="opacity" values="0.3;1;0.3" dur="2.4s" begin={`${i * 0.5}s`} repeatCount="indefinite" />
-        </circle>
+        <g key={i}>
+          <rect x="8" y={14 + i * 18} width="104" height="8" rx="1.5" fill="var(--bg-elev-3)" />
+          <rect x="8" y={14 + i * 18} width="0" height="8" rx="1.5" fill="var(--c-trust)">
+            <animate attributeName="width" values={`0;${[96, 78, 104][i]};${[96, 78, 104][i]};0`} keyTimes="0;0.5;0.85;1" dur="5s" begin={`${i * 0.3}s`} repeatCount="indefinite" />
+          </rect>
+        </g>
       ))}
     </svg>
   );

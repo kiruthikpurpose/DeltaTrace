@@ -9,7 +9,8 @@ All notable changes to this project are documented here.
 
 ### Added
 - New identity: alarm streams that merge, pass a trust gauge and end as one incident. A rich app icon (`public/app-icon.svg`) and a flat product mark used in the sidebar, favicon and README.
-- Launch sound: synthesised with Web Audio (no files), each cue triggered by its visual. The animation starts immediately and plays sound automatically where the browser allows it; where autoplay is blocked it plays silently with a small hint, and the first click or key adds the remaining sound without skipping or restarting. A Settings toggle turns it off.
+- Launch animation docks the mark smoothly (compositor-driven flight with a cross-fade hand-off) and adapts to phones.
+- Flat linear meters replace the semicircle and ring gauges; pipeline labels size to their text.
 - The wordmark now travels with the mark and becomes the sidebar text, instead of two names fading in and out.
 - Launch screen (dark, once per session): amber alarm dots converge into streams and one incident, the drawing simplifies into the mark, and the mark flies into the sidebar logo. Click or any key skips it; disabled under reduced motion; falls back to a fade where the sidebar logo is not visible.
 - Apache 2.0 license, contribution guide, code of conduct and security policy.
