@@ -37,7 +37,7 @@
     "vitest": "^2.1.5"
   },
   "license": "Apache-2.0",
-  "description": "DeltaTrace Live: sensor trust scoring, delay-based alarm grouping and trust-gated alarm tuning for pipeline control rooms",
+  "description": "DeltaTrace: Trust-Aware Alarm Grouping and Tuning for Pipelines",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/kiruthikpurpose/DeltaTrace.git"

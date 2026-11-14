@@ -1,8 +1,10 @@
 <div align="center">
 
-# DeltaTrace Live
+# DeltaTrace
 
-**Sensor trust, delay-based alarm grouping and safer alarm settings for pipeline control rooms.**
+**Trust-Aware Alarm Grouping and Tuning for Pipelines**
+
+Sensor trust scoring, delay-based incident grouping and trust-gated alarm tuning for pipeline control rooms.
 
 [![CI](https://github.com/kiruthikpurpose/DeltaTrace/actions/workflows/ci.yml/badge.svg)](https://github.com/kiruthikpurpose/DeltaTrace/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
@@ -21,7 +23,7 @@ This repository is a complete browser application with a built-in process simula
 
 ## Contents
 
-[Why](#why) · [Functions](#functions) · [Architecture](#architecture) · [Alarm decisions](#alarm-decisions) · [Safety rules](#safety-rules) · [Screens](#screens) · [Getting started](#getting-started) · [Testing and CI](#testing-and-ci) · [Deployment](#deployment) · [Reports](#reports) · [Project layout](#project-layout) · [Configuration](#configuration) · [Limitations](#limitations) · [Contributing](#contributing) · [License](#license)
+[Why](#why) · [Motivation](#why-this-problem) · [Functions](#functions) · [Applications](#applications-and-use-cases) · [Architecture](#architecture) · [Alarm decisions](#alarm-decisions) · [Safety rules](#safety-rules) · [Screens](#screens) · [Getting started](#getting-started) · [Testing and CI](#testing-and-ci) · [Deployment](#deployment) · [Reports](#reports) · [Project layout](#project-layout) · [Configuration](#configuration) · [Roadmap](#future-improvements) · [Limitations](#limitations) · [Contributing](#contributing) · [License](#license)
 
 ## Why
 
@@ -29,6 +31,15 @@ A long pipeline is monitored by sensors every ~20 km, and the control system rai
 
 - **One event, many alarms.** A leak or pump trip sends a pressure wave past many sensors in turn, producing dozens of alarms within minutes.
 - **Some alarms are not real.** Sensors freeze, drift, spike, replay old data, go offline or are tampered with, and hand-set alarm limits drift back toward flooding.
+
+## Why this problem
+
+I chose alarm handling on pipelines for four reasons.
+
+- **It is a real operational problem.** Alarm floods are a recognised cause of missed or late responses in process control. Industry guidance (ISA-18.2, EEMUA 191) treats roughly one alarm per 10 minutes as manageable and more than ten in ten minutes as a flood. A single pump trip or leak on a long line can exceed that within a minute.
+- **The physics gives a usable signal.** A pressure wave travels at a known speed, so the time between two alarms says whether one event can explain both. That turns "group alarms" from guesswork into a rule that can be explained to an operator.
+- **Trust and alarms are linked.** A sensor that lies produces alarms that should not be believed, and a flood of alarms from one event hides which sensors are failing. Treating trust, grouping and tuning as one loop is more useful than solving each alone.
+- **It can be done safely.** The design keeps the existing system in charge: read-only inputs, no control commands, every raw alarm retained, fail-open behaviour, and operator approval for every setting change. That makes it adoptable in a safety-conscious environment.
 
 ## Functions
 
@@ -39,6 +50,22 @@ A long pipeline is monitored by sensors every ~20 km, and the control system rai
 | **Trust-gated replay tuner** | Replays candidate thresholds, deadbands and delays on stored data from trusted sensors only and recommends the best safe setting for approval. | Alarm Tuner |
 
 The three feed each other: trust improves grouping, grouping produces labelled events, labelled events improve tuning, and tuning reduces false alarms, which cleans the data trust relies on.
+
+## Applications and use cases
+
+DeltaTrace is designed for supervisory monitoring of long linear assets where events propagate along the line and sensors are spaced far apart.
+
+| Setting | Use case | What DeltaTrace contributes |
+|---|---|---|
+| Oil and refined-product pipelines | Leak, pump trip and valve closure events during normal operation | One ranked incident with a likely origin instead of dozens of alarms |
+| Gas transmission lines | Pressure transients from compressor trips or valve actions | Delay-window grouping across stations, separate handling of flow-balance alarms |
+| Water and wastewater mains | Burst detection and pump-station faults | Distinguishes a real burst from a stuck or drifting pressure transmitter |
+| Remote sites with weak links | Radio or satellite outages | Flags stale channels as a data-integrity incident so a real event nearby is not masked |
+| Cyber-physical security | Replayed or injected sensor data | Detects exact replays and false drops that no neighbour confirms |
+| Alarm rationalisation projects | Periodic review of limits, deadbands and delays | Replays candidate settings on trusted history and records every approved change |
+| Training and evaluation | Operator training, vendor demonstrations, method research | Reproducible scenarios, fault injection, benchmark reports and PDF output |
+
+These are intended applications. The behaviour has been exercised only on the built-in process simulator, not on plant data.
 
 ## Architecture
 
@@ -201,6 +228,21 @@ Defaults live in `src/engine/config.ts` and can be changed on the Settings page.
 | Incident quiet time | 120 s |
 
 The simulation is reproducible: the same seed, configuration and injection timeline give the same run. The seed is shown in the top bar.
+
+## Future improvements
+
+| Area | Improvement |
+|---|---|
+| Real data | Replay historian exports (CSV, OPC UA history) through the same engine; calibrate trust weights and wave speed per segment from field data. |
+| Wave speed | Estimate wave speed online from observed arrival times instead of a fixed setting; allow different speeds per segment and product. |
+| Topology | Support branches, loops and multiple lines; use real elevation and pump curves in the process model. |
+| Grouping | Separate overlapping events in time and place with a joint origin fit; learn linking windows from operator-confirmed incidents. |
+| Trust | Add pressure-flow consistency models, temperature channels and learned per-sensor noise baselines; explain trust changes with the contributing evidence. |
+| Tuner | Multi-objective search beyond the grid, per-priority constraints, and rollback simulation before approval. |
+| Operator feedback | Use dispositions (confirmed, false alarm) as training labels in the loop, with drift monitoring for the labels themselves. |
+| Integration | Read-only OPC UA and historian connectors, a signed write-back interface and an approval workflow integrated with management of change. |
+| Performance | Move the engine into a Web Worker or a service for larger networks and long histories. |
+| Quality | Property-based tests for more safety invariants, load tests, and an accessibility audit with assistive technology. |
 
 ## Limitations
 

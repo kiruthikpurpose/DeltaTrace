@@ -4,6 +4,9 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+### Changed
+- Project named "DeltaTrace: Trust-Aware Alarm Grouping and Tuning for Pipelines"; README gains motivation, applications and roadmap sections.
+
 ### Added
 - Apache 2.0 license, contribution guide, code of conduct and security policy.
 - GitHub Actions workflow running typecheck, lint, tests, build and a bundle-size check on Node 18, 20 and 22.
