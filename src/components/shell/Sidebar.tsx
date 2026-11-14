@@ -1,0 +1,46 @@
+import { ChevronsLeft, ChevronsRight, Activity } from 'lucide-react';
+import { NavLink } from 'react-router-dom';
+import { NAV } from '../../routes';
+import { useSimStore } from '../../state/simStore';
+import { useUiStore } from '../../state/uiStore';
+
+export function Sidebar() {
+  const collapsed = useUiStore((s) => s.sidebarCollapsed);
+  const toggle = useUiStore((s) => s.toggleSidebar);
+  const engineOn = useSimStore((s) => s.snap?.engineEnabled ?? true);
+  const groups = [...new Set(NAV.map((n) => n.group))];
+  return (
+    <aside className="sidebar" aria-label="Primary">
+      <div className="brand">
+        <div className="brand-mark" aria-hidden>
+          <Activity size={18} color="#fff" strokeWidth={2.6} />
+        </div>
+        <span>DeltaTrace</span>
+      </div>
+      <nav className="nav" aria-label="Main navigation">
+        {groups.map((g) => (
+          <div key={g}>
+            <div className="nav-group">{g}</div>
+            {NAV.filter((n) => n.group === g).map((n) => (
+              <NavLink key={n.path} to={n.path} end={n.path === '/'} className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`} title={n.title} aria-label={n.title}>
+                {n.icon}
+                <span>{n.title}</span>
+              </NavLink>
+            ))}
+          </div>
+        ))}
+      </nav>
+      <div className="side-foot">
+        <div className={`engine-pill ${engineOn ? 'on' : 'off'}`} role="status" aria-live="polite">
+          <span className="dot" aria-hidden />
+          <span className="label">{engineOn ? 'Engine ACTIVE' : 'Fail-open'}</span>
+        </div>
+        <span className="label">Simulated data</span>
+        <button className="btn ghost sm" onClick={toggle} aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'} style={{ justifyContent: 'flex-start' }}>
+          {collapsed ? <ChevronsRight size={16} /> : <ChevronsLeft size={16} />}
+          <span className="label">Collapse</span>
+        </button>
+      </div>
+    </aside>
+  );
+}
