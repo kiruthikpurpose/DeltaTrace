@@ -6,11 +6,9 @@
 (function () {
   var sp = document.getElementById('splash');
   if (!sp) return;
-  var KEY = 'deltatrace.splash';
   var root = document.documentElement;
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   function remove() {
-    try { sessionStorage.setItem(KEY, '1'); } catch (e) {}
     sp.remove(); root.classList.remove('splash-on');
     window.dispatchEvent(new Event('deltatrace:splash-done'));
   }

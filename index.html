@@ -29,7 +29,7 @@
   </head>
   <body>
     <div id="splash" aria-hidden="true"></div>
-    <script>try{if(sessionStorage.getItem("deltatrace.splash")){document.getElementById("splash").remove()}else{document.documentElement.classList.add("splash-on")}}catch(e){}</script>
+    <script>document.documentElement.classList.add("splash-on")</script>
     <script src="/splash.js"></script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
