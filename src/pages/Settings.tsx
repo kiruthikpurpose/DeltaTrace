@@ -91,7 +91,7 @@ export default function Settings() {
               </div>
             </div>
             <div className="hr" />
-            <button className="btn danger" onClick={() => setWipe(true)}>Clear saved data…</button>
+            <button className="btn danger" style={{ alignSelf: 'flex-start' }} onClick={() => setWipe(true)}>Clear saved data…</button>
             <p className="muted" style={{ fontSize: 12 }}>Saved data lives only in this browser (localStorage, namespaced <code>deltatrace.v1.*</code>): theme, sidebar, config, change log, dispositions. The app works fully if storage is unavailable.</p>
           </div>
         </Card>

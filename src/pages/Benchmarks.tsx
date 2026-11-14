@@ -172,7 +172,7 @@ export default function Benchmarks() {
         )}
       </Card>
 
-      <Card title="Experiments E1–E7" sub="Run on demand; each states what it shows and where DeltaTrace does not help" accent="tune">
+      <Card title="Experiments E1–E7" sub="Run on demand" accent="tune">
         <div className="exp-grid">
           {EXPERIMENTS.map((e) => {
             const r = exps[e.id];

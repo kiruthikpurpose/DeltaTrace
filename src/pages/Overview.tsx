@@ -90,27 +90,27 @@ export default function Overview() {
         <Card accent="trust" className="innov">
           <TrustIllustration />
           <h2>1 · Trust Engine</h2>
-          <p className="muted">Every sensor gets a live trust score (0–1) by checking it against its pipeline neighbours, a mass balance, its own signal behaviour and its communication health.</p>
+          <p className="muted">Live 0–1 score per sensor from neighbour agreement, mass balance, signal behaviour and communications.</p>
           <div className="live-line"><b className="num">{good}</b> sensors GOOD · <b className="num">{unc}</b> UNCERTAIN · <b className="num">{bad}</b> BAD</div>
           <Link to="/trust">Open Trust Center →</Link>
         </Card>
         <Card accent="group" className="innov">
           <GroupIllustration />
           <h2>2 · Delay-Based Grouping</h2>
-          <p className="muted">Alarms join one incident when their time gaps fit the wave travel time between sensors (distance ÷ wave speed + tolerance). Incidents are classified, ranked and written back; every raw alarm is kept.</p>
+          <p className="muted">Alarms whose time gaps fit the wave travel time join one incident. Incidents are classified and ranked; every raw alarm is kept.</p>
           <div className="live-line">{mainInc ? <><b className="num">{mainInc.alarmIds.length}</b> raw alarms → <b className="num">1</b> incident</> : <>Calm: <b className="num">{snap.rawTotal}</b> raw alarms so far</>}</div>
           <Link to="/incidents">Open Incidents →</Link>
         </Card>
         <Card accent="tune" className="innov">
           <TuneIllustration />
           <h2>3 · Trust-Gated Replay Tuner</h2>
-          <p className="muted">Candidate thresholds, deadbands and delays are replayed on stored data from trusted sensors only. The best safe setting is written back after an operator approves it.</p>
+          <p className="muted">Candidate settings are replayed on trusted history. The best safe setting is written back after operator approval.</p>
           <div className="live-line">{last ? <>Last tuning: <b>{last.point}</b> · {last.evidence.split(',')[0]}</> : <>No tuning approved yet</>}</div>
           <Link to="/tuner">Open Alarm Tuner →</Link>
         </Card>
       </div>
 
-      <Card title="Live before / after" sub="Same pipeline, same alarms: what the operator has to deal with in the last 10 simulated minutes" accent="brand">
+      <Card title="Live before / after" sub="Last 10 simulated minutes" accent="brand">
         <div className="before-after">
           <div className="ba-tile">
             <span className="muted">Raw alarms (last 10 min)</span>
@@ -132,16 +132,16 @@ export default function Overview() {
             <span className="muted" style={{ fontSize: 12 }}>incidents + advisories</span>
           </div>
         </div>
-        <p className="muted" style={{ marginTop: 10 }}>Inject a fault (button above, or press <kbd>F</kbd>) and watch the left number jump while the right stays small.</p>
+        <p className="muted" style={{ marginTop: 10 }}>Inject a fault (<kbd>F</kbd>) to compare the two numbers.</p>
       </Card>
 
       <div className="two-col">
-        <Card title="The closed loop" sub="trust → grouping → labelled events → tuning → fewer false alarms → cleaner data → better trust">
+        <Card title="The closed loop" sub="Trust, grouping, labelled events, tuning, cleaner data">
           <div className="row" style={{ justifyContent: 'center' }}>
             <LoopDiagram size={330} />
           </div>
         </Card>
-        <Card title="Safety first" sub="Six rules, enforced in code and checked live">
+        <Card title="Safety first" sub="Enforced in code, checked live">
           <div className="chips-rules">
             {RULES.map((r) => (
               <span key={r.n} className="chip" title={r.body}>{r.icon}{r.title}</span>

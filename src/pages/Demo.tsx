@@ -171,7 +171,7 @@ export default function Demo() {
       <Console embedded />
 
       {started && (step.focus === 'tuner' || tune.phase !== 'idle') && (
-        <Card title="Tuning in the demo" sub="Replay → Pareto → contamination → approve → live rate drops" accent="tune" className="demo-tuner">
+        <Card title="Tuning in the demo" sub="Replay, Pareto front, gating check, approval" accent="tune" className="demo-tuner">
           <div className="two-col">
             <div>
               {tune.phase === 'running' && <p role="status">Replaying 175 candidates on 6 hours of trusted history…</p>}

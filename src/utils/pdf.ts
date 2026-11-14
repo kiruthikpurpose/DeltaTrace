@@ -256,7 +256,7 @@ export class PdfDoc {
     this.text(title, M, this.y, 9, { bold: true });
     this.y += 32;
     const L = 40;
-    const B = 22;
+    const B = 30;
     const top = this.y;
     const plotW = CW - L - 8;
     const plotH = height - B;
@@ -286,7 +286,7 @@ export class PdfDoc {
         else if (kind === 'current') this.rect(x - 4, y - 4, 8, 8, C.brand);
         else this.circle(x, y, 5, C.ok);
       }
-    this.text(xl, M + L + plotW / 2, top + plotH + 13, 8, { align: 'c', color: C.muted });
+    this.text(xl, M + L + plotW / 2, top + plotH + 18, 8, { align: 'c', color: C.muted });
     this.text(yl, M, top - 12, 8, { color: C.muted });
     this.y = top + height + 4;
     let lx = M + L;

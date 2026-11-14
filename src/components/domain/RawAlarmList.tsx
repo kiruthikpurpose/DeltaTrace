@@ -24,7 +24,7 @@ export const RawAlarmRow = memo(function RawAlarmRow({ a }: { a: RawAlarm }) {
 
 export function RawAlarmList({ alarms, max = 60, height = 330 }: { alarms: RawAlarm[]; max?: number; height?: number }) {
   const list = alarms.filter((a) => a.source === 'scada').slice(0, max);
-  if (!list.length) return <EmptyState icon={<Info />} title="No alarms">The existing system is quiet. Inject a fault to see what happens.</EmptyState>;
+  if (!list.length) return <EmptyState icon={<Info />} title="No alarms">Inject a fault to generate alarms.</EmptyState>;
   return (
     <ul className="alarm-list" style={{ maxHeight: height }} aria-label="Raw alarm list, newest first" aria-live="off">
       {list.map((a) => (

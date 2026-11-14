@@ -142,6 +142,8 @@ button.chip[aria-pressed='true'], .chip.active { background: var(--brand-soft); 
 
 /* ---------- Segmented / Toggle / Slider ---------- */
 .seg {
+  align-self: flex-start;
+  flex-wrap: wrap;
   display: inline-flex;
   padding: 3px;
   background: var(--bg-elev-2);
@@ -150,6 +152,7 @@ button.chip[aria-pressed='true'], .chip.active { background: var(--brand-soft); 
   gap: 2px;
 }
 .seg button {
+  white-space: nowrap;
   border: 0;
   background: transparent;
   padding: 3px 10px;

@@ -172,7 +172,7 @@ export default function HowItWorks() {
         ))}
       </nav>
 
-      <Section id="problem" title="The problem in 20 seconds" lead="A long pipeline is watched through sensors about every 20 km. The existing system reads them and raises an alarm whenever a reading crosses a limit. Two things go wrong.">
+      <Section id="problem" title="The problem in 20 seconds" lead="Sensors every 20 km raise an alarm at each limit crossing. Two problems follow.">
         <div className="two-col">
           <Card><ProblemAnim /><Alt>One event sends a pressure wave along the pipe. Each sensor in turn raises an alarm, so a single event produces many alarms. Separately, one sensor is lying.</Alt></Card>
           <Card>
@@ -189,7 +189,7 @@ export default function HowItWorks() {
         </div>
       </Section>
 
-      <Section id="architecture" title="System architecture" lead="DeltaTrace sits beside the existing system: read-only in, controlled write-back out. Click any block.">
+      <Section id="architecture" title="System architecture" lead="Read-only in, controlled write-back out. Select a block for details.">
         <div className="two-col arch-layout">
           <Card flush><div className="arch-scroll" style={{ padding: 8 }}><ArchitectureDiagram selected={arch} onSelect={setArch} failOpen={!snap.engineEnabled} /></div></Card>
           <Card title={arch ? ARCH_INFO[arch] ? arch.toUpperCase() : '' : 'Select a block'}>
@@ -208,7 +208,7 @@ export default function HowItWorks() {
         <Alt>Architecture: field sensors and RTUs connect through communication links and industrial protocols to the central SCADA server, historian, GPS clock and operator console. A read-only gateway copies data into the DeltaTrace unit containing a pipeline map, trust engine, grouping and classification engine, replay tuner, audit log and write-back module. A write-back interface returns incidents, quality flags and approved settings to the central server. A fail-open bypass sends raw alarms straight to the operator console. DeltaTrace issues no control commands.</Alt>
       </Section>
 
-      <Section id="delay" title="Pipeline map & the delay rule" lead="A pressure wave travels at about 1000 m/s, so the time between two alarms tells you whether they can come from the same event: delay = distance ÷ wave speed.">
+      <Section id="delay" title="Pipeline map & the delay rule" lead="delay = distance ÷ wave speed. The time between two alarms shows whether one event can explain both.">
         <div className="two-col">
           <Card title="Which alarms would merge?" sub="A wave starts at km 80. Move the assumed wave speed.">
             <Slider label="Assumed wave speed" value={c} min={400} max={1200} step={20} unit=" m/s" onChange={setC} />
@@ -230,7 +230,7 @@ export default function HowItWorks() {
         </div>
       </Section>
 
-      <Section id="trust" title="Innovation 1 · Trust engine" lead="Four checks feed one live trust score between 0 and 1. Break the sensor below and watch the score move.">
+      <Section id="trust" title="Innovation 1 · Trust engine" lead="Four checks produce one trust score from 0 to 1. Break the sensor to see it move.">
         <div className="two-col">
           <Card accent="trust" title={`Live example: ${CHANNELS[ch].tag}`}>
             <div className="trust-cards">
@@ -267,7 +267,7 @@ export default function HowItWorks() {
         </div>
       </Section>
 
-      <Section id="grouping" title="Innovation 2 · Delay-based incident grouping" lead="Step through how alarms become one ranked, explained incident. Nothing is ever deleted.">
+      <Section id="grouping" title="Innovation 2 · Delay-based incident grouping" lead="How alarms become one ranked incident. No alarm is deleted.">
         <div className="two-col">
           <Card accent="group" title="Step-through" actions={<Segmented label="Step" value={gStep} onChange={setGStep} options={CONE_STEPS.map((_, i) => ({ id: i, label: String(i + 1) }))} />}>
             <p style={{ minHeight: 24 }}><b>{CONE_STEPS[gStep]}</b></p>
@@ -301,7 +301,7 @@ export default function HowItWorks() {
         </div>
       </Section>
 
-      <Section id="tuner" title="Innovation 3 · Trust-gated replay tuner" lead="Alarm limits are set by hand and drift back toward flooding. The tuner tests candidates on stored data and proposes the best safe setting.">
+      <Section id="tuner" title="Innovation 3 · Trust-gated replay tuner" lead="Tests candidate alarm settings on stored data and proposes the best safe one.">
         <Card accent="tune">
           <div className="pipeline-steps" role="list" aria-label="Tuner steps">
             {['Stored data', 'Trust gate', 'Candidates', 'Replay', 'Measure', 'Reject / select', 'Approve', 'Write back'].map((s, k) => (
@@ -318,7 +318,7 @@ export default function HowItWorks() {
         </Card>
       </Section>
 
-      <Section id="loop" title="The closed loop" lead="Trust → grouping → labelled events → tuning → fewer false alarms → cleaner data → better trust.">
+      <Section id="loop" title="The closed loop" lead="Each stage improves the data the next one uses.">
         <div className="two-col">
           <Card><div className="row" style={{ justifyContent: 'center' }}><LoopDiagram size={340} /></div><Alt>A triangle of three nodes: trust, grouping and tuning, with arrows flowing around the loop.</Alt></Card>
           <Card title="Alarm load per iteration" actions={<button className="btn sm tune" onClick={runLoop} disabled={loopBusy}>{loopBusy ? 'Running…' : 'Run 3 iterations'}</button>}>
@@ -338,7 +338,7 @@ export default function HowItWorks() {
         <Card><SafetyRuleList snap={snap} /></Card>
       </Section>
 
-      <Section id="dataflow" title="Data flow per scan" lead="Every 5 simulated seconds the engine runs one scan, in this order.">
+      <Section id="dataflow" title="Data flow per scan" lead="One scan every 5 simulated seconds, in this order.">
         <Card>
           <div className="scan-flow" role="list" aria-label="Stages of one scan">
             <div className="scan-pulse" aria-hidden />
@@ -351,7 +351,7 @@ export default function HowItWorks() {
         </Card>
       </Section>
 
-      <Section id="tech" title="Technology & deployment" lead="The demo is a static website; a real deployment would look different.">
+      <Section id="tech" title="Technology & deployment" lead="This build is a static website; a real deployment differs as listed.">
         <div className="two-col">
           <Card title="How this demo works">
             <ul className="plain">

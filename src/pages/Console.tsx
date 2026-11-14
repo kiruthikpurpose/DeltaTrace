@@ -15,6 +15,8 @@ import { Ticker } from '../components/ui/Ticker';
 import { Toggle } from '../components/ui/Toggle';
 import { FloodGauge } from '../components/viz/FloodGauge';
 import { PipelineSchematic } from '../components/viz/PipelineSchematic';
+import { PipelineCompact } from '../components/viz/PipelineCompact';
+import { useMedia } from '../utils/useMedia';
 import { StripChart } from '../components/viz/StripChart';
 import { runner } from '../state/runner';
 import { useSimStore } from '../state/simStore';
@@ -29,6 +31,7 @@ const PT_COLORS = ['var(--brand)', 'var(--c-trust)', 'var(--c-tune)', 'var(--c-g
 export default function Console({ embedded }: { embedded?: boolean } = {}) {
   const snap = useSimStore((s) => s.snap)!;
   const replaying = useSimStore((s) => s.replaying);
+  const narrow = useMedia('(max-width: 720px)');
   const ui = useUiStore();
   const open = ui.selectedIncident !== null ? [...snap.openIncidents, ...snap.recentClosed].find((i) => i.id === ui.selectedIncident) ?? null : null;
   const stripSeries = useMemo(() => ui.stripChannels.map((ch, i) => ({ id: `pt${ch}`, label: CHANNELS[ch].tag, ch, color: PT_COLORS[i % PT_COLORS.length] })), [ui.stripChannels]);
@@ -61,7 +64,7 @@ export default function Console({ embedded }: { embedded?: boolean } = {}) {
             <button className="btn" onClick={() => runner.startReplay()} disabled={!runner.canReplay() || replaying} title="Slow-motion 0.25× re-run of the last 5 minutes with captions">
               <History size={15} /> Replay last 5 minutes
             </button>
-            <button className="btn primary" onClick={() => ui.set({ faultDrawer: true })}>
+            <button className="btn primary dup-inject" onClick={() => ui.set({ faultDrawer: true })}>
               <Zap size={15} /> Inject fault
             </button>
           </>
@@ -71,12 +74,15 @@ export default function Console({ embedded }: { embedded?: boolean } = {}) {
       )}
 
       <Card flush className="hero-card" label="Animated pipeline schematic">
-        <div className="schematic-hint muted">Swipe sideways to pan the pipeline</div>
-        <div className="schematic-scroll">
-          <div style={{ padding: '8px 12px 4px' }}>
-          <PipelineSchematic snap={snap} explain={ui.explain} showTruth={ui.showTruth} selectedIncident={open} />
+        {narrow ? (
+          <PipelineCompact snap={snap} />
+        ) : (
+          <div className="schematic-scroll">
+            <div style={{ padding: '8px 12px 4px' }}>
+              <PipelineSchematic snap={snap} explain={ui.explain} showTruth={ui.showTruth} selectedIncident={open} />
+            </div>
           </div>
-        </div>
+        )}
       </Card>
 
       <div className="console-grid">
@@ -114,7 +120,7 @@ export default function Console({ embedded }: { embedded?: boolean } = {}) {
           {snap.engineEnabled ? (
             <>
               <div className="inc-list" aria-label="Open incidents" aria-live="polite">
-                {incidents.length === 0 && <EmptyState icon={<Waves />} title="No open incidents">Calm. Inject a fault to watch dozens of alarms become one incident.</EmptyState>}
+                {incidents.length === 0 && <EmptyState icon={<Waves />} title="No open incidents">Inject a fault to create one.</EmptyState>}
                 {incidents.map((i) => (
                   <IncidentCard key={i.id} inc={i} selected={ui.selectedIncident === i.id} onOpen={(id) => ui.set({ selectedIncident: id })} />
                 ))}
@@ -149,7 +155,7 @@ export default function Console({ embedded }: { embedded?: boolean } = {}) {
         </div>
       </div>
 
-      <Card className="charts-card" title="Live strip charts" actions={<Segmented label="Window" value={ui.chartWindow} onChange={(v) => ui.set({ chartWindow: v })} options={[{ id: 60, label: '60 s' }, { id: 300, label: '5 min' }, { id: 600, label: '10 min' }]} />} sub="Triangles = raw alarms · dashed ticks = expected wave arrival (distance ÷ wave speed)">
+      <Card className="charts-card" title="Live strip charts" actions={<Segmented label="Window" value={ui.chartWindow} onChange={(v) => ui.set({ chartWindow: v })} options={[{ id: 60, label: '60 s' }, { id: 300, label: '5 min' }, { id: 600, label: '10 min' }]} />} sub="Triangles: raw alarms. Dashed ticks: expected wave arrival.">
         <div className="chart-grid">
           <div>
             <StripChart title="Pressure deviation (selected sensors)" unit="bar" series={stripSeries} windowSec={ui.chartWindow} minSpan={1} />

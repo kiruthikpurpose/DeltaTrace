@@ -74,7 +74,7 @@ export default function Trust() {
         purpose="Live trust score per sensor from four checks: neighbours, mass balance, signal, communications."
         info={['Green = GOOD (≥ 0.7), amber = UNCERTAIN, red hatched = BAD (< 0.4).', 'A real event seen by several neighbours does not lower trust: the engine widens its tolerance instead.', 'Once BAD, a sensor needs T ≥ 0.55 for 3 scans in a row to recover (hysteresis).']}
       />
-      <Card title="Trust heatmap" sub="15 channels × last 10 minutes · click a row to select · hatched = BAD" accent="trust">
+      <Card title="Trust heatmap" sub="15 channels, last 10 minutes. Hatched = BAD." accent="trust">
         <TrustHeatmap />
         <div style={{ marginTop: 10 }}>
           <Legend items={[{ color: 'var(--ok)', label: 'GOOD ≥ 0.7' }, { color: 'var(--warn)', label: 'UNCERTAIN 0.4–0.7' }, { color: 'var(--bad)', label: 'BAD < 0.4 (hatched). Leaving BAD needs T ≥ 0.55 for 3 scans (hysteresis)' }]} />
@@ -122,12 +122,12 @@ export default function Trust() {
       </div>
 
       <div className="two-col">
-        <Card title="Predicted vs measured" sub="Deviation from nominal (bar). Predicted = inverse-distance average of the ±2-hop neighbours.">
+        <Card title="Predicted vs measured" sub="Deviation from nominal (bar)">
           <StripChart title={`${CHANNELS[ch].tag} signal`} unit={ch < 12 ? 'bar' : 'm³/h'} series={series} windowSec={300} minSpan={ch < 12 ? 0.6 : 10} showDelayTicks={false} />
           <div style={{ height: 8 }} />
           <StripChart title="Residual (measured − predicted)" unit="bar" series={resid} windowSec={300} minSpan={0.6} showDelayTicks={false} height={130} showAlarms={false} />
         </Card>
-        <Card title="Neighbour graph" sub="Edge width = weight (1/distance); colour = agreement with this sensor">
+        <Card title="Neighbour graph" sub="Arc width = weight; colour = agreement">
           <NeighbourGraph snap={snap} ch={ch} />
           <Legend items={[{ color: 'var(--ok)', label: 'agrees' }, { color: 'var(--warn)', label: 'differs' }, { color: 'var(--bad)', label: 'disagrees' }]} />
         </Card>

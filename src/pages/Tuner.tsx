@@ -176,7 +176,7 @@ export default function Tuner() {
           </button>
         </Card>
 
-        <Card title="Gated vs contaminated" sub="Same history, with and without trust gating, both judged on clean data" accent="tune">
+        <Card title="Gated vs contaminated" sub="Both judged on clean data" accent="tune">
           {cmp.g && cmp.u ? (
             <div className="stack">
               <div className="cmp">
@@ -208,7 +208,7 @@ export default function Tuner() {
         </Card>
       </div>
 
-      <Card title="Loop view: closed-loop improvement" sub="Iteration 0 → 3: each iteration applies the previous approved settings and labels, then re-runs the mixed-stress scenario" accent="tune" actions={<button className="btn tune sm" onClick={runLoop} disabled={loopBusy}>{loopBusy ? 'Running…' : 'Run loop iterations'}</button>}>
+      <Card title="Loop view: closed-loop improvement" sub="Scenario S8 re-run after each tuning round" accent="tune" actions={<button className="btn tune sm" onClick={runLoop} disabled={loopBusy}>{loopBusy ? 'Running…' : 'Run loop iterations'}</button>}>
         <div className="loop-view">
           <LoopDiagram size={240} />
           <div className="grow">

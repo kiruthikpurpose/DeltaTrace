@@ -62,7 +62,11 @@ export function benchmarkReport(res: BenchResult, exps: ExperimentResult[]) {
     { size: 7.5 },
   );
   const quiet = res.rows.filter((r) => r.note);
-  if (quiet.length) d.note(quiet.map((r) => `${r.id}: ${r.note}`).join('  '), 'warn');
+  if (quiet.length) {
+    const byNote = new Map<string, string[]>();
+    for (const r of quiet) byNote.set(r.note!, [...(byNote.get(r.note!) ?? []), r.id]);
+    d.note([...byNote].map(([n, ids]) => `${ids.join(', ')}: ${n}`).join(' '), 'warn');
+  }
   d.bars('Peak alarms in any 10 minutes', res.rows.map((r) => r.id), [{ name: 'Existing system', color: C.bad, values: res.rows.map((r) => r.baseline.peak10) }, { name: 'DeltaTrace operator items', color: C.brand, values: res.rows.map((r) => r.deltatrace.peak10) }]);
   d.bars('Time in alarm flood (%)', res.rows.map((r) => r.id), [{ name: 'Existing system', color: C.bad, values: res.rows.map((r) => r.baseline.pctFlood) }, { name: 'DeltaTrace', color: C.brand, values: res.rows.map((r) => r.deltatrace.pctFlood) }]);
   d.h1('3. Incident classification');
@@ -155,10 +159,15 @@ export function sessionReport(a: { snap: Snapshot; incidents: Incident[]; adviso
   if (!a.changes.length) d.p('No alarm-setting changes approved.', 9, C.muted);
   else d.table([{ header: 'MOC', w: 0.9 }, { header: 'Sim time', w: 1, align: 'r' }, { header: 'Point', w: 1.5 }, { header: 'Old', w: 2.2 }, { header: 'New', w: 2.2 }, { header: 'Status', w: 1 }, { header: 'Evidence', w: 3 }], a.changes.map((c) => [`MOC-${c.id}`, mmss(c.t), c.point, c.old, c.new, c.status, c.evidence]), { size: 7.5 });
   d.h1('7. Audit trail');
-  d.p(`${a.audit.length} entries retained (most recent ${Math.min(120, a.audit.length)} shown).`, 8.5, C.muted);
-  d.table([{ header: 'Time', w: 0.9 }, { header: 'Actor', w: 1.3 }, { header: 'Action', w: 1.7 }, { header: 'Reason', w: 6 }, { header: 'Ref', w: 1 }], a.audit.slice(-120).reverse().map((e) => [mmss(e.t), e.actor, e.action, e.reason, e.ref ?? '']), { size: 7 });
+  const counts = new Map<string, number>();
+  for (const e of a.audit) counts.set(e.action, (counts.get(e.action) ?? 0) + 1);
+  d.table([{ header: 'Decision type', w: 3 }, { header: 'Entries', w: 1, align: 'r' }], [...counts].sort((x, y) => y[1] - x[1]).map(([k, v]) => [k, String(v)]));
+  const notable = a.audit.filter((e) => e.action !== 'group');
+  d.p(`${a.audit.length} entries retained. Individual grouping decisions are summarised above; the ${Math.min(100, notable.length)} most recent other entries follow.`, 8.5, C.muted);
+  d.table([{ header: 'Time', w: 0.9 }, { header: 'Actor', w: 1.3 }, { header: 'Action', w: 1.7 }, { header: 'Reason', w: 6 }, { header: 'Ref', w: 1 }], notable.slice(-100).reverse().map((e) => [mmss(e.t), e.actor, e.action, e.reason, e.ref ?? '']), { size: 7 });
   d.h1('8. Write-back log (dry run)');
-  d.table([{ header: 'Time', w: 0.9 }, { header: 'Tag', w: 5 }, { header: 'Value', w: 1.6 }, { header: 'Kind', w: 1 }], a.writes.slice(-80).reverse().map((w) => [mmss(w.t), w.tag, String(w.value), w.kind]), { size: 7 });
+  d.p(`${a.writes.length} writes retained; the 40 most recent are listed.`, 8.5, C.muted);
+  d.table([{ header: 'Time', w: 0.9 }, { header: 'Tag', w: 5 }, { header: 'Value', w: 1.6 }, { header: 'Kind', w: 1 }], a.writes.slice(-40).reverse().map((w) => [mmss(w.t), w.tag, String(w.value), w.kind]), { size: 7 });
   d.h1('9. Configuration');
   configTable(d, snap.cfg);
   savePdf(d.build({ generated: stamp(), doc: 'Operations and Audit Report' }), file('operations-report'));
@@ -183,7 +192,7 @@ export function incidentReport(inc: Incident, alarms: RawAlarm[], cfg: Config) {
     { label: 'MEAN TRUST', value: inc.meanTrust.toFixed(2) },
   ]);
   d.h1('2. Classification basis');
-  d.bullets([...inc.classReasons, `Corroboration ${inc.corroboration.toFixed(2)} (process >= ${cfg.corrProcess}, fault < ${cfg.corrFault}); mean trust ${inc.meanTrust.toFixed(2)}.`]);
+  d.bullets(inc.classReasons.length ? inc.classReasons : [`Corroboration ${inc.corroboration.toFixed(2)} (process >= ${cfg.corrProcess}, fault < ${cfg.corrFault}); mean trust ${inc.meanTrust.toFixed(2)}.`]);
   if (inc.origin) {
     d.h1('3. Origin estimate');
     d.p(`Estimated position km ${inc.origin.km.toFixed(1)} +/- ${((inc.origin.hi - inc.origin.lo) / 2).toFixed(1)} km (range ${inc.origin.lo.toFixed(1)} - ${inc.origin.hi.toFixed(1)}), residual ${inc.origin.residual.toFixed(1)} s. This is a grouping aid, not a leak locator.`);
@@ -224,7 +233,7 @@ export function tunerReport(a: { results: Partial<Record<TunerClassId, TunerResu
   let n = 2;
   for (const c of classes) {
     const r = a.results[c.id]!;
-    d.pageBreak();
+    if (n > 2) d.pageBreak();
     d.h1(`${n++}. ${c.label}`);
     d.kpis([
       { label: 'CANDIDATES', value: String(r.candidates.length) },

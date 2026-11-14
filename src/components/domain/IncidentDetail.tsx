@@ -58,7 +58,7 @@ export function IncidentDetail({ inc, compact }: { inc: Incident; compact?: bool
       </Card>
 
       {!compact && (
-        <Card title="Timeline: position vs time" sub="Dashed line = expected pressure-wavefront (slope = 1/c). First alarm per sensor: on the line = corroborating, ringed = outlier; small grey dots = repeat alarms." accent="group">
+        <Card title="Timeline: position vs time" sub="Dashed line: expected wavefront. Ringed: outlier. Grey: repeat alarms." accent="group">
           <IncidentTimeline incident={inc} alarms={alarms} c={cfg.waveSpeed} tol={cfg.clockTol} />
         </Card>
       )}
