@@ -14,7 +14,7 @@ export function Sidebar() {
   return (
     <aside className={`sidebar${mobileNav ? ' open' : ''}`} aria-label="Primary">
       <div className="brand">
-        <Logo size={32} className="brand-logo" />
+        <Logo size={32} id="brand-logo" className="brand-logo" />
         <span>DeltaTrace</span>
       </div>
       <nav className="nav" aria-label="Main navigation">

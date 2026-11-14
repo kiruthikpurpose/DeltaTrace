@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <title>DeltaTrace Live — fewer alarms, clearer incidents, safer settings</title>
     <meta name="description" content="DeltaTrace Live is an in-browser simulation showing how trust scoring, delay-based incident grouping and trust-gated alarm tuning calm alarm floods on an oil and gas pipeline. Simulated data — demonstration only." />
     <meta property="og:title" content="DeltaTrace Live" />
@@ -12,55 +13,20 @@
     <meta name="color-scheme" content="light dark" />
     <script>try{var t=localStorage.getItem("deltatrace.v1.theme");t=t?JSON.parse(t):(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");document.documentElement.dataset.theme=t}catch(e){}</script>
     <style>
-      #splash{position:fixed;inset:0;z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f5f5f7;color:#1d1d1f;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;overflow:hidden;transition:opacity .9s cubic-bezier(.32,.72,0,1),transform .9s cubic-bezier(.32,.72,0,1),filter .9s cubic-bezier(.32,.72,0,1);--accent:#2c6ca3;--muted:#6e6e73;--ring:#b9bec5;--dot:#8a8f96;--track:rgba(0,0,0,.1)}
-      :root[data-theme="dark"] #splash{background:#0a0b0d;color:#f5f5f7;--accent:#5b9fd6;--muted:#8d9299;--ring:#3d434b;--dot:#6b727b;--track:rgba(255,255,255,.12)}
-      #splash.leaving{opacity:0;transform:scale(1.04);filter:blur(8px);pointer-events:none}
+      #splash{position:fixed;inset:0;z-index:1000;background:#14171b;color:#e8eaed;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;overflow:hidden;transition:background .8s ease}
+      .sp-svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+      .sp-name{position:absolute;left:0;right:0;text-align:center;font-weight:600;letter-spacing:-.035em;opacity:0;filter:blur(8px);transform:translateY(10px);transition:opacity 1s cubic-bezier(.16,1,.3,1),transform 1s cubic-bezier(.16,1,.3,1),filter 1s}
+      .sp-name .l{font-weight:300}.sp-name.on{opacity:1;filter:none;transform:none}.sp-name.off{opacity:0;transition-duration:.45s}
+      .sp-sub{position:absolute;left:0;right:0;text-align:center;color:#8d949c;opacity:0;transition:opacity 1s}.sp-sub.on{opacity:1}.sp-sub.off{opacity:0;transition-duration:.45s}
+      .sp-credit{position:absolute;bottom:34px;left:0;right:0;text-align:center;font-size:12px;letter-spacing:.04em;color:#8d949c;opacity:0;transition:opacity 1s}.sp-credit.on{opacity:1}.sp-credit.off{opacity:0;transition-duration:.4s}
       .splash-on body{overflow:hidden}
-      #sp-canvas{position:absolute;inset:0;width:100%;height:100%}
-      .sp-stage{position:relative;display:flex;flex-direction:column;align-items:center;transform:translateY(-2vmin)}
-      .sp-logo{width:clamp(150px,24vmin,280px);height:auto;overflow:visible;stroke:currentColor}
-      .sp-track{stroke:var(--ring);stroke-width:4;opacity:0;animation:sp-fade .8s 2.8s ease forwards}
-      .sp-arc{stroke:var(--accent);stroke-width:5;stroke-dasharray:1;stroke-dashoffset:1;animation:sp-draw 1.1s 2.75s cubic-bezier(.65,0,.35,1) forwards}
-      .sp-tri{stroke-width:4.5;stroke-dasharray:1;stroke-dashoffset:1;animation:sp-draw .9s 2.15s cubic-bezier(.65,0,.35,1) forwards}
-      .sp-v{fill:currentColor;stroke:none;opacity:0;transform-box:fill-box;transform-origin:center;animation:sp-pop .7s cubic-bezier(.16,1,.3,1) forwards}
-      .sp-v1{animation-delay:2.1s}.sp-v2{animation-delay:2.3s}.sp-v3{animation-delay:2.5s}
-      .sp-core{fill:var(--accent);stroke:none;opacity:0;transform-box:fill-box;transform-origin:center;animation:sp-core 1s 1.85s cubic-bezier(.16,1,.3,1) forwards}
-      .sp-name{margin:3.2vmin 0 0;font-size:clamp(36px,6.4vmin,76px);line-height:1.08;font-weight:600;letter-spacing:-.035em;opacity:0;filter:blur(10px);transform:translateY(12px);animation:sp-rise 1.2s 3.1s cubic-bezier(.16,1,.3,1) forwards}
-      .sp-light{font-weight:300}
-      .sp-sub{margin:1.2vmin 0 0;font-size:clamp(14px,2.1vmin,22px);letter-spacing:-.005em;color:var(--muted);opacity:0;transform:translateY(6px);animation:sp-rise2 1s 3.45s cubic-bezier(.16,1,.3,1) forwards}
-      .sp-bar{margin-top:4.2vmin;width:clamp(120px,16vmin,200px);height:2px;border-radius:2px;background:var(--track);overflow:hidden;opacity:0;animation:sp-fade .8s 3.3s ease forwards}
-      .sp-bar i{display:block;height:100%;width:100%;background:var(--accent);border-radius:2px;transform-origin:left;transform:scaleX(0);animation:sp-fill 2.4s 3.3s cubic-bezier(.3,.1,.2,1) forwards;transition:transform .35s ease}
-      #splash.ready .sp-bar i{animation:none;transform:scaleX(1)}
-      .sp-credit{position:absolute;bottom:4vmin;margin:0;font-size:12px;letter-spacing:.04em;color:var(--muted);opacity:0;animation:sp-fade 1.2s 3.7s ease forwards}
-      @keyframes sp-draw{to{stroke-dashoffset:0}}
-      @keyframes sp-pop{from{opacity:0;transform:scale(.2)}to{opacity:1;transform:scale(1)}}
-      @keyframes sp-core{0%{opacity:0;transform:scale(.1)}55%{opacity:1;transform:scale(1.35)}100%{opacity:1;transform:scale(1)}}
-      @keyframes sp-rise{to{opacity:1;filter:blur(0);transform:none}}
-      @keyframes sp-rise2{to{opacity:1;transform:none}}
-      @keyframes sp-fade{to{opacity:1}}
-      @keyframes sp-fill{0%{transform:scaleX(0)}100%{transform:scaleX(.9)}}
-      @media (prefers-reduced-motion:reduce){#sp-canvas{display:none}#splash *{animation-duration:.01s!important;animation-delay:0s!important}#splash{transition-duration:.2s}}
+      .splash-on #brand-logo{visibility:hidden}
+      .splash-on .brand span{opacity:0}
+      .brand span{transition:opacity .6s ease}
     </style>
   </head>
   <body>
-    <div id="splash" aria-hidden="true">
-      <canvas id="sp-canvas"></canvas>
-      <div class="sp-stage">
-        <svg class="sp-logo" viewBox="0 0 120 120" fill="none" stroke-linecap="round" stroke-linejoin="round">
-          <circle class="sp-track" cx="60" cy="60" r="52" />
-          <path class="sp-arc" pathLength="1" d="M60 8 A52 52 0 1 1 15 86" />
-          <path class="sp-tri" pathLength="1" d="M60 34 L87 80 H33 Z" />
-          <circle class="sp-v sp-v1" cx="60" cy="34" r="4.8" />
-          <circle class="sp-v sp-v2" cx="87" cy="80" r="4.8" />
-          <circle class="sp-v sp-v3" cx="33" cy="80" r="4.8" />
-          <circle class="sp-core" cx="60" cy="63" r="7" />
-        </svg>
-        <h1 class="sp-name"><span>Delta</span><span class="sp-light">Trace</span></h1>
-        <p class="sp-sub">Trust-aware alarm grouping and tuning for pipelines</p>
-        <div class="sp-bar"><i></i></div>
-      </div>
-      <p class="sp-credit">Created by Kiruthik</p>
-    </div>
+    <div id="splash" aria-hidden="true"></div>
     <script>try{if(sessionStorage.getItem("deltatrace.splash")){document.getElementById("splash").remove()}else{document.documentElement.classList.add("splash-on")}}catch(e){}</script>
     <script src="/splash.js"></script>
     <div id="root"></div>

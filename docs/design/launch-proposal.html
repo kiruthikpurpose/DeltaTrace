@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><title>DeltaTrace launch proposal</title>
+<style>
+:root{--bg:#14171b;--surface:#1b1f24;--border:#2c3238;--text:#e8eaed;--muted:#8d949c;--brand:#5b9fd6;--warn:#e0a030;--line:#c9d6e2}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,Helvetica,Arial,sans-serif;overflow:hidden}
+/* mock app behind the splash */
+#app{position:fixed;inset:0;display:grid;grid-template-columns:232px 1fr}
+#side{background:var(--surface);border-right:1px solid var(--border);padding:16px 12px}
+#slot{display:flex;align-items:center;gap:10px;height:40px;font-weight:650;font-size:16px;letter-spacing:-.02em}
+#slot i{width:32px;height:32px;display:block}
+#side .it{height:30px;margin:6px 0;border-radius:6px;background:var(--border);opacity:.55}
+#main{padding:28px}#main .h{height:22px;width:220px;background:var(--border);border-radius:5px;margin-bottom:20px}
+#main .c{height:150px;background:var(--surface);border:1px solid var(--border);border-radius:6px;margin-bottom:16px}
+/* splash */
+#sp{position:fixed;inset:0;background:var(--bg);transition:opacity 1s cubic-bezier(.32,.72,0,1)}
+#sp.out{opacity:0;pointer-events:none}
+svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.name{position:absolute;left:0;right:0;text-align:center;font-weight:600;letter-spacing:-.035em;opacity:0;transition:opacity 1s cubic-bezier(.16,1,.3,1),transform 1s cubic-bezier(.16,1,.3,1),filter 1s;filter:blur(8px);transform:translateY(10px)}
+.name span{font-weight:300}.name.on{opacity:1;filter:none;transform:none}.name.off{opacity:0;transition-duration:.5s}
+.sub{position:absolute;left:0;right:0;text-align:center;color:var(--muted);opacity:0;transition:opacity 1s}.sub.on{opacity:1}.sub.off{opacity:0;transition-duration:.5s}
+.credit{position:absolute;bottom:34px;left:0;right:0;text-align:center;font-size:12px;letter-spacing:.04em;color:var(--muted);opacity:0;transition:opacity 1s}.credit.on{opacity:1}.credit.off{opacity:0;transition-duration:.4s}
+</style>
+<div id="app"><aside id="side"><div id="slot"><i></i><span id="slotname" style="opacity:0;transition:opacity .6s">DeltaTrace</span></div><div class="it"></div><div class="it"></div><div class="it"></div><div class="it"></div></aside><main id="main"><div class="h"></div><div class="c"></div><div class="c"></div></main></div>
+<div id="sp"><svg id="svg"></svg><div class="name" id="name"><span style="font-weight:600">Delta</span><span>Trace</span></div><div class="sub" id="sub">Trust-aware alarm grouping and tuning for pipelines</div><div class="credit" id="credit">Created by Kiruthik</div></div>
+<script>
+const NS='http://www.w3.org/2000/svg';
+const el=(t,a={},p=svg)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);p.appendChild(e);return e};
+const svg=document.getElementById('svg');
+const W=innerWidth,H=innerHeight,S=Math.min(W,H)/1024*0.66; // icon scale
+const ease='cubic-bezier(.65,0,.35,1)',out='cubic-bezier(.16,1,.3,1)';
+const defs=el('defs');
+const grad=(id,c0,c1,o0)=>{const g=el('linearGradient',{id,gradientUnits:'userSpaceOnUse',x1:126,y1:0,x2:690,y2:0},defs);el('stop',{offset:0,'stop-color':c0,'stop-opacity':o0},g);el('stop',{offset:.6,'stop-color':c0},g);el('stop',{offset:1,'stop-color':c1},g)};
+grad('r0','#5fb4ff','#e8f6ff',.25);grad('r1','#59d7ff','#f0fdff',.25);grad('r2','#7ea8ff','#eef3ff',.25);
+const band=el('linearGradient',{id:'band',gradientUnits:'userSpaceOnUse',x1:530,y1:0,x2:884,y2:0},defs);el('stop',{offset:0,'stop-color':'#e8f6ff'},band);el('stop',{offset:1,'stop-color':'#fff'},band);
+const fl=(id,sd)=>{const f=el('filter',{id,x:'-40%',y:'-40%',width:'180%',height:'180%'},defs);el('feGaussianBlur',{stdDeviation:sd},f)};fl('b18',18);fl('b6',6);
+const ng=el('radialGradient',{id:'ng'},defs);el('stop',{offset:0,'stop-color':'#fff'},ng);el('stop',{offset:.4,'stop-color':'#c8e6ff'},ng);el('stop',{offset:1,'stop-color':'#4c8dff','stop-opacity':0},ng);
+// layer for scattered dots in screen space
+const field=el('g');
+// icon group (icon coordinates centred on 520,520)
+const root=el('g');const grp=el('g',{},root);
+const place=(sc,tx,ty)=>root.style.transform=`translate(${tx}px,${ty}px) scale(${sc})`;
+root.style.transformOrigin='0 0';root.style.transition='transform 1.5s '+ease;
+const CX=W/2,CY=H/2-H*0.02;
+const base=(sc)=>place(sc,CX-520*sc,CY-520*sc);base(S);
+const LX=650,LY=520,MX=560,NX=884;
+const ys=[236,332,426,520,614,708,804];
+// ribbons
+const rib=[];const rg=el('g',{style:'mix-blend-mode:screen',opacity:'.9'},grp);
+ys.forEach((y0,i)=>{const p=el('path',{d:`M126,${y0} C320,${y0} 380,520 ${MX},520 L${LX+40},520`,fill:'none',stroke:`url(#r${i%3})`,'stroke-width':i==3?28:24,'stroke-linecap':'round',pathLength:1,'stroke-dasharray':1,'stroke-dashoffset':1},rg);p.style.transition=`stroke-dashoffset 1.2s ${ease} ${i*.04}s, opacity 1s, stroke .9s`;rib.push(p)});
+// alarm dots anchors
+const anchors=ys.map((y0)=>el('circle',{cx:126,cy:y0,r:15,fill:'#e0a030',opacity:0},grp));
+anchors.forEach(a=>{a.style.transition='opacity .6s, fill .8s';a.style.transformBox='fill-box';a.style.transformOrigin='center'});
+// lens
+const lens=el('g',{opacity:0},grp);lens.style.transition='opacity 1s, transform 1s '+out;lens.style.transformOrigin=`${LX}px ${LY}px`;lens.style.transform='scale(.9)';
+const lensFill=el('circle',{cx:LX,cy:LY,r:168,fill:'rgba(156,200,255,.10)'},lens);lensFill.style.transition='fill 1s';
+const lensRim=el('circle',{cx:LX,cy:LY,r:168,fill:'none',stroke:'rgba(190,224,255,.7)','stroke-width':7},lens);lensRim.style.transition='stroke .9s,stroke-width .9s';
+const P=(a,r)=>[LX+r*Math.cos(a*Math.PI/180),LY+r*Math.sin(a*Math.PI/180)];
+const arc=(a0,a1,r)=>{const s=P(a0,r),e=P(a1,r);return `M${s[0]} ${s[1]} A${r} ${r} 0 ${a1-a0>180?1:0} 1 ${e[0]} ${e[1]}`};
+const track=el('path',{d:arc(-140,140,198),fill:'none',stroke:'rgba(255,255,255,.09)','stroke-width':20,'stroke-linecap':'round',opacity:0},grp);track.style.transition='opacity .8s';
+const prog=el('path',{d:arc(-140,-140+280*.82,198),fill:'none',stroke:'#6fb6ff','stroke-width':20,'stroke-linecap':'round',pathLength:1,'stroke-dasharray':1,'stroke-dashoffset':1},grp);prog.style.transition=`stroke-dashoffset 1.3s ${ease}, stroke-width .9s, stroke .9s`;
+const ticks=el('g',{opacity:0},grp);ticks.style.transition='opacity .9s';
+for(let i=0;i<29;i++){const a=-140+280*i/28,M=i%7==0,p=P(a,M?218:221),q=P(a,234);el('path',{d:`M${p[0]} ${p[1]} L${q[0]} ${q[1]}`,stroke:'#fff','stroke-opacity':M?.4:.17,'stroke-width':M?5:3,'stroke-linecap':'round'},ticks)}
+// band + node
+const bandG=el('g',{},grp);
+const bandGlow=el('path',{d:`M${MX-30},520 H${NX}`,stroke:'url(#band)','stroke-width':46,'stroke-linecap':'round',fill:'none',filter:'url(#b18)',opacity:0,pathLength:1,'stroke-dasharray':1,'stroke-dashoffset':1},bandG);
+const bandL=el('path',{d:`M${MX-30},520 H${NX}`,stroke:'url(#band)','stroke-width':34,'stroke-linecap':'round',fill:'none',pathLength:1,'stroke-dasharray':1,'stroke-dashoffset':1},bandG);
+bandL.style.transition=`stroke-dashoffset 1s ${ease}, stroke-width .9s, stroke .9s`;bandGlow.style.transition=`stroke-dashoffset 1s ${ease}, opacity .8s`;
+const halo=el('circle',{cx:NX,cy:520,r:92,fill:'url(#ng)',opacity:0,filter:'url(#b6)'},grp);halo.style.transition='opacity 1s';
+const nodeRing=el('circle',{cx:NX,cy:520,r:54,fill:'none',stroke:'rgba(255,255,255,.5)','stroke-width':5,opacity:0},grp);nodeRing.style.transition='opacity .8s';
+const node=el('circle',{cx:NX,cy:520,r:0,fill:'#fff'},grp);node.style.transition='r .7s '+out+', fill .9s';
+// scattered dots
+const dots=[];const N=70;
+for(let i=0;i<N;i++){const x=Math.random()*W,y=Math.random()*H;const d=el('circle',{cx:x,cy:y,r:1.6+Math.random()*2.6,fill:i<7?'#e0a030':'#6c7580',opacity:0},field);d._x=x;d._y=y;d.style.transition='opacity .9s';dots.push(d)}
+const toScreen=(x,y)=>[CX+(x-520)*S,CY+(y-520)*S];
+const name=document.getElementById('name'),sub=document.getElementById('sub'),credit=document.getElementById('credit');
+const fs=Math.max(40,Math.min(W,H)*0.064);name.style.fontSize=fs+'px';sub.style.fontSize=Math.max(14,Math.min(W,H)*.021)+'px';
+const T=(ms,fn)=>setTimeout(fn,ms);
+let k=window.SPEED||1.3;const t=ms=>ms/k;
+// timeline
+T(t(150),()=>dots.forEach((d,i)=>setTimeout(()=>d.style.opacity=i<7?.95:.5,Math.random()*500)));
+T(t(1100),()=>{dots.forEach((d,i)=>{d.style.transition='transform 1.4s '+ease+', opacity 1.2s';if(i<7){const [ax,ay]=toScreen(126,ys[i]);d.style.transform=`translate(${ax-d._x}px,${ay-d._y}px)`}else{const [ax,ay]=toScreen(MX,520);d.style.transform=`translate(${ax-d._x}px,${ay-d._y}px)`;d.style.opacity=0}})});
+T(t(2250),()=>{dots.slice(0,7).forEach(d=>d.style.opacity=0);anchors.forEach(a=>a.setAttribute('opacity',1));rib.forEach(p=>p.style.strokeDashoffset=0)});
+T(t(2900),()=>{lens.setAttribute('opacity',1);lens.style.transform='scale(1)';track.setAttribute('opacity',1);prog.style.strokeDashoffset=.0;ticks.setAttribute('opacity',1)});
+T(t(3500),()=>{bandL.style.strokeDashoffset=0;bandGlow.setAttribute('opacity',.8);bandGlow.style.strokeDashoffset=0;node.setAttribute('r',34);halo.setAttribute('opacity',.9);nodeRing.setAttribute('opacity',1)});
+// simplify: complex -> simple mark
+T(t(4700),()=>{
+  const sc=S*0.5;place(sc,CX-520*sc,CY-520*sc-H*0.07);
+  anchors.forEach(a=>a.setAttribute('opacity',0));
+  [0,2,4,6].forEach(i=>rib[i].setAttribute('opacity',0));
+  rib.forEach(p=>{p.setAttribute('stroke','#c9d6e2');p.setAttribute('stroke-width',30)});
+  ticks.setAttribute('opacity',0);track.setAttribute('opacity',0);
+  halo.setAttribute('opacity',0);bandGlow.setAttribute('opacity',0);
+  lensFill.setAttribute('fill','rgba(0,0,0,0)');lensRim.setAttribute('stroke','#8d949c');lensRim.setAttribute('stroke-width',14);
+  prog.setAttribute('stroke','#5b9fd6');prog.setAttribute('stroke-width',26);
+  bandL.setAttribute('stroke','#e8eaed');bandL.setAttribute('stroke-width',30);node.setAttribute('fill','#5b9fd6');nodeRing.setAttribute('opacity',0);
+  const markBottom=CY-H*0.07+(804-520)*S*0.5;name.style.top=(markBottom+H*0.045)+'px';
+  T(t(700),()=>name.classList.add('on'));
+  T(t(1200),()=>{sub.style.top=(parseFloat(name.style.top)+fs*1.3)+'px';sub.classList.add('on');credit.classList.add('on')});
+});
+// dock into the sidebar slot
+T(t(7200),()=>{
+  const slot=document.querySelector('#slot i').getBoundingClientRect();
+  const tgt=slot.width/ (560*1) ; // mark spans ~560 icon units
+  const sc=slot.width/560*1.0;
+  const tx=slot.left+slot.width/2-(LX-40)*sc, ty=slot.top+slot.height/2-520*sc;
+  root.style.transition='transform 1.2s '+ease;place(sc,tx,ty);
+  name.classList.add('off');sub.classList.add('off');credit.classList.add('off');
+  T(t(700),()=>{document.getElementById('slotname').style.opacity=1});
+  T(t(900),()=>{const sp=document.getElementById('sp');sp.style.background='transparent';sp.style.pointerEvents='none';field.style.opacity=0});
+});
+</script>
+</html>

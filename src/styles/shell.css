@@ -271,3 +271,4 @@
   .page { padding: 12px; gap: 16px; }
   .toast-host { left: 12px; right: 12px; max-width: none; bottom: 8px; }
 }
+.collapsed .brand-logo { width: 36px; height: auto; }
