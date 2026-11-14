@@ -12,6 +12,11 @@
   function remove() { sp.remove(); root.classList.remove('splash-on'); mark(); }
   if (reduce) { remove(); return; }
 
+  var soundPref = true;
+  try { soundPref = localStorage.getItem('deltatrace.v1.sound') !== '"off"'; } catch (e) {}
+  var AC = window.AudioContext || window.webkitAudioContext;
+  var actx = null, engine = null;
+  function cue(n, when) { if (engine) { try { engine.cue(n, when); } catch (e) {} } }
   var NS = 'http://www.w3.org/2000/svg';
   var W = window.innerWidth, H = window.innerHeight;
   var S = Math.min(W, H) / 1024 * 0.66;
@@ -23,7 +28,7 @@
   var svg = document.createElementNS(NS, 'svg');
   svg.setAttribute('class', 'sp-svg');
   sp.appendChild(svg);
-  var name = document.createElement('div'); name.className = 'sp-name'; name.innerHTML = '<span style="font-weight:600">Delta</span><span class="l">Trace</span>';
+  var name = document.createElement('div'); name.className = 'sp-name'; name.innerHTML = '<span class="sp-nt"><span style="font-weight:600">Delta</span><span class="l">Trace</span></span>';
   var sub = document.createElement('div'); sub.className = 'sp-sub'; sub.textContent = 'Trust-aware alarm grouping and tuning for pipelines';
   var credit = document.createElement('div'); credit.className = 'sp-credit'; credit.textContent = 'Created by Kiruthik';
   sp.appendChild(name); sp.appendChild(sub); sp.appendChild(credit);
@@ -79,34 +84,43 @@
   }
   function toScreen(x, y) { return [CX + (x - 520) * S, CY + (y - 520) * S]; }
 
-  // --- timeline
-  T(150, function () { dots.forEach(function (c, i) { setTimeout(function () { c.style.opacity = i < 7 ? 0.95 : 0.5; }, Math.random() * 450); }); });
-  T(1100, function () {
-    dots.forEach(function (c, i) {
-      c.style.transition = 'transform 1.4s ' + EASE + ', opacity 1.2s';
-      var t = i < 7 ? toScreen(126, ys[i]) : toScreen(MX, 520);
-      c.style.transform = 'translate(' + (t[0] - c._x) + 'px,' + (t[1] - c._y) + 'px)';
-      if (i >= 7) c.style.opacity = 0;
+  var started = false;
+  function start(withSound) {
+    if (started) return; started = true;
+    if (withSound && engine) cue('start');
+    T(150, function () { cue('scatter'); dots.forEach(function (c, i) { setTimeout(function () { c.style.opacity = i < 7 ? 0.95 : 0.5; }, Math.random() * 450); }); });
+    T(1100, function () {
+      cue('converge');
+      dots.forEach(function (c, i) {
+        c.style.transition = 'transform 1.4s ' + EASE + ', opacity 1.2s';
+        var t = i < 7 ? toScreen(126, ys[i]) : toScreen(MX, 520);
+        c.style.transform = 'translate(' + (t[0] - c._x) + 'px,' + (t[1] - c._y) + 'px)';
+        if (i >= 7) c.style.opacity = 0;
+      });
     });
-  });
-  T(2250, function () { dots.slice(0, 7).forEach(function (c) { c.style.opacity = 0; }); anchors.forEach(function (a) { a.setAttribute('opacity', 1); }); rib.forEach(function (p) { p.style.strokeDashoffset = 0; }); });
-  T(2900, function () { lens.setAttribute('opacity', 1); lens.style.transform = 'scale(1)'; track.setAttribute('opacity', 1); prog.style.strokeDashoffset = 0; ticks.setAttribute('opacity', 1); });
-  T(3500, function () { bandL.style.strokeDashoffset = 0; bandGlow.setAttribute('opacity', 0.8); bandGlow.style.strokeDashoffset = 0; node.setAttribute('r', 34); halo.setAttribute('opacity', 0.9); nodeRing.setAttribute('opacity', 1); });
-  T(4700, function () {
-    var sc = S * 0.5; place(sc, CX - 520 * sc, CY - 520 * sc - H * 0.07);
-    anchors.forEach(function (a) { a.setAttribute('opacity', 0); });
-    [0, 2, 4, 6].forEach(function (i) { rib[i].setAttribute('opacity', 0); });
-    rib.forEach(function (p) { p.setAttribute('stroke', '#e3e6e9'); p.setAttribute('stroke-width', 30); });
-    ticks.setAttribute('opacity', 0); track.setAttribute('opacity', 0); halo.setAttribute('opacity', 0); bandGlow.setAttribute('opacity', 0);
-    lensFill.setAttribute('fill', 'rgba(0,0,0,0)'); lensRim.setAttribute('stroke', '#94a0ab'); lensRim.setAttribute('stroke-width', 14);
-    prog.setAttribute('stroke', '#5b9fd6'); prog.setAttribute('stroke-width', 26);
-    bandL.setAttribute('stroke', '#e3e6e9'); bandL.setAttribute('stroke-width', 30); node.setAttribute('fill', '#5b9fd6'); nodeRing.setAttribute('opacity', 0);
-    var bottom = CY - H * 0.07 + (804 - 520) * S * 0.5;
-    name.style.top = (bottom + H * 0.045) + 'px';
-    T(700, function () { name.classList.add('on'); });
-    T(1200, function () { sub.style.top = (parseFloat(name.style.top) + fs * 1.3) + 'px'; sub.classList.add('on'); credit.classList.add('on'); });
-  });
-  T(6500, function () { reachedDock = true; tryDock(); });
+    T(2250, function () { cue('streams'); dots.slice(0, 7).forEach(function (c) { c.style.opacity = 0; }); anchors.forEach(function (a) { a.setAttribute('opacity', 1); }); rib.forEach(function (p) { p.style.strokeDashoffset = 0; }); });
+    T(2900, function () { cue('lens'); lens.setAttribute('opacity', 1); lens.style.transform = 'scale(1)'; track.setAttribute('opacity', 1); prog.style.strokeDashoffset = 0; ticks.setAttribute('opacity', 1); });
+    T(3500, function () { cue('node'); bandL.style.strokeDashoffset = 0; bandGlow.setAttribute('opacity', 0.8); bandGlow.style.strokeDashoffset = 0; node.setAttribute('r', 34); halo.setAttribute('opacity', 0.9); nodeRing.setAttribute('opacity', 1); });
+    T(4300, function () {
+      cue('settle');
+      var sc = S * 0.5; place(sc, CX - 520 * sc, CY - 520 * sc - H * 0.07);
+      anchors.forEach(function (a) { a.setAttribute('opacity', 0); });
+      [0, 2, 4, 6].forEach(function (i) { rib[i].setAttribute('opacity', 0); });
+      rib.forEach(function (p) { p.setAttribute('stroke', '#e3e6e9'); p.setAttribute('stroke-width', 30); });
+      ticks.setAttribute('opacity', 0); track.setAttribute('opacity', 0); halo.setAttribute('opacity', 0); bandGlow.setAttribute('opacity', 0);
+      lensFill.setAttribute('fill', 'rgba(0,0,0,0)'); lensRim.setAttribute('stroke', '#94a0ab'); lensRim.setAttribute('stroke-width', 14);
+      prog.setAttribute('stroke', '#5b9fd6'); prog.setAttribute('stroke-width', 26);
+      bandL.setAttribute('stroke', '#e3e6e9'); bandL.setAttribute('stroke-width', 30); node.setAttribute('fill', '#5b9fd6'); nodeRing.setAttribute('opacity', 0);
+      var bottom = CY - H * 0.07 + (804 - 520) * S * 0.5;
+      name.style.top = (bottom + H * 0.045) + 'px';
+      T(700, function () { cue('name'); name.classList.add('on'); });
+      T(1200, function () { cue('sub'); sub.style.top = (parseFloat(name.style.top) + fs * 1.3) + 'px'; sub.classList.add('on'); credit.classList.add('on'); });
+    });
+    T(6900, function () { reachedDock = true; tryDock(); });
+
+
+    setTimeout(function () { sp.addEventListener('click', skip, { once: true }); window.addEventListener('keydown', onKey); }, 600);
+  }
 
   function cssVar(n) { return getComputedStyle(root).getPropertyValue(n).trim(); }
   function fadeOut() {
@@ -127,14 +141,42 @@
     rib.forEach(function (p) { p.setAttribute('stroke', ink); });
     bandL.setAttribute('stroke', ink); lensRim.setAttribute('stroke', muted); prog.setAttribute('stroke', brand); node.setAttribute('fill', brand);
     rootG.style.transition = 'transform 1.25s cubic-bezier(.65,0,.35,1)'; place(sc, tx, ty);
-    name.classList.add('off'); sub.classList.add('off'); credit.classList.add('off');
+    cue('dockStart');
+    // the wordmark travels with the mark and becomes the sidebar text
+    var nt = name.querySelector('.sp-nt'), tn = document.getElementById('brand-name'), cr = nt.getBoundingClientRect(), tr = tn && tn.getBoundingClientRect();
+    if (tr && tr.width > 8) {
+      var ns = tr.width / cr.width, nx = tr.left - cr.left, ny = tr.top + tr.height / 2 - cr.top - ns * cr.height / 2;
+      name.style.transition = 'none'; nt.style.transition = 'transform 1.25s cubic-bezier(.65,0,.35,1)'; nt.style.transform = 'translate(' + nx + 'px,' + ny + 'px) scale(' + ns + ')';
+    } else { name.classList.add('off'); }
+    sub.classList.add('off'); credit.classList.add('off');
+    setTimeout(function () { cue("land"); }, 1235);
     setTimeout(function () { sp.style.background = 'transparent'; field.style.opacity = 0; }, 350);
-    setTimeout(function () { root.classList.remove('splash-on'); }, 1150);
-    setTimeout(remove, 1350);
+    setTimeout(function () { root.classList.remove('splash-on'); }, 1245);
+    setTimeout(remove, 1300);
   }
   // skip: any click or key
-  function skip() { timers.forEach(clearTimeout); fadeOut(); }
-  sp.addEventListener('click', skip, { once: true });
-  window.addEventListener('keydown', function () { if (!done) skip(); }, { once: true });
+  function skip() { timers.forEach(clearTimeout); if (engine) cue('skip'); fadeOut(); }
+  function onKey() { if (!done) skip(); }
   window.__deltaSplash = { ready: function () { ready = true; tryDock(); } };
+
+  // --- boot: sound needs a user gesture in most browsers, so ask once, quietly
+  function boot() {
+    if (!soundPref || !AC || !window.DeltaAudio) { start(false); return; }
+    try { actx = new AC(); } catch (e) { start(false); return; }
+    var settled = false;
+    function go(sound) { if (settled) return; settled = true; if (sound) engine = window.DeltaAudio.Engine(actx); start(sound); }
+    actx.resume().catch(function () {});
+    setTimeout(function () {
+      if (settled) return;
+      if (actx.state === 'running') { go(true); return; }
+      var gate = document.createElement('div'); gate.className = 'sp-gate';
+      gate.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg><b>Click to begin</b><small>Continue without sound</small>';
+      sp.appendChild(gate);
+      function begin(sound, e) { if (e) e.stopPropagation(); gate.classList.add('out'); setTimeout(function () { gate.remove(); }, 400); actx.resume().then(function () { go(sound && actx.state === 'running'); }, function () { go(false); }); }
+      gate.addEventListener('click', function (e) { begin(true, e); });
+      gate.querySelector('small').addEventListener('click', function (e) { begin(false, e); });
+      window.addEventListener('keydown', function (e) { if (settled) return; if (e.key === 'Escape') { settled = true; gate.remove(); fadeOut(); } else begin(true); }, { once: false });
+    }, 160);
+  }
+  boot();
 })();

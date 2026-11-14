@@ -9,6 +9,8 @@ All notable changes to this project are documented here.
 
 ### Added
 - New identity: alarm streams that merge, pass a trust gauge and end as one incident. A rich app icon (`public/app-icon.svg`) and a flat product mark used in the sidebar, favicon and README.
+- Launch sound: synthesised with Web Audio (no files), each cue triggered by its visual. Browsers block audio until interaction, so a quiet "Click to begin" appears when needed, with a "Continue without sound" option; a Settings toggle turns it off.
+- The wordmark now travels with the mark and becomes the sidebar text, instead of two names fading in and out.
 - Launch screen (dark, once per session): amber alarm dots converge into streams and one incident, the drawing simplifies into the mark, and the mark flies into the sidebar logo. Click or any key skips it; disabled under reduced motion; falls back to a fade where the sidebar logo is not visible.
 - Apache 2.0 license, contribution guide, code of conduct and security policy.
 - GitHub Actions workflow running typecheck, lint, tests, build and a bundle-size check on Node 18, 20 and 22.

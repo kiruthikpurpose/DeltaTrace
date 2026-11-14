@@ -15,7 +15,7 @@ export function Sidebar() {
     <aside className={`sidebar${mobileNav ? ' open' : ''}`} aria-label="Primary">
       <div className="brand">
         <Logo size={32} id="brand-logo" className="brand-logo" />
-        <span>DeltaTrace</span>
+        <span id="brand-name"><b>Delta</b><i>Trace</i></span>
       </div>
       <nav className="nav" aria-label="Main navigation">
         {groups.map((g) => (

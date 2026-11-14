@@ -272,3 +272,6 @@
   .toast-host { left: 12px; right: 12px; max-width: none; bottom: 8px; }
 }
 .collapsed .brand-logo { width: 36px; height: auto; }
+#brand-name { font-weight: 600; letter-spacing: -0.035em; }
+#brand-name b { font-weight: 600; }
+#brand-name i { font-style: normal; font-weight: 400; }
