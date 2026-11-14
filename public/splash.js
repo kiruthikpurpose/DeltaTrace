@@ -87,7 +87,7 @@
   var started = false;
   function start(withSound) {
     if (started) return; started = true;
-    if (withSound && engine) cue('start');
+    if (engine) cue('start');
     T(150, function () { cue('scatter'); dots.forEach(function (c, i) { setTimeout(function () { c.style.opacity = i < 7 ? 0.95 : 0.5; }, Math.random() * 450); }); });
     T(1100, function () {
       cue('converge');
@@ -119,7 +119,7 @@
     T(6900, function () { reachedDock = true; tryDock(); });
 
 
-    setTimeout(function () { sp.addEventListener('click', skip, { once: true }); window.addEventListener('keydown', onKey); }, 600);
+    setTimeout(function () { sp.addEventListener('click', onPointer, { once: true }); window.addEventListener('keydown', onKey); }, 600);
   }
 
   function cssVar(n) { return getComputedStyle(root).getPropertyValue(n).trim(); }
@@ -156,27 +156,33 @@
   }
   // skip: any click or key
   function skip() { timers.forEach(clearTimeout); if (engine) cue('skip'); fadeOut(); }
-  function onKey() { if (!done) skip(); }
+  function onKey(e) { if (done) return; if (e.key === 'Escape') { skip(); return; } if (unlock()) return; skip(); }
+  function onPointer() { if (done) return; if (unlock()) { sp.addEventListener('click', onPointer, { once: true }); return; } skip(); }
   window.__deltaSplash = { ready: function () { ready = true; tryDock(); } };
 
-  // --- boot: sound needs a user gesture in most browsers, so ask once, quietly
-  function boot() {
-    if (!soundPref || !AC || !window.DeltaAudio) { start(false); return; }
-    try { actx = new AC(); } catch (e) { start(false); return; }
-    var settled = false;
-    function go(sound) { if (settled) return; settled = true; if (sound) engine = window.DeltaAudio.Engine(actx); start(sound); }
-    actx.resume().catch(function () {});
-    setTimeout(function () {
-      if (settled) return;
-      if (actx.state === 'running') { go(true); return; }
-      var gate = document.createElement('div'); gate.className = 'sp-gate';
-      gate.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg><b>Click to begin</b><small>Continue without sound</small>';
-      sp.appendChild(gate);
-      function begin(sound, e) { if (e) e.stopPropagation(); gate.classList.add('out'); setTimeout(function () { gate.remove(); }, 400); actx.resume().then(function () { go(sound && actx.state === 'running'); }, function () { go(false); }); }
-      gate.addEventListener('click', function (e) { begin(true, e); });
-      gate.querySelector('small').addEventListener('click', function (e) { begin(false, e); });
-      window.addEventListener('keydown', function (e) { if (settled) return; if (e.key === 'Escape') { settled = true; gate.remove(); fadeOut(); } else begin(true); }, { once: false });
-    }, 160);
+  // --- boot: start at once; try to play sound automatically, unlock on the first gesture if the browser blocks it
+  var t0 = performance.now(), locked = false;
+  function arm() {
+    if (engine || !actx || actx.state !== 'running') return;
+    engine = window.DeltaAudio.Engine(actx);
+    if (hint) { hint.remove(); hint = null; }
+    cue(performance.now() - t0 < 500 ? 'start' : 'sub'); // a small acknowledgement when sound joins late
   }
-  boot();
+  var hint = null;
+  if (soundPref && AC && window.DeltaAudio) {
+    try {
+      actx = new AC();
+      actx.addEventListener('statechange', arm);
+      actx.resume().then(arm, function () {});
+      setTimeout(function () {
+        if (engine || done) return;
+        locked = true; // browser blocked autoplay: wait quietly for the first click or key
+        hint = document.createElement('div'); hint.className = 'sp-hint';
+        hint.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M16 9.5a4 4 0 0 1 0 5"/></svg>Click or press a key for sound';
+        sp.appendChild(hint);
+      }, 1200);
+    } catch (e) { actx = null; }
+  }
+  function unlock() { if (!locked || engine || !actx) return false; locked = false; actx.resume().then(arm, function () {}); return true; }
+  start(true);
 })();
