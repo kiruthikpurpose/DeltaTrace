@@ -258,7 +258,7 @@ export function PipelineSchematic({ snap, explain, showTruth, selectedIncident }
             <g key={inc.id}>
               <rect x={x1} y={PY - 122} width={x2 - x1} height={PY - 122 > 0 ? 122 + 58 : 180} rx={4} fill={col} opacity={0.07} stroke={col} strokeWidth={1.2} />
               <rect x={x1} y={PY - 140} width={Math.max(120, label.length * 6.6 + 14)} height={18} rx={3} fill={col} />
-              <text x={x1 + 7} y={PY - 127} fontSize={11} fontWeight={600} fill="#fff">{label}</text>
+              <text x={x1 + 7} y={PY - 127} fontSize={11} fontWeight={600} fill="var(--on-accent)">{label}</text>
             </g>
           );
         })}
@@ -350,7 +350,7 @@ export function PipelineSchematic({ snap, explain, showTruth, selectedIncident }
               {al && (
                 <g transform={`translate(${x},${PY - 96})`}>
                   <circle r={10} fill={al.crit ? 'var(--bad)' : 'var(--warn)'} style={{ animation: 'pulse-ring 1.3s infinite', color: al.crit ? 'var(--bad)' : 'var(--warn)' }} />
-                  <text textAnchor="middle" dominantBaseline="central" fontSize={11} fontWeight={800} fill="#fff">{al.n}</text>
+                  <text textAnchor="middle" dominantBaseline="central" fontSize={11} fontWeight={800} fill="var(--on-accent)">{al.n}</text>
                 </g>
               )}
               {/* trust ring + tag */}

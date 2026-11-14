@@ -6,7 +6,7 @@ export function IncidentTimeline({ incident, alarms, c, tol, height = 260 }: { i
   const pts = alarms.filter((a) => a.source === 'scada' && a.type !== 'FLAT');
   if (!pts.length) return null;
   const W = 640;
-  const L = 44;
+  const L = 56;
   const R = 14;
   const T = 14;
   const B = 30;
@@ -14,6 +14,7 @@ export function IncidentTimeline({ incident, alarms, c, tol, height = 260 }: { i
   const tMax = Math.max(...pts.map((a) => a.time)) + 10;
   const X = (t: number) => L + ((t - tMin) / Math.max(1, tMax - tMin)) * (W - L - R);
   const Y = (km: number) => T + (1 - km / 200) * (height - T - B);
+  const showWave = incident.cls === 'process-event';
   const o = incident.origin;
   const first = [...pts].sort((a, b) => a.time - b.time)[0];
   const km0 = o ? o.km : NODE_KM[first.node];
@@ -34,16 +35,17 @@ export function IncidentTimeline({ incident, alarms, c, tol, height = 260 }: { i
         </g>
       ))}
       {Array.from({ length: ticks + 1 }, (_, i) => tMin + ((tMax - tMin) * i) / ticks).map((t, i) => (
-        <text key={i} x={X(t)} y={height - 10} textAnchor="middle" fontSize={11} fill="var(--chart-axis)" fontFamily="var(--mono)">{Math.round(t)}s</text>
+        <text key={i} x={X(t)} y={height - 10} textAnchor="middle" fontSize={11} fill="var(--chart-axis)" fontFamily="var(--mono)">{Math.round(t)} s</text>
       ))}
-      <text x={10} y={12} fontSize={11} fill="var(--chart-axis)">km</text>
-      <path d={wavePath(1)} fill="none" stroke="var(--c-group)" strokeWidth={2} strokeDasharray="6 4" />
-      <path d={wavePath(-1)} fill="none" stroke="var(--c-group)" strokeWidth={2} strokeDasharray="6 4" />
+      <text transform={`translate(11,${(T + height - B) / 2}) rotate(-90)`} textAnchor="middle" fontSize={11} fill="var(--chart-axis)">position (km)</text>
+      {showWave && <path d={wavePath(1)} fill="none" stroke="var(--c-group)" strokeWidth={1.5} strokeDasharray="6 4" />}
+      {showWave && <path d={wavePath(-1)} fill="none" stroke="var(--c-group)" strokeWidth={1.5} strokeDasharray="6 4" />}
       {pts.map((a) => {
         const exp = wave(NODE_KM[a.node]);
         const isFirst = !pts.some((b) => b.node === a.node && (b.time < a.time || (b.time === a.time && b.id < a.id)));
         if (!isFirst) return <circle key={a.id} cx={X(a.time)} cy={Y(NODE_KM[a.node])} r={2.8} fill="var(--text-muted)" opacity={0.5}><title>repeat alarm from the same sensor</title></circle>;
-        const on = Math.abs(a.time - exp) <= tol + 5 + 4;
+        if (a.type.startsWith('FLOW')) return <rect key={a.id} x={X(a.time) - 5} y={Y(NODE_KM[a.node]) - 5} width={10} height={10} fill="var(--c-group)"><title>Mass-balance alarm (flow lag, not on the wavefront)</title></rect>;
+        const on = !showWave || Math.abs(a.time - exp) <= tol + 5 + 4;
         return (
           <g key={a.id}>
             <circle cx={X(a.time)} cy={Y(NODE_KM[a.node])} r={a.safetyCritical ? 6 : 4.5} fill={on ? 'var(--c-group)' : 'var(--bad)'} opacity={0.85} />

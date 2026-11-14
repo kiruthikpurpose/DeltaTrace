@@ -14,7 +14,7 @@ export function Sidebar() {
     <aside className={`sidebar${mobileNav ? ' open' : ''}`} aria-label="Primary">
       <div className="brand">
         <div className="brand-mark" aria-hidden>
-          <Activity size={18} color="#fff" strokeWidth={2.6} />
+          <Activity size={18} color="var(--bg)" strokeWidth={2.6} />
         </div>
         <span>DeltaTrace</span>
       </div>

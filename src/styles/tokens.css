@@ -25,6 +25,7 @@
   --pipe: #b4bcc4; --pipe-inner: #d8dde2;
   --chart-grid: rgba(28, 34, 40, 0.1); --chart-axis: #56626d;
   --overlay: rgba(20, 26, 32, 0.45);
+  --on-accent: #ffffff;
 }
 :root[data-theme='dark'] {
   color-scheme: dark;
@@ -39,6 +40,7 @@
   --pipe: #3a424b; --pipe-inner: #232930;
   --chart-grid: rgba(227, 230, 233, 0.09); --chart-axis: #94a0ab;
   --overlay: rgba(0, 0, 0, 0.6);
+  --on-accent: #0d1319;
 }
 :root {
   --trust-soft: color-mix(in srgb, var(--c-trust) 14%, var(--bg-elev-1));

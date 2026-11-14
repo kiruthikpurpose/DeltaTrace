@@ -1,13 +1,11 @@
 import { X } from 'lucide-react';
-import { useEffect, useRef, type ReactNode } from 'react';
-import { useEscape } from '../../utils/a11y';
+import { useRef, type ReactNode } from 'react';
+import { useEscape, useFocusTrap } from '../../utils/a11y';
 
 export function Drawer({ open, onClose, title, children, wide, actions }: { open: boolean; onClose: () => void; title: ReactNode; children: ReactNode; wide?: boolean; actions?: ReactNode }) {
   useEscape(onClose, open);
   const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (open) ref.current?.focus();
-  }, [open]);
+  useFocusTrap(ref, open);
   if (!open) return null;
   return (
     <>

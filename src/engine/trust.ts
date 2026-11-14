@@ -285,7 +285,8 @@ export class TrustEngine {
       const prev = this.devAt(ch, i + 1);
       const mid = this.devAt(ch, i);
       const next = this.devAt(ch, i - 1);
-      if (Math.abs(mid - prev) > 6 * sig && Math.abs(next - prev) < 0.5 * Math.abs(mid - prev)) cnt++;
+      const jump = ch < 12 ? Math.max(6 * sig, 1.5) : 6 * sig; // real spike storms are 5-10 bar; far-field ringing is smaller
+      if (Math.abs(mid - prev) > jump && Math.abs(next - prev) < 0.5 * Math.abs(mid - prev)) cnt++;
     }
     return Math.min(3, cnt * 0.75);
   }

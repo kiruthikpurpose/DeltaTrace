@@ -4,7 +4,7 @@ import { NAV } from '../../routes';
 import { runner } from '../../state/runner';
 import { useSimStore } from '../../state/simStore';
 import { useUiStore } from '../../state/uiStore';
-import { useEscape } from '../../utils/a11y';
+import { useEscape, useFocusTrap } from '../../utils/a11y';
 import { QUICK_FAULTS, injectQuick } from '../domain/FaultInjector';
 
 interface Cmd {
@@ -22,6 +22,8 @@ export function CommandPalette() {
   const input = useRef<HTMLInputElement>(null);
   const engineOn = useSimStore((s) => s.snap?.engineEnabled ?? true);
   useEscape(close, open);
+  const box = useRef<HTMLDivElement>(null);
+  useFocusTrap(box, open);
   useEffect(() => {
     if (open) {
       setQ('');
@@ -53,7 +55,7 @@ export function CommandPalette() {
   return (
     <>
       <div className="overlay" onClick={close} aria-hidden />
-      <div className="palette" role="dialog" aria-modal="true" aria-label="Command palette">
+      <div className="palette" ref={box} role="dialog" aria-modal="true" aria-label="Command palette">
         <input
           ref={input}
           value={q}

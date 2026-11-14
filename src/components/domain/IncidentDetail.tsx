@@ -58,12 +58,12 @@ export function IncidentDetail({ inc, compact }: { inc: Incident; compact?: bool
       </Card>
 
       {!compact && (
-        <Card title="Timeline: position vs time" sub="Dashed line: expected wavefront. Ringed: outlier. Grey: repeat alarms." accent="group">
+        <Card title="Timeline: position vs time" sub="Dashed: expected wavefront. Ringed: outlier. Square: mass balance. Grey: repeats." accent="group">
           <IncidentTimeline incident={inc} alarms={alarms} c={cfg.waveSpeed} tol={cfg.clockTol} />
         </Card>
       )}
 
-      <Card title={`Member alarms (${alarms.length}) — all raw alarms retained`} flush>
+      <Card title={`Member alarms (${alarms.length})`} sub="All raw alarms retained" actions={<Link to="/console" className="btn sm ghost">Show in raw log</Link>} flush>
         <Table
           label="Member alarms"
           maxHeight={compact ? 220 : 300}
@@ -75,7 +75,6 @@ export function IncidentDetail({ inc, compact }: { inc: Incident; compact?: bool
             { key: 'type', header: 'Type', render: (a) => a.type },
             { key: 't', header: 'Time', render: (a) => <span className="mono">{mmss(a.time)}</span>, sort: (a, b) => a.time - b.time },
             { key: 'role', header: 'Role', render: (a) => <span className={`badge ${a.role === 'headline' ? 'group' : 'neutral'}`}>{a.role ?? 'member'}{a.safetyCritical ? ' · critical' : ''}</span> },
-            { key: 'raw', header: '', render: () => <Link to="/console" title="show in raw log" style={{ fontSize: 12 }}>show in raw log</Link> },
           ]}
         />
       </Card>

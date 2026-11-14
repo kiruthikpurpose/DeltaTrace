@@ -42,7 +42,7 @@ export default function Writeback() {
         </div>
       </Card>
       <div className="two-col">
-        <Card title="Written to control system (simulated)" sub={`${book.totalWrites} writes this run · OPC-UA style tags`} accent="group">
+        <Card title="Written to control system" sub={`${book.totalWrites} writes · OPC-UA tags · all dry run`} accent="group">
           <WriteBackFeed />
         </Card>
         <Card title="Audit log" sub={`${book.totalAudit} entries this run`} accent="trust" flush>

@@ -81,6 +81,11 @@ export class Aggregator {
 
   private linkTest(a: RawAlarm, m: RawAlarm, cfg: Config): boolean {
     if (cfg.groupingMode === 'fixed') return Math.abs(a.time - m.time) <= cfg.fixedWindow;
+    // diagnostic alarms (comms, no-change) describe the instrument, not the process: they only group with their own kind
+    if (NON_PHYSICAL.includes(a.type) || NON_PHYSICAL.includes(m.type)) {
+      if (a.type !== m.type) return false;
+      if (a.ch === m.ch) return Math.abs(a.time - m.time) <= cfg.incidentQuiet;
+    }
     if (a.ch === m.ch) return Math.abs(a.time - m.time) <= cfg.incidentQuiet; // same-source continuation
     if (CHANNELS[a.ch].kind === 'FT' && CHANNELS[m.ch].kind === 'FT') return Math.abs(a.time - m.time) <= cfg.incidentQuiet;
     if (hops(a.node, m.node) > cfg.hopLimit) return false;

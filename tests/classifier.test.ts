@@ -40,3 +40,18 @@ describe('classifier on scenarios', () => {
     for (const s of SCENARIOS) expect(s.duration).toBe(1800);
   });
 });
+
+describe('diagnostic alarms stay separate from process alarms', () => {
+  it('a comms outage next to a leak does not turn the leak into a data-integrity incident', () => {
+    const sim = new Simulation(DEFAULT_CONFIG, 77);
+    sim.injectFault({ type: 'comms', channels: [6, 7, 8], delay: 60, duration: 240 });
+    sim.injectFault({ type: 'leak', km: 60, size: 'medium', delay: 80 });
+    for (let i = 0; i < 500; i++) sim.step();
+    const incs = sim.agg.all();
+    const leak = incs.find((i) => i.cls === 'process-event');
+    const comms = incs.find((i) => i.cls === 'data-integrity');
+    expect(leak).toBeTruthy();
+    expect(comms).toBeTruthy();
+    for (const id of comms!.alarmIds) expect(sim.agg.alarms.get(id)!.type).toBe('COMM');
+  });
+});

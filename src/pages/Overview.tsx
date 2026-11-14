@@ -142,16 +142,9 @@ export default function Overview() {
           </div>
         </Card>
         <Card title="Safety first" sub="Enforced in code, checked live">
-          <div className="chips-rules">
-            {RULES.map((r) => (
-              <span key={r.n} className="chip" title={r.body}>{r.icon}{r.title}</span>
-            ))}
-          </div>
-          <div style={{ height: 10 }} />
           <SafetyRuleList snap={snap} compact />
         </Card>
       </div>
-      <p className="muted" style={{ textAlign: 'center' }}>All data is simulated; this is a demonstration, not a validated safety product.</p>
     </div>
   );
 }

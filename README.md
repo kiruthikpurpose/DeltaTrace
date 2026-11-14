@@ -225,6 +225,12 @@ Enforced in code, checked live in the UI, covered by tests.
 | **How It Works** | 12 interactive sections driven by live data, with text alternatives |
 | **Settings** | Wave speed, tolerances, trust weights, thresholds, demotion rules, seed, theme |
 
+## Interface notes
+
+- **Palette:** neutral gray surfaces in the ISA-101 tradition; colour is reserved for alarm priority, trust state and incident class. All text and state colours meet WCAG AA contrast in both themes.
+- **Responsive:** sidebar becomes an off-canvas menu below 820 px; below 720 px the pipeline is shown as a node list instead of a diagram. Verified at 320, 390, 600, 768, 1024 and 1440 px with no horizontal overflow.
+- **Accessibility:** dialogs trap and restore focus, canvases and diagrams have text alternatives, motion respects `prefers-reduced-motion`.
+
 ## Reports
 
 PDF reports are generated in the browser (no server, no external library) and downloaded as A4 documents with cover block, KPI tiles, tables, vector charts, page headers and page numbers:
@@ -241,7 +247,7 @@ PDF reports are generated in the browser (no server, no external library) and do
 ```bash
 npm i
 npm run dev          # http://localhost:5173
-npm test             # 51 tests: engine, safety, scenarios, tuner, persistence, UI smoke
+npm test             # 52 tests: engine, safety, scenarios, tuner, persistence, UI smoke
 npm run typecheck
 npm run lint
 npm run build        # → dist/

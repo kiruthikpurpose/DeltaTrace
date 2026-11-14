@@ -59,7 +59,7 @@
 .btn.primary {
   background: var(--brand);
   border-color: var(--brand);
-  color: #fff;
+  color: var(--on-accent);
 }
 .btn.primary:hover:not(:disabled) {
   background: var(--brand-ink);
@@ -67,7 +67,7 @@
 .btn.danger {
   background: var(--bad);
   border-color: var(--bad);
-  color: #fff;
+  color: var(--on-accent);
 }
 .btn.ghost {
   background: transparent;
@@ -84,9 +84,9 @@
 .btn.icon {
   padding: 7px;
 }
-.btn.tune { background: var(--brand); border-color: var(--brand); color: #fff; }
-.btn.group { background: var(--brand); border-color: var(--brand); color: #fff; }
-.btn.trust { background: var(--brand); border-color: var(--brand); color: #fff; }
+.btn.tune { background: var(--brand); border-color: var(--brand); color: var(--on-accent); }
+.btn.group { background: var(--brand); border-color: var(--brand); color: var(--on-accent); }
+.btn.trust { background: var(--brand); border-color: var(--brand); color: var(--on-accent); }
 .btn.tune:hover:not(:disabled), .btn.group:hover:not(:disabled), .btn.trust:hover:not(:disabled) { background: var(--brand-ink); }
 .btn.danger:hover:not(:disabled) { background: color-mix(in srgb, var(--bad) 85%, #000); }
 .btn.big {

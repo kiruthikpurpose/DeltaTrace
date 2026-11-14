@@ -21,7 +21,7 @@ export function AuditLog({ height = 420 }: { height?: number }) {
         { key: 'actor', header: 'Actor', render: (r) => <span className={`badge ${r.actor === 'Operator' ? 'tune' : r.actor === 'DeltaTrace' ? 'group' : 'neutral'}`}>{r.actor}</span> },
         { key: 'action', header: 'Action', render: (r) => <b>{r.action}</b> },
         { key: 'reason', header: 'Reason', render: (r) => r.reason },
-        { key: 'ref', header: 'Ref', render: (r) => <span className="mono muted">{r.ref}</span> },
+        { key: 'ref', header: 'Ref', render: (r) => <span className="mono muted" style={{ whiteSpace: 'nowrap' }}>{r.ref}</span> },
       ]}
     />
   );

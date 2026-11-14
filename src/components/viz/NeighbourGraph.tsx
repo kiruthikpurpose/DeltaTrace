@@ -39,7 +39,7 @@ export function NeighbourGraph({ snap, ch }: { snap: Snapshot; ch: number }) {
         );
       })}
       <circle cx={cx} cy={axisY} r={17} fill="var(--brand)" stroke="var(--bg-elev-1)" strokeWidth={3} />
-      <text x={cx} y={axisY + 1} textAnchor="middle" dominantBaseline="central" fontSize={11} fontWeight={700} fontFamily="var(--mono)" fill="#fff">{ch}</text>
+      <text x={cx} y={axisY + 1} textAnchor="middle" dominantBaseline="central" fontSize={11} fontWeight={700} fontFamily="var(--mono)" fill="var(--on-accent)">{ch}</text>
       <text x={cx} y={axisY + 32} textAnchor="middle" fontSize={11.5} fontWeight={700} fill="var(--text)">PT-{ch}</text>
       <text x={cx} y={axisY + 47} textAnchor="middle" fontSize={10.5} fill="var(--text-muted)" fontFamily="var(--mono)">selected</text>
       <text x={cx} y={axisY + 77} textAnchor="middle" fontSize={10.5} fill="var(--text-muted)" fontFamily="var(--mono)">Δ {selfDev.toFixed(2)} bar</text>
