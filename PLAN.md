@@ -1,4 +1,4 @@
-# PLAN — DeltaTrace Live
+# PLAN - DeltaTrace Live
 
 ## Phases
 1. Scaffold & design system (Vite, tokens, shell, routing, shared UI)

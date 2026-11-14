@@ -301,7 +301,7 @@ export class SimulationRunner {
     this.replay = null;
     this.acc = 0;
     useSimStore.setState({ replaying: false, caption: '' });
-    toast('Replay finished — back to live', 'ok');
+    toast('Replay finished - back to live', 'ok');
     this.push(true);
   }
   stopReplay() {

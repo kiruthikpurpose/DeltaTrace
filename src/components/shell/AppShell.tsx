@@ -88,7 +88,7 @@ export function AppShell() {
           </ErrorBoundary>
         </main>
         <footer className="sim-label" role="note">
-          <span>Simulated data — demonstration only</span>
+          <span>Simulated data - demonstration only</span>
           <span>DeltaTrace Live</span>
         </footer>
       </div>

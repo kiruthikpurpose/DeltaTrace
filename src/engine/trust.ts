@@ -365,7 +365,7 @@ export class TrustEngine {
     return sw > 0 ? sd / sw : 0;
   }
 
-  /** Series for heatmaps: trust row (copied) — kept in the simulation history buffers. */
+  /** Series for heatmaps: trust row (copied) - kept in the simulation history buffers. */
   reset() {
     this.T.fill(1);
     this.cls.fill('GOOD');
