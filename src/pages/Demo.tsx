@@ -24,6 +24,7 @@ interface Step {
 
 export default function Demo() {
   const snap = useSimStore((s) => s.snap)!;
+  const speed = useSimStore((s) => s.speed);
   const presenter = useUiStore((s) => s.presenter);
   const [started, setStarted] = useState(false);
   const [i, setI] = useState(0);
@@ -33,7 +34,7 @@ export default function Demo() {
   const cleanup = useRef<void | (() => void)>(undefined);
   const timers = useRef<number[]>([]);
   const later = (fn: () => void, ms: number) => {
-    timers.current.push(window.setTimeout(fn, ms));
+    timers.current.push(window.setTimeout(fn, ms / Math.max(1, useSimStore.getState().speed)));
   };
 
   const runTuning = useCallback(async () => {
@@ -57,16 +58,16 @@ export default function Demo() {
 
   const steps = useMemo<Step[]>(
     () => [
-      { title: 'Normal operation', caption: 'A 200 km pipeline. Sensors every 20 km. All trusted.', focus: 'schematic', seconds: 30, enter: () => { runner.reset(7); runner.setSpeed(1); useUiStore.getState().set({ explain: false, selectedIncident: null }); } },
-      { title: 'The problem', caption: 'One event. Dozens of alarms.', focus: 'raw', seconds: 40, enter: () => { runner.clearAll(); runner.setSpeed(5); runner.inject({ type: 'pumpTrip', node: 4 }); } },
+      { title: 'Normal operation', caption: 'A 200 km pipeline. Sensors every 20 km. All trusted.', focus: 'schematic', seconds: 30, enter: () => { runner.reset(7); useUiStore.getState().set({ explain: false, selectedIncident: null }); } },
+      { title: 'The problem', caption: 'One event. Dozens of alarms.', focus: 'raw', seconds: 40, enter: () => { runner.clearAll(); runner.inject({ type: 'pumpTrip', node: 4 }); } },
       { title: 'Delay-based grouping', caption: 'Alarms are grouped when their time gaps fit distance ÷ wave speed. Two simultaneous alarms 150 km apart are NOT merged.', focus: 'dt', seconds: 45, enter: () => { useUiStore.getState().set({ explain: true }); runner.inject({ type: 'falseDrop', channel: 10, duration: 100, delay: 30 }); } },
-      { title: 'A leak', caption: 'The origin estimate lands near km 87: a grouping aid, not a leak locator.', focus: 'schematic', seconds: 45, enter: () => { runner.clearAll(); runner.setSpeed(5); runner.inject({ type: 'leak', km: 87, size: 'medium' }); } },
-      { title: 'A lying sensor', caption: 'PT-7 freezes. Its trust ring goes amber, then red; its alarm becomes an advisory. Nothing is hidden.', focus: 'dt', seconds: 45, enter: () => { runner.clearAll(); useUiStore.getState().set({ explain: false }); runner.setSpeed(5); runner.inject({ type: 'stuck', channel: 7 }); } },
-      { title: 'Spoof + real event', caption: 'PT-3 replays old data while a real valve closes at N5: a data-integrity incident and a process event, correctly separated.', focus: 'dt', seconds: 55, enter: () => { runner.clearAll(); runner.setSpeed(10); runner.inject({ type: 'replay', channel: 3 }); runner.inject({ type: 'valveClosure', node: 5, size: 'medium', delay: 230 }); } },
-      { title: 'Comms outage + leak', caption: 'Three RTUs go dark while a leak starts at km 40: two separate incidents.', focus: 'dt', seconds: 60, enter: () => { runner.clearAll(); runner.setSpeed(5); for (const s of QUICK_FAULTS[6].specs) runner.inject(s); } },
-      { title: 'Tuning', caption: 'Replay candidate settings on trusted data, see the Pareto front, watch contamination hurt, approve the best safe setting.', focus: 'tuner', seconds: 30, enter: () => { runner.clearAll(); runner.setSpeed(5); runner.inject({ type: 'pumpTrip', node: 4, duration: 90 }); void runTuning(); } },
-      { title: 'Fail-open', caption: 'Engine OFF: the right panel mirrors the raw alarms. Switch it back ON and incidents return.', focus: 'dt', seconds: 30, enter: () => { runner.clearAll(); runner.setSpeed(5); runner.inject({ type: 'valveClosure', node: 6, size: 'large', duration: 120 }); later(() => runner.setConfig({ engineEnabled: false }), 5000); later(() => runner.setConfig({ engineEnabled: true }), 20000); return () => runner.setConfig({ engineEnabled: true }); } },
-      { title: 'Close the loop', caption: 'Trust → grouping → labelled events → tuning → fewer false alarms → cleaner data → better trust. Critical alarms hidden: 0.', focus: 'summary', seconds: 40, enter: () => { runner.clearAll(); runner.setSpeed(1); } },
+      { title: 'A leak', caption: 'The origin estimate lands near km 87: a grouping aid, not a leak locator.', focus: 'schematic', seconds: 45, enter: () => { runner.clearAll(); runner.inject({ type: 'leak', km: 87, size: 'medium' }); } },
+      { title: 'A lying sensor', caption: 'PT-7 freezes. Its trust ring goes amber, then red; its alarm becomes an advisory. Nothing is hidden.', focus: 'dt', seconds: 45, enter: () => { runner.clearAll(); useUiStore.getState().set({ explain: false }); runner.inject({ type: 'stuck', channel: 7 }); } },
+      { title: 'Spoof + real event', caption: 'PT-3 replays old data while a real valve closes at N5: a data-integrity incident and a process event, correctly separated.', focus: 'dt', seconds: 55, enter: () => { runner.clearAll(); runner.inject({ type: 'replay', channel: 3 }); runner.inject({ type: 'valveClosure', node: 5, size: 'medium', delay: 230 }); } },
+      { title: 'Comms outage + leak', caption: 'Three RTUs go dark while a leak starts at km 40: two separate incidents.', focus: 'dt', seconds: 60, enter: () => { runner.clearAll(); for (const s of QUICK_FAULTS[6].specs) runner.inject(s); } },
+      { title: 'Tuning', caption: 'Replay candidate settings on trusted data, see the Pareto front, watch contamination hurt, approve the best safe setting.', focus: 'tuner', seconds: 30, enter: () => { runner.clearAll(); runner.inject({ type: 'pumpTrip', node: 4, duration: 90 }); void runTuning(); } },
+      { title: 'Fail-open', caption: 'Engine OFF: the right panel mirrors the raw alarms. Switch it back ON and incidents return.', focus: 'dt', seconds: 30, enter: () => { runner.clearAll(); runner.inject({ type: 'valveClosure', node: 6, size: 'large', duration: 120 }); later(() => runner.setConfig({ engineEnabled: false }), 5000); later(() => runner.setConfig({ engineEnabled: true }), 20000); return () => runner.setConfig({ engineEnabled: true }); } },
+      { title: 'Close the loop', caption: 'Trust → grouping → labelled events → tuning → fewer false alarms → cleaner data → better trust. Critical alarms hidden: 0.', focus: 'summary', seconds: 40, enter: () => { runner.clearAll(); } },
     ],
     [runTuning],
   );
@@ -88,12 +89,13 @@ export default function Demo() {
     if (!started) return;
     const id = window.setInterval(() => {
       if (!auto) return;
+      const sp = Math.max(1, useSimStore.getState().speed);
       setLeft((l) => {
-        if (l <= 1) {
+        if (l <= sp) {
           if (i < stepRef.current.length - 1) setTimeout(() => go(i + 1), 0);
           return 0;
         }
-        return l - 1;
+        return l - sp;
       });
     }, 1000);
     return () => clearInterval(id);
@@ -153,7 +155,7 @@ export default function Demo() {
               <button className="btn" onClick={() => go(i + 1)} disabled={i === steps.length - 1} aria-label="Next step"><ChevronRight size={16} /></button>
               <button className="btn" onClick={start}><RotateCcw size={15} /> Restart</button>
               <span className="grow" />
-              <span className="mono muted">step {i + 1}/{steps.length} · next in {left}s</span>
+              <span className="mono muted">step {i + 1}/{steps.length} · next in {Math.ceil(left / speed)}s</span>
             </div>
             <div className="progress" aria-hidden><i style={{ width: `${(1 - left / step.seconds) * 100}%` }} /></div>
           </div>
@@ -164,7 +166,7 @@ export default function Demo() {
         <div className="demo-caption" role="status" aria-live="polite">
           <span className="badge group">Step {i + 1} · {step.title}</span>
           <p>{step.caption}</p>
-          {presenter && <span className="countdown mono">{left}s</span>}
+          {presenter && <span className="countdown mono">{Math.ceil(left / speed)}s</span>}
         </div>
       )}
 
