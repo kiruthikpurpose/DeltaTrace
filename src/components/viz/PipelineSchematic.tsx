@@ -16,35 +16,52 @@ export const xOf = (km: number) => X0 + km * KMX;
 
 function NodeIcon({ kind, x, y, tripped, closed }: { kind: string; x: number; y: number; tripped?: boolean; closed?: boolean }) {
   const col = tripped ? 'var(--bad)' : 'var(--text-muted)';
-  const fill = tripped ? 'var(--bad-soft)' : 'var(--bg-elev-1)';
+  const body = tripped ? 'var(--bad-soft)' : 'var(--bg-elev-2)';
+  const sw = 1.8;
   if (kind === 'pump' || kind === 'injection')
     return (
       <g transform={`translate(${x},${y})`}>
-        <circle r={15} fill={fill} stroke={col} strokeWidth={2} />
-        <path d="M-6,-7 L9,0 L-6,7 Z" fill={col} />
-        {kind === 'injection' && <path d="M-26,0 H-17 M-21,-4 L-17,0 L-21,4" stroke={col} strokeWidth={2} fill="none" />}
-        {tripped && <text x={14} y={-12} fontSize={15}>⚠</text>}
+        {/* discharge nozzle and motor */}
+        <rect x={-3} y={-21} width={12} height={9} rx={1.5} fill={body} stroke={col} strokeWidth={sw} />
+        <rect x={-24} y={-6} width={11} height={12} rx={2} fill={body} stroke={col} strokeWidth={sw} />
+        <path d="M-13,-2 H-9 M-13,2 H-9" stroke={col} strokeWidth={1.4} />
+        {/* volute */}
+        <circle r={13} fill={body} stroke={col} strokeWidth={sw} />
+        {/* impeller */}
+        <g className={tripped ? undefined : 'spin-slow'} style={{ transformBox: 'fill-box', transformOrigin: 'center' }}>
+          <path d="M0,-8 Q6,-5 0,0 Q-6,5 0,8 M-8,0 Q-5,-6 0,0 Q5,6 8,0" fill="none" stroke={col} strokeWidth={1.8} strokeLinecap="round" />
+        </g>
+        <circle r={2.2} fill={col} />
+        {kind === 'injection' && <path d="M-34,10 H-26 M-30,6 L-26,10 L-30,14" stroke={col} strokeWidth={sw} fill="none" strokeLinecap="round" />}
+        {tripped && <path d="M16,-14 L22,-4 H10 Z" fill="var(--bad)" />}
       </g>
     );
   if (kind === 'valve')
     return (
-      <g transform={`translate(${x},${y}) rotate(${closed ? 90 : 0})`}>
-        <path d="M-11,-9 L11,9 L11,-9 L-11,9 Z" fill={fill} stroke={col} strokeWidth={2} strokeLinejoin="round" />
-        <path d="M0,0 V-14" stroke={col} strokeWidth={2} />
+      <g transform={`translate(${x},${y})`}>
+        {/* actuator and stem */}
+        <path d="M0,-3 V-15" stroke={col} strokeWidth={sw} />
+        <path d="M-8,-15 H8" stroke={col} strokeWidth={2.4} strokeLinecap="round" />
+        {/* body */}
+        <path d="M-13,-9 L0,0 L-13,9 Z M13,-9 L0,0 L13,9 Z" fill={closed || tripped ? col : body} stroke={col} strokeWidth={sw} strokeLinejoin="round" />
+        <circle r={2.4} fill={closed || tripped ? 'var(--bg-elev-1)' : col} />
+        {closed && <path d="M-16,12 H16" stroke="var(--bad)" strokeWidth={2} strokeLinecap="round" />}
       </g>
     );
   if (kind === 'tap')
     return (
       <g transform={`translate(${x},${y})`}>
-        <path d="M0,18 V4" stroke={col} strokeWidth={2} />
-        <rect x={-12} y={-14} width={24} height={18} rx={4} fill={fill} stroke={col} strokeWidth={2} />
-        <path d="M-12,-6 H12" stroke={col} strokeWidth={1.5} />
+        <path d="M0,18 V6" stroke={col} strokeWidth={sw} />
+        <rect x={-13} y={-15} width={26} height={21} rx={4} fill={body} stroke={col} strokeWidth={sw} />
+        <path d="M-9,1 H-4 L-1,-8 L2,8 L5,1 H9" fill="none" stroke={col} strokeWidth={1.5} strokeLinejoin="round" />
+        <path d="M13,-4 H21 M18,-8 L22,-4 L18,0" fill="none" stroke={col} strokeWidth={sw} strokeLinecap="round" />
       </g>
     );
   return (
     <g transform={`translate(${x},${y})`}>
-      <path d="M-13,-12 v22 a13,5 0 0 0 26,0 v-22" fill={fill} stroke={col} strokeWidth={2} />
-      <ellipse cx={0} cy={-12} rx={13} ry={5} fill={fill} stroke={col} strokeWidth={2} />
+      <path d="M-14,-12 v21 a14,5 0 0 0 28,0 v-21" fill={body} stroke={col} strokeWidth={sw} />
+      <path d="M-14,0 v9 a14,5 0 0 0 28,0 v-9 a14,5 0 0 1 -28,0 Z" fill="var(--brand)" opacity={0.28} />
+      <ellipse cx={0} cy={-12} rx={14} ry={5} fill={body} stroke={col} strokeWidth={sw} />
     </g>
   );
 }
@@ -380,8 +397,9 @@ export function PipelineSchematic({ snap, explain, showTruth, selectedIncident }
                 <text textAnchor="middle" dominantBaseline="central" fontSize={9.5} fontWeight={700} fontFamily="var(--mono)" fill="var(--text)">{st.cls === 'BAD' ? '✕' : st.cls === 'UNCERTAIN' ? '!' : (st.T * 100).toFixed(0)}</text>
               </g>
               <text x={x} y={PY + 104} textAnchor="middle" fontSize={11} fontWeight={600} fill="var(--text)" fontFamily="var(--mono)">PT-{n.id}</text>
+              <text x={x} y={PY + 117} textAnchor="middle" fontSize={10} fill="var(--text-muted)" fontFamily="var(--mono)">{Number.isFinite(snap.measured[n.id]) ? snap.measured[n.id].toFixed(1) : '--'} bar</text>
               {st.likelyFault && st.cls !== 'GOOD' && (
-                <g transform={`translate(${x},${PY + 120})`}>
+                <g transform={`translate(${x},${PY + 134})`}>
                   <rect x={-(st.likelyFault.length * 3 + 8)} y={-8} width={st.likelyFault.length * 6 + 16} height={15} rx={7.5} fill={st.cls === 'BAD' ? 'var(--bad-soft)' : 'var(--warn-soft)'} stroke={st.cls === 'BAD' ? 'var(--bad)' : 'var(--warn)'} />
                   <text textAnchor="middle" dominantBaseline="central" fontSize={9} fontWeight={800} fill={st.cls === 'BAD' ? 'var(--bad-ink)' : 'var(--warn-ink)'}>{st.likelyFault.toUpperCase()}</text>
                 </g>
@@ -394,7 +412,7 @@ export function PipelineSchematic({ snap, explain, showTruth, selectedIncident }
           const st = snap.trust[ch];
           const x = xOf(CHANNELS[ch].km);
           return (
-            <g key={ch} transform={`translate(${x + (ch === 12 ? 30 : ch === 14 ? -30 : 0)},${PY + 150})`}>
+            <g key={ch} transform={`translate(${x + (ch === 12 ? 30 : ch === 14 ? -30 : 0)},${PY + 168})`}>
               <rect x={-((CHANNELS[ch].tag.length + 4) * 3.2 + 10)} y={-9} width={(CHANNELS[ch].tag.length + 4) * 6.4 + 20} height={18} rx={9} fill="var(--bg-elev-1)" stroke={TRUST_COLOR[st.cls]} strokeWidth={2} />
               <text textAnchor="middle" dominantBaseline="central" fontSize={10} fontFamily="var(--mono)" fontWeight={700} fill="var(--text)">{CHANNELS[ch].tag} {(st.T * 100).toFixed(0)}</text>
             </g>

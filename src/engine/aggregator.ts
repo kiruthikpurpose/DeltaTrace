@@ -17,6 +17,7 @@ const NON_ORIGIN: string[] = ['FLAT', 'COMM', 'DQ', 'FLOWDEV', 'FLOWLOW', 'FLOWH
 const NON_PHYSICAL: string[] = ['FLAT', 'COMM', 'DQ'];
 
 export class Aggregator {
+  private pendingCls = new Map<number, { cls: IncidentClass; n: number }>();
   open: Incident[] = [];
   archive: Incident[] = [];
   advisories: Advisory[] = [];
@@ -321,12 +322,21 @@ export class Aggregator {
       },
       cfg,
     );
+    // A settled class changes only after the new class has held for 3 consecutive scans (no flapping)
     if (inc.cls !== res.cls && !res.provisional && !inc.provisional) {
-      inc.prevCls = inc.cls;
-      inc.reclassifiedAt = t;
-      this.hooks.audit('DeltaTrace', 'class-change', `${incLabel(inc.id)} reclassified ${CLASS_LABEL[inc.cls]} → ${CLASS_LABEL[res.cls]}`, incLabel(inc.id));
-      this.hooks.event('reclassified', `${incLabel(inc.id)} reclassified: ${CLASS_LABEL[res.cls]}`, inc.id);
-    }
+      const pend = this.pendingCls.get(inc.id);
+      const n = pend && pend.cls === res.cls ? pend.n + 1 : 1;
+      if (n < 3) {
+        this.pendingCls.set(inc.id, { cls: res.cls, n });
+        res.cls = inc.cls;
+      } else {
+        this.pendingCls.delete(inc.id);
+        inc.prevCls = inc.cls;
+        inc.reclassifiedAt = t;
+        this.hooks.audit('DeltaTrace', 'class-change', `${incLabel(inc.id)} reclassified ${CLASS_LABEL[inc.cls]} → ${CLASS_LABEL[res.cls]}`, incLabel(inc.id));
+        this.hooks.event('reclassified', `${incLabel(inc.id)} reclassified: ${CLASS_LABEL[res.cls]}`, inc.id);
+      }
+    } else this.pendingCls.delete(inc.id);
     if (inc.cls !== res.cls || inc.provisional !== res.provisional) inc.version++;
     inc.cls = res.cls;
     inc.provisional = res.provisional;

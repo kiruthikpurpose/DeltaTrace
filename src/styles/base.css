@@ -123,3 +123,40 @@ textarea {
     scroll-behavior: auto !important;
   }
 }
+
+/* ---------- Motion system ---------- */
+@keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes spin-slow { to { transform: rotate(360deg); } }
+@keyframes bar-grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes alarm-in { 0% { opacity: 0; transform: translateX(-14px); background: var(--warn-soft); } 100% { opacity: 1; transform: none; background: transparent; } }
+@keyframes ring-ping { 0% { transform: scale(0.6); opacity: 0.7; } 100% { transform: scale(2.2); opacity: 0; } }
+@keyframes sheen { from { transform: translateX(-120%); } to { transform: translateX(220%); } }
+
+.spin-slow { animation: spin-slow 2.4s linear infinite; }
+
+/* staggered entrance for the blocks of a page */
+.page > * { animation: rise 0.5s var(--ease) both; }
+.page > *:nth-child(1) { animation-delay: 0ms; }
+.page > *:nth-child(2) { animation-delay: 60ms; }
+.page > *:nth-child(3) { animation-delay: 120ms; }
+.page > *:nth-child(4) { animation-delay: 180ms; }
+.page > *:nth-child(5) { animation-delay: 240ms; }
+.page > *:nth-child(n + 6) { animation-delay: 300ms; }
+
+/* interaction feedback */
+.card { transition: border-color var(--t-fast) var(--ease), box-shadow var(--t-med) var(--ease), transform var(--t-med) var(--ease); }
+.card:hover { border-color: var(--border-strong); }
+.btn { transition: background var(--t-fast) var(--ease), transform 90ms var(--ease), box-shadow var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease); }
+.btn:active:not(:disabled) { transform: scale(0.97); }
+.btn.primary { position: relative; overflow: hidden; }
+.btn.primary:hover:not(:disabled)::after {
+  content: ''; position: absolute; inset: 0 auto 0 0; width: 40%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.22), transparent);
+  animation: sheen 0.8s var(--ease);
+}
+.nav-link svg { transition: transform var(--t-med) var(--ease); }
+.nav-link:hover svg { transform: translateX(2px) scale(1.08); }
+
+/* new alarm rows and incident cards arrive with a short highlight */
+.alarm-row, .raw-row { animation: alarm-in 0.9s var(--ease); }
+.badge, .chip { transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease), transform var(--t-fast) var(--ease); }
