@@ -89,17 +89,16 @@ export default function Demo() {
     if (!started) return;
     const id = window.setInterval(() => {
       if (!auto) return;
-      const sp = Math.max(1, useSimStore.getState().speed);
       setLeft((l) => {
-        if (l <= sp) {
+        if (l <= 1) {
           if (i < stepRef.current.length - 1) setTimeout(() => go(i + 1), 0);
           return 0;
         }
-        return l - sp;
+        return l - 1;
       });
-    }, 1000);
+    }, 1000 / Math.max(1, speed));
     return () => clearInterval(id);
-  }, [started, auto, i, go]);
+  }, [started, auto, i, go, speed]);
   useEffect(
     () => () => {
       timers.current.forEach(clearTimeout);
@@ -155,7 +154,7 @@ export default function Demo() {
               <button className="btn" onClick={() => go(i + 1)} disabled={i === steps.length - 1} aria-label="Next step"><ChevronRight size={16} /></button>
               <button className="btn" onClick={start}><RotateCcw size={15} /> Restart</button>
               <span className="grow" />
-              <span className="mono muted">step {i + 1}/{steps.length} · next in {Math.ceil(left / speed)}s</span>
+              <span className="mono muted">step {i + 1}/{steps.length} · next in {left}s</span>
             </div>
             <div className="progress" aria-hidden><i style={{ width: `${(1 - left / step.seconds) * 100}%` }} /></div>
           </div>
@@ -166,7 +165,7 @@ export default function Demo() {
         <div className="demo-caption" role="status" aria-live="polite">
           <span className="badge group">Step {i + 1} · {step.title}</span>
           <p>{step.caption}</p>
-          {presenter && <span className="countdown mono">{Math.ceil(left / speed)}s</span>}
+          {presenter && <span className="countdown mono">{left}s</span>}
         </div>
       )}
 
