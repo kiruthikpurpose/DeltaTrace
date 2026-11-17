@@ -43,7 +43,8 @@
   background: var(--bg-elev-2); border-radius: 0 8px 8px 0; font-size: 13px; animation: slide-in var(--t-med) var(--ease);
 }
 .alarm-type { font-family: var(--mono); font-size: 11px; background: var(--bg-elev-3); border-radius: 5px; padding: 0 6px; }
-.pulse-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bad); color: var(--bad); animation: pulse-ring 1.4s infinite; }
+.pulse-dot { position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--bad); }
+.pulse-dot::after { content: ''; position: absolute; inset: 0; border-radius: 50%; background: var(--bad); animation: ring-ping 1.4s ease-out infinite; }
 .inc-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
 .inc-card {
   text-align: left; width: 100%; background: var(--bg-elev-2); border: 1px solid var(--border);
@@ -272,3 +273,4 @@
 /* scroll cue: the section strip fades out where it continues */
 .hiw-nav { scrollbar-width: none; -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 36px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 36px), transparent); }
 .hiw-nav::-webkit-scrollbar { display: none; }
+.alarm-list .pulse-dot::after { animation: none; display: none; }

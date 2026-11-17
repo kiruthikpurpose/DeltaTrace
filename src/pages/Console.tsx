@@ -1,5 +1,5 @@
 import { History, Zap, ShieldAlert, Eye } from 'lucide-react';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { FT_DEL, FT_IN, FT_OUT, CHANNELS, NOMINAL } from '../engine';
 import { AdvisoryShelf } from '../components/domain/AdvisoryShelf';
 import { IncidentCard } from '../components/domain/IncidentCard';
@@ -30,6 +30,14 @@ const PT_COLORS = ['var(--brand)', 'var(--c-trust)', 'var(--c-tune)', 'var(--c-g
 
 export default function Console({ embedded }: { embedded?: boolean } = {}) {
   const snap = useSimStore((s) => s.snap)!;
+  // the SVG schematic needs far fewer updates than the 10 Hz data stream
+  const [slowSnap, setSlowSnap] = useState(snap);
+  const latest = useRef(snap);
+  latest.current = snap;
+  useEffect(() => {
+    const id = setInterval(() => setSlowSnap(latest.current), 250);
+    return () => clearInterval(id);
+  }, []);
   const replaying = useSimStore((s) => s.replaying);
   const narrow = useMedia('(max-width: 720px)');
   const ui = useUiStore();
@@ -79,7 +87,7 @@ export default function Console({ embedded }: { embedded?: boolean } = {}) {
         ) : (
           <div className="schematic-scroll">
             <div style={{ padding: '8px 12px 4px' }}>
-              <PipelineSchematic snap={snap} explain={ui.explain} showTruth={ui.showTruth} selectedIncident={open} />
+              <PipelineSchematic snap={slowSnap} explain={ui.explain} showTruth={ui.showTruth} selectedIncident={open} />
             </div>
           </div>
         )}

@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CHANNELS, NODES, NODE_KM, hops, delay, type Incident, type Snapshot } from '../../engine';
 import { runner } from '../../state/runner';
+import { useSimStore } from '../../state/simStore';
 import { useUiStore } from '../../state/uiStore';
 import { readTheme, TRUST_COLOR } from '../../utils/colors';
 import { fmt } from '../../utils/format';
@@ -27,10 +28,7 @@ function NodeIcon({ kind, x, y, tripped, closed }: { kind: string; x: number; y:
         <path d="M-13,-2 H-9 M-13,2 H-9" stroke={col} strokeWidth={1.4} />
         {/* volute */}
         <circle r={13} fill={body} stroke={col} strokeWidth={sw} />
-        {/* impeller */}
-        <g className={tripped ? undefined : 'spin-slow'} style={{ transformBox: 'fill-box', transformOrigin: 'center' }}>
-          <path d="M0,-8 Q6,-5 0,0 Q-6,5 0,8 M-8,0 Q-5,-6 0,0 Q5,6 8,0" fill="none" stroke={col} strokeWidth={1.8} strokeLinecap="round" />
-        </g>
+        {/* impeller blades are drawn on the canvas overlay so rotation does not repaint the SVG */}
         <circle r={2.2} fill={col} />
         {kind === 'injection' && <path d="M-34,10 H-26 M-30,6 L-26,10 L-30,14" stroke={col} strokeWidth={sw} fill="none" strokeLinecap="round" />}
         {tripped && <path d="M16,-14 L22,-4 H10 Z" fill="var(--bad)" />}
@@ -75,12 +73,12 @@ interface Props {
 }
 
 /** Hero visual: SVG structure + canvas overlay (particles, pressure waves, sensor pings). */
-export function PipelineSchematic({ snap, explain, showTruth, selectedIncident }: Props) {
+export const PipelineSchematic = memo(function PipelineSchematic({ snap, explain, showTruth, selectedIncident }: Props) {
   const nav = useNavigate();
   const canvas = useRef<HTMLCanvasElement>(null);
   const wrap = useRef<HTMLDivElement>(null);
-  const snapRef = useRef(snap);
-  snapRef.current = snap;
+  const snap0 = useRef(snap);
+  snap0.current = snap;
   const theme = useUiStore((s) => s.theme);
   const [tip, setTip] = useState<{ ch: number; x: number } | null>(null);
 
@@ -107,13 +105,17 @@ export function PipelineSchematic({ snap, explain, showTruth, selectedIncident }
     const ro = new ResizeObserver(resize);
     ro.observe(wrap.current!);
     let phase = 0;
+    let spin = 0;
     let last = performance.now();
     const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    let gap = 16;
     const draw = (now: number) => {
       raf = requestAnimationFrame(draw);
+      if (now - last < gap) return;
+      const cost0 = performance.now();
       const dt = Math.min(0.1, (now - last) / 1000);
       last = now;
-      const s = snapRef.current;
+      const s = useSimStore.getState().snap ?? snap0.current; // canvas reads the live snapshot; the SVG below renders at a lower rate
       ctx.clearRect(0, 0, W, H);
       const vt = runner.visualTime();
       if (runner.running && !reduce) phase = (phase + dt * 26 * Math.min(1.8, 0.5 + Math.log10(1 + runner.speed))) % 40;
@@ -133,6 +135,28 @@ export function PipelineSchematic({ snap, explain, showTruth, selectedIncident }
         ctx.stroke();
       }
       ctx.globalAlpha = 1;
+      // pump impellers (rotate while running, stop when the pump has tripped)
+      const tripped = new Set<number>();
+      for (const f of s.faults) if (f.started && f.spec.type === 'pumpTrip') tripped.add(f.spec.node ?? 4);
+      spin = runner.running && !reduce ? (spin + dt * 2.6 * Math.min(2, 0.5 + Math.log10(1 + runner.speed))) % (Math.PI * 2) : spin;
+      ctx.lineWidth = 1.8;
+      ctx.lineCap = 'round';
+      for (const nd of NODES) {
+        if (nd.kind !== 'pump' && nd.kind !== 'injection') continue;
+        ctx.save();
+        ctx.translate(xOf(nd.km), PY - 46);
+        ctx.rotate(tripped.has(nd.id) ? 0 : spin);
+        ctx.strokeStyle = tripped.has(nd.id) ? colors.bad : colors.axis;
+        ctx.beginPath();
+        ctx.moveTo(0, -8);
+        ctx.quadraticCurveTo(6, -5, 0, 0);
+        ctx.quadraticCurveTo(-6, 5, 0, 8);
+        ctx.moveTo(-8, 0);
+        ctx.quadraticCurveTo(-5, -6, 0, 0);
+        ctx.quadraticCurveTo(5, 6, 8, 0);
+        ctx.stroke();
+        ctx.restore();
+      }
       // batch interface bands
       for (const f of s.faults) {
         if (f.spec.type !== 'batch' || !f.started) continue;
@@ -196,6 +220,7 @@ export function PipelineSchematic({ snap, explain, showTruth, selectedIncident }
         }
         ctx.globalAlpha = 1;
       }
+      gap = Math.min(100, Math.max(16, (performance.now() - cost0) * 3));
     };
     raf = requestAnimationFrame(draw);
     return () => {
@@ -382,11 +407,11 @@ export function PipelineSchematic({ snap, explain, showTruth, selectedIncident }
               <line x1={x} x2={x} y1={PY - 44} y2={PY - 13} stroke="var(--pipe)" strokeWidth={2} />
               <NodeIcon kind={n.kind} x={x} y={PY - 52 + 6} tripped={f?.trip} closed={f?.closed} />
               {/* heartbeat */}
-              <circle cx={x + 17} cy={PY - 70} r={2.6} fill="var(--ok)" style={{ animation: `blink 1.6s ${(n.id % 6) * 0.25}s infinite` }} />
+              <circle cx={x + 17} cy={PY - 70} r={2.6} fill="var(--ok)" />
               {/* alarm badge */}
               {al && (
                 <g transform={`translate(${x},${PY - 96})`}>
-                  <circle r={10} fill={al.crit ? 'var(--bad)' : 'var(--warn)'} style={{ animation: 'pulse-ring 1.3s infinite', color: al.crit ? 'var(--bad)' : 'var(--warn)' }} />
+                  <><circle r={14} fill={al.crit ? 'var(--bad)' : 'var(--warn)'} opacity={0.22} /><circle r={10} fill={al.crit ? 'var(--bad)' : 'var(--warn)'} /></>
                   <text textAnchor="middle" dominantBaseline="central" fontSize={11} fontWeight={800} fill="var(--on-accent)">{al.n}</text>
                 </g>
               )}
@@ -434,4 +459,4 @@ export function PipelineSchematic({ snap, explain, showTruth, selectedIncident }
       )}
     </div>
   );
-}
+});

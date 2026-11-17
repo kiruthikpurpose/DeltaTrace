@@ -36,7 +36,28 @@ export function TrustHeatmap({ height = 330 }: { height?: number }) {
     const ro = new ResizeObserver(resize);
     ro.observe(wrap.current!);
     colors = readTheme();
-    const draw = () => {
+    // BAD cells share one pre-rendered hatch pattern instead of stroking lines per cell
+    const hp = document.createElement('canvas');
+    hp.width = hp.height = 6;
+    const hc = hp.getContext('2d');
+    if (hc) {
+      hc.strokeStyle = 'rgba(0,0,0,0.45)';
+      hc.lineWidth = 1;
+      hc.beginPath();
+      hc.moveTo(-1, 7);
+      hc.lineTo(7, -1);
+      hc.stroke();
+    }
+    const hatch = hc ? ctx.createPattern(hp, 'repeat') : null;
+    let lastDraw = 0;
+    let gap = 33;
+    const draw = (now = 0) => {
+      if (now - lastDraw < gap) {
+        raf = requestAnimationFrame(draw);
+        return;
+      }
+      lastDraw = now;
+      const cost0 = performance.now();
       const sim = runner.sim;
       const rowH = (height - 22) / NCH;
       const cw = (w - LABEL_W) / COLS;
@@ -64,15 +85,9 @@ export function TrustHeatmap({ height = 330 }: { height?: number }) {
           const [r, g, b] = trustRgb(t);
           ctx.fillStyle = `rgb(${r},${g},${b})`;
           ctx.fillRect(x, ch * rowH + 1, cw + 0.6, rowH - 1.5);
-          if (t < 0.4) {
-            ctx.strokeStyle = 'rgba(0,0,0,0.45)';
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            for (let k = -rowH; k < cw + rowH; k += 5) {
-              ctx.moveTo(x + k, ch * rowH + rowH - 1);
-              ctx.lineTo(x + k + rowH - 2, ch * rowH + 1);
-            }
-            ctx.stroke();
+          if (t < 0.4 && hatch) {
+            ctx.fillStyle = hatch;
+            ctx.fillRect(x, ch * rowH + 1, cw + 0.6, rowH - 1.5);
           }
         }
       }
@@ -97,6 +112,7 @@ export function TrustHeatmap({ height = 330 }: { height?: number }) {
         ctx.lineWidth = 1.5;
         ctx.strokeRect(LABEL_W + (h.c - frac) * cw, h.r * rowH + 0.5, cw, rowH);
       }
+      gap = Math.min(120, Math.max(33, (performance.now() - cost0) * 4));
       raf = requestAnimationFrame(draw);
     };
     raf = requestAnimationFrame(draw);

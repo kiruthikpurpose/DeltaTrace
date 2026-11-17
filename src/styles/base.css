@@ -98,10 +98,6 @@ textarea {
   background-clip: content-box;
 }
 
-@keyframes pulse-ring {
-  0% { box-shadow: 0 0 0 0 currentColor; opacity: 1; }
-  100% { box-shadow: 0 0 0 9px transparent; opacity: 0.9; }
-}
 @keyframes slide-in {
   from { opacity: 0; transform: translateY(-10px) scale(0.98); }
   to { opacity: 1; transform: none; }
@@ -128,7 +124,7 @@ textarea {
 @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 @keyframes spin-slow { to { transform: rotate(360deg); } }
 @keyframes bar-grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
-@keyframes alarm-in { 0% { opacity: 0; transform: translateX(-14px); background: var(--warn-soft); } 100% { opacity: 1; transform: none; background: transparent; } }
+@keyframes alarm-in { 0% { opacity: 0; transform: translateX(-12px); } 100% { opacity: 1; transform: none; } }
 @keyframes ring-ping { 0% { transform: scale(0.6); opacity: 0.7; } 100% { transform: scale(2.2); opacity: 0; } }
 @keyframes sheen { from { transform: translateX(-120%); } to { transform: translateX(220%); } }
 

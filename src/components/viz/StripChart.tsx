@@ -60,10 +60,12 @@ export function StripChart({ series, windowSec, height = 190, unit, title, minSp
     const ro = new ResizeObserver(resize);
     ro.observe(wrap.current!);
     let lastDraw = 0;
+    let gap = 33; // widens when a frame is expensive (slow devices) so the page stays responsive
     const draw = (now: number) => {
       raf = requestAnimationFrame(draw);
-      if (now - lastDraw < 33) return;
+      if (now - lastDraw < gap) return;
       lastDraw = now;
+      const cost0 = performance.now();
       const p = propsRef.current;
       const sim = runner.sim;
       const L = 46;
@@ -214,6 +216,7 @@ export function StripChart({ series, windowSec, height = 190, unit, title, minSp
         ctx.stroke();
         ctx.setLineDash([]);
       }
+      gap = Math.min(120, Math.max(33, (performance.now() - cost0) * 4));
     };
     raf = requestAnimationFrame(draw);
     return () => {

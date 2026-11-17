@@ -45,4 +45,6 @@ Implemented in `aggregator.ts` and verified in `tests/safety.test.ts`: critical 
 
 ## Performance
 
-Initial JavaScript is about 86 kB gzip (budget 400 kB, enforced by `npm run check:bundle`). Pages are lazy-loaded. Canvases read ring buffers directly instead of re-rendering React components.
+Initial JavaScript is about 86 kB gzip (budget 400 kB, enforced by `npm run check:bundle`). Pages are lazy-loaded. Canvases read ring buffers directly instead of re-rendering React components, and pace themselves: a canvas that takes long to draw lowers its own frame rate instead of blocking input. The SVG pipeline schematic re-renders four times a second; the canvas overlay on top of it (flow chevrons, pump impellers, pressure waves) runs at full rate. The runner advances the simulation in time slices of about 9 ms per frame, so on slow devices simulated time falls behind instead of freezing the page.
+
+Measured in headless Chromium on the Live Console at 30x speed with faults injected: 60 fps on an unthrottled CPU, and about 31 to 36 fps with the CPU throttled 4x (about 22 fps before the optimisations). First contentful paint is about 70 ms unthrottled and about 140 ms at 4x throttling.

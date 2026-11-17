@@ -66,7 +66,9 @@ export class SimulationRunner {
     if (this.running) {
       this.acc = Math.min(this.acc + dt * this.speed, 30);
       let n = 0;
-      while (this.acc >= 1 && n < 30) {
+      const t0 = performance.now();
+      // time-sliced: on slow devices the clock falls behind instead of freezing the UI
+      while (this.acc >= 1 && n < 30 && (n === 0 || performance.now() - t0 < 9)) {
         this.sim.step();
         this.acc -= 1;
         n++;
