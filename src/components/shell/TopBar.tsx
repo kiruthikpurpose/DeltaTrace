@@ -14,15 +14,17 @@ import { useState } from 'react';
 export function TopBar() {
   const loc = useLocation();
   const item = NAV.find((n) => (n.path === '/' ? loc.pathname === '/' : loc.pathname.startsWith(n.path)));
-  const snap = useSimStore((s) => s.snap)!;
+  const raw10 = useSimStore((s) => s.snap!.raw10);
+  const op10 = useSimStore((s) => s.snap!.op10);
+  const active = useSimStore((s) => s.snap!.faults.filter((f) => f.started).length);
+  const simT = useSimStore((s) => s.snap!.t);
   const running = useSimStore((s) => s.running);
   const speed = useSimStore((s) => s.speed);
   const theme = useUiStore((s) => s.theme);
   const toggleTheme = useUiStore((s) => s.toggleTheme);
   const seed = useConfigStore((s) => s.seed);
   const [seedDraft, setSeedDraft] = useState(String(seed));
-  const flood = snap.raw10 >= 10;
-  const active = snap.faults.filter((f) => f.started).length;
+  const flood = raw10 >= 10;
   return (
     <header className="topbar" role="banner">
       <button className="btn icon ghost menu-btn" aria-label="Open navigation" onClick={() => useUiStore.getState().set({ mobileNav: true })}>
@@ -45,7 +47,7 @@ export function TopBar() {
             <RotateCcw size={16} />
           </button>
         </Tooltip>
-        <span className="sim-clock" aria-label="Simulation clock">{clock(snap.t)}</span>
+        <span className="sim-clock" aria-label="Simulation clock">{clock(simT)}</span>
         <span className="seed-pop"><Popover label="Seed" trigger={<><Dice5 size={14} aria-hidden /> <span className="mono">{seed}</span></>}>
           <div className="stack">
             <b>Random seed</b>
@@ -59,8 +61,8 @@ export function TopBar() {
       </div>
       <div className="top-spacer" />
       <div className="live-chips" aria-label="Live indicators">
-        <span className={`chip${flood ? ' flood' : ''}`} title="Raw alarms in the last 10 simulated minutes">Raw/10 min <b>{snap.raw10}</b></span>
-        <span className="chip" title="Operator items (incidents + advisories) in the last 10 minutes">Items/10 min <b>{snap.op10}</b></span>
+        <span className={`chip${flood ? ' flood' : ''}`} title="Raw alarms in the last 10 simulated minutes">Raw/10 min <b>{raw10}</b></span>
+        <span className="chip" title="Operator items (incidents + advisories) in the last 10 minutes">Items/10 min <b>{op10}</b></span>
         <span className={`chip${active ? ' flood' : ''}`}>Faults <b>{active}</b></span>
       </div>
       <button className="btn" onClick={() => useUiStore.getState().set({ paletteOpen: true })} aria-label="Open command palette" title="Command palette (Ctrl/Cmd+K)">

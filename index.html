@@ -2,6 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="theme-color" content="#14171b" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -29,7 +30,7 @@
   </head>
   <body>
     <div id="splash" aria-hidden="true"></div>
-    <script>document.documentElement.classList.add("splash-on")</script>
+    <script>document.documentElement.classList.add("splash-on");setTimeout(function(){var e=document.getElementById("splash");if(e){e.remove();document.documentElement.classList.remove("splash-on")}},15000)</script>
     <script src="/splash.js"></script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
