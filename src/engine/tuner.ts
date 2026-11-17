@@ -181,7 +181,7 @@ interface Metrics {
   total: number;
 }
 
-function summarize(counts: Int32Array, n: number, falseCount: number, firstScan: Int32Array, nEv: number, ts: TrainingSet, flowOnly: boolean, total: number): Metrics {
+function summarize(counts: Int32Array, n: number, falseCount: number, firstScan: Int32Array, nEv: number, ts: TrainingSet, total: number): Metrics {
   // rolling 10-min (120 scans) sum
   let run = 0;
   let peak = 0;
@@ -261,7 +261,7 @@ function replay(p: Prepared, cls: TunerClassId, thr: number, db: number, onDelay
         cn = 0;
       }
     }
-    return summarize(counts, n, falseCount, first, ts.events.length, ts, true, total);
+    return summarize(counts, n, falseCount, first, ts.events.length, ts, total);
   }
   for (let ch = 0; ch < 12; ch++) {
     const nom = NOMINAL[ch];
@@ -303,7 +303,7 @@ function replay(p: Prepared, cls: TunerClassId, thr: number, db: number, onDelay
       }
     }
   }
-  return summarize(counts, n, falseCount, first, ts.events.length, ts, false, total);
+  return summarize(counts, n, falseCount, first, ts.events.length, ts, total);
 }
 
 export interface TunerResult {

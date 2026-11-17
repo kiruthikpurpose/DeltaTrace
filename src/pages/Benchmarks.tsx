@@ -1,5 +1,5 @@
 import { Copy, Download, FileText, FlaskConical, Play } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { EXPERIMENTS, runBenchmarks, runExperiment, type BenchResult, type ExperimentResult } from '../engine';
 import { PageHeader } from '../components/shell/PageHeader';
 import { Card } from '../components/ui/Card';
@@ -92,6 +92,13 @@ export default function Benchmarks() {
     setRes(r);
     setBusy(false);
   };
+  // show real results on first visit instead of an empty card
+  const auto = useRef(false);
+  useEffect(() => {
+    if (auto.current || import.meta.env.MODE === 'test') return;
+    auto.current = true;
+    void run();
+  }, []);
   const runExp = async (id: string) => {
     setExpBusy(id);
     await new Promise((r) => setTimeout(r, 20));

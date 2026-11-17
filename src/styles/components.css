@@ -534,3 +534,4 @@ kbd {
   border-radius: var(--r1); padding: 6px 9px; font-size: 12px; display: flex; flex-direction: column; gap: 2px;
   pointer-events: none; box-shadow: var(--shadow-2); z-index: 5; white-space: nowrap;
 }
+@media (max-width: 720px) { .tbl .hide-sm { display: none; } }

@@ -79,6 +79,13 @@ export default function Tuner() {
   useEffect(() => {
     document.title = 'Alarm Tuner · DeltaTrace Live';
   }, []);
+  // first visit: run the replay so the Pareto chart is never empty
+  const auto = useRef(false);
+  useEffect(() => {
+    if (auto.current || import.meta.env.MODE === 'test') return;
+    auto.current = true;
+    void run();
+  }, []);
   const runLoop = async () => {
     setLoopBusy(true);
     setLoop(null);

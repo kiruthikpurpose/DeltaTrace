@@ -75,9 +75,9 @@ export default function Incidents() {
               { key: 'rank', header: 'Rank', render: (i) => (i.status === 'open' ? `#${i.rank}` : '–'), sort: (a, b) => a.rank - b.rank },
               { key: 'cls', header: 'Class', render: (i) => <ClassBadge cls={i.cls} provisional={i.provisional} /> },
               { key: 'n', header: 'Alarms', render: (i) => <span className="num">{i.alarmIds.length}</span>, sort: (a, b) => a.alarmIds.length - b.alarmIds.length, className: 'r' },
-              { key: 'ch', header: 'Sources', render: (i) => <span className="muted">{i.channels.slice(0, 4).map((c) => CHANNELS[c].tag).join(', ')}{i.channels.length > 4 ? '…' : ''}</span> },
+              { key: 'ch', header: 'Sources', className: 'hide-sm', render: (i) => <span className="muted">{i.channels.slice(0, 4).map((c) => CHANNELS[c].tag).join(', ')}{i.channels.length > 4 ? '…' : ''}</span> },
               { key: 't', header: 'Opened', render: (i) => <span className="mono">{mmss(i.openedAt)}</span>, sort: (a, b) => a.openedAt - b.openedAt },
-              { key: 'st', header: 'Status', render: (i) => <span className={`badge ${i.status === 'open' ? 'ok' : 'neutral'}`}>{i.status}</span> },
+              { key: 'st', className: 'hide-sm', header: 'Status', render: (i) => <span className={`badge ${i.status === 'open' ? 'ok' : 'neutral'}`}>{i.status}</span> },
             ]}
           />
         </Card>
