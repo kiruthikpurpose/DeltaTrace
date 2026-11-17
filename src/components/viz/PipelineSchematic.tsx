@@ -227,6 +227,25 @@ export function PipelineSchematic({ snap, explain, showTruth, selectedIncident }
     return null;
   }, [explain, snap.recentAlarms, snap.t, snap.cfg.hopLimit]);
 
+  // stack incident labels into lanes so neighbouring labels never overlap
+  const incLane = new Map<number, number>();
+  const incX = new Map<number, number>();
+  {
+    const ends: number[] = [];
+    const info = snap.openIncidents.map((inc) => {
+      const cs = inc.channels.length ? inc.channels.map((c) => CHANNELS[c].km) : [NODE_KM[inc.segment[0]]];
+      const l = inc.origin ? Math.min(inc.origin.km, ...cs) : Math.min(...cs);
+      const w = Math.max(120, `INC-000 · ${inc.alarmIds.length} alarms`.length * 6.6 + 14);
+      return { id: inc.id, x1: Math.min(xOf(l) - 24, W - w - 2), w };
+    }).sort((x, y) => x.x1 - y.x1);
+    for (const it of info) {
+      let ln = ends.findIndex((e) => it.x1 >= e + 4);
+      if (ln < 0) ln = ends.length < 3 ? ends.length : ends.indexOf(Math.min(...ends));
+      ends[ln] = it.x1 + it.w;
+      incLane.set(it.id, ln);
+      incX.set(it.id, it.x1);
+    }
+  }
   const desc = `Pipeline schematic, 200 km west to east with 12 sensor nodes. ${snap.openIncidents.length} open incident(s); ${snap.activeAlarms.length} active raw alarm(s); trust: ${snap.trust.filter((t) => t.cls === 'GOOD').length} good, ${snap.trust.filter((t) => t.cls === 'UNCERTAIN').length} uncertain, ${snap.trust.filter((t) => t.cls === 'BAD').length} bad.`;
 
   return (
@@ -252,12 +271,14 @@ export function PipelineSchematic({ snap, explain, showTruth, selectedIncident }
           const x1 = xOf(lo) - 24;
           const x2 = xOf(hi) + 24;
           const col = inc.cls === 'process-event' ? 'var(--c-group)' : inc.cls === 'data-integrity' ? 'var(--k-integrity)' : 'var(--k-fault)';
+          const lx = incX.get(inc.id) ?? x1;
           const label = `INC-${String(inc.id).padStart(3, '0')} · ${inc.alarmIds.length} alarms`;
           return (
             <g key={inc.id}>
               <rect x={x1} y={PY - 122} width={x2 - x1} height={PY - 122 > 0 ? 122 + 58 : 180} rx={4} fill={col} opacity={0.07} stroke={col} strokeWidth={1.2} />
-              <rect x={x1} y={PY - 140} width={Math.max(120, label.length * 6.6 + 14)} height={18} rx={3} fill={col} />
-              <text x={x1 + 7} y={PY - 127} fontSize={11} fontWeight={600} fill="var(--on-accent)">{label}</text>
+              <line x1={lx + 10} x2={lx + 10} y1={PY - 140 - (incLane.get(inc.id) ?? 0) * 20 + 18} y2={PY - 122} stroke={col} strokeWidth={1.2} opacity={(incLane.get(inc.id) ?? 0) ? 1 : 0} />
+              <rect x={lx} y={PY - 140 - (incLane.get(inc.id) ?? 0) * 20} width={Math.max(120, label.length * 6.6 + 14)} height={18} rx={3} fill={col} />
+              <text x={lx + 7} y={PY - 127 - (incLane.get(inc.id) ?? 0) * 20} fontSize={11} fontWeight={600} fill="var(--on-accent)">{label}</text>
             </g>
           );
         })}
