@@ -1,16 +1,5 @@
-import { useEffect, useState, type RefObject } from 'react';
+import { useEffect, type RefObject } from 'react';
 
-export function usePrefersReducedMotion(): boolean {
-  const [r, setR] = useState(() => typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
-  useEffect(() => {
-    const mq = window.matchMedia?.('(prefers-reduced-motion: reduce)');
-    if (!mq) return;
-    const f = () => setR(mq.matches);
-    mq.addEventListener?.('change', f);
-    return () => mq.removeEventListener?.('change', f);
-  }, []);
-  return r;
-}
 export const reducedMotion = () => typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
 /** Trap focus inside a container while mounted and restore on unmount. */

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { CHANNELS, DEFAULT_CONFIG, NODES, Simulation, delay, generateTraining, runLoopIterations, runTuner, type LoopIteration, type TunerResult } from '../engine';
 import { SafetyRuleList } from '../components/domain/SafetyRules';
 import { PageHeader } from '../components/shell/PageHeader';
@@ -54,7 +54,7 @@ function ProblemAnim() {
           </ellipse>
         ))}
       </g>
-      {nodes.map((x, i) => {
+      {nodes.map((x) => {
         const d = Math.abs(x - 330) / 330;
         return (
           <g key={x}>

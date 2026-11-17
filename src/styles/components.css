@@ -380,28 +380,6 @@ table.tbl {
   width: max-content;
 }
 
-/* ---------- Tabs ---------- */
-.tabs {
-  display: flex;
-  gap: 4px;
-  border-bottom: 1px solid var(--border);
-  overflow-x: auto;
-}
-.tabs button {
-  border: 0;
-  background: transparent;
-  padding: 8px 14px;
-  font-weight: 600;
-  color: var(--text-muted);
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
-  white-space: nowrap;
-}
-.tabs button[aria-selected='true'] {
-  color: var(--text);
-  border-bottom-color: var(--brand);
-}
-
 /* ---------- Kpi ---------- */
 .kpi {
   display: flex;

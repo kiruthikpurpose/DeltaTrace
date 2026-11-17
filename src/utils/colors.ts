@@ -7,7 +7,6 @@ export const CLASS_COLOR: Record<IncidentClass, string> = {
   'data-integrity': 'var(--k-integrity)',
   'needs-review': 'var(--k-review)',
 };
-export const SEVERITY_COLOR = ['', 'var(--info)', 'var(--warn)', 'var(--bad)', 'var(--bad)'];
 
 /** Trust (0..1) → green/amber/red for canvases. */
 export function trustRgb(t: number): [number, number, number] {

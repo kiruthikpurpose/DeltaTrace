@@ -293,7 +293,6 @@ export class SimulationRunner {
     toast('Replaying last 5 minutes at 0.25×', 'info');
     this.push(true);
   }
-  private captionTimer = 0;
   finishReplay() {
     if (!this.replay) return;
     this.sim = this.replay.live;

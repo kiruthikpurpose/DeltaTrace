@@ -33,9 +33,6 @@ export function computeKpis(times: number[], duration: number, staleAlarms = 0):
   };
 }
 
-export const FLOOD_THRESHOLD = 10;
-export const ACCEPTABLE_PER_10 = 1;
-
 export function peakWindow(times: number[], win = 600): number {
   const s = [...times].sort((a, b) => a - b);
   let best = 0;

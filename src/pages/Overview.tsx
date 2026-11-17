@@ -1,6 +1,6 @@
 import { ArrowRight, PlayCircle } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { SafetyRuleList, RULES } from '../components/domain/SafetyRules';
+import { SafetyRuleList } from '../components/domain/SafetyRules';
 import { Card } from '../components/ui/Card';
 import { Ticker } from '../components/ui/Ticker';
 import { LoopDiagram } from '../components/viz/LoopDiagram';

@@ -1,5 +1,5 @@
 import { CHANNELS, type Advisory, type BenchResult, type ChangeRecord, type Config, type ExperimentResult, type Incident, type RawAlarm, type Snapshot, type TunerClassId, type TunerResult, type AuditEntry, type WriteBackEntry, TUNER_CLASSES } from '../engine';
-import { C, PdfDoc, hex, savePdf, type Column } from './pdf';
+import { C, PdfDoc, hex, savePdf } from './pdf';
 import { clock, mmss } from './format';
 
 const stamp = () => new Date().toISOString().slice(0, 16).replace('T', ' ') + ' UTC';

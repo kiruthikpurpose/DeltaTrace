@@ -5,7 +5,6 @@ const KINDS: NodeDef['kind'][] = ['injection', 'valve', 'valve', 'valve', 'pump'
 const NAMES = ['PS-1', 'SV-1', 'SV-2', 'SV-3', 'PS-2', 'SV-4', 'DT-1', 'SV-5', 'PS-3', 'SV-6', 'SV-7', 'TERM'];
 
 export const NODES: NodeDef[] = NODE_KM.map((km, i) => ({ id: i, name: NAMES[i], km, kind: KINDS[i], rtu: `RTU-${i}` }));
-export const PIPE_KM = 200;
 export const NCH = 15;
 export const FT_IN = 12;
 export const FT_DEL = 13;
@@ -22,8 +21,6 @@ export const CHANNELS: Channel[] = [
 ];
 
 export const chTag = (ch: number) => CHANNELS[ch].tag;
-export const chNode = (ch: number) => CHANNELS[ch].node;
-export const chKm = (ch: number) => CHANNELS[ch].km;
 
 export function alongPipeDistance(i: number, j: number): number {
   return Math.abs(NODE_KM[i] - NODE_KM[j]);
@@ -45,9 +42,6 @@ export function neighbours(i: number, k = 2): { node: number; km: number; w: num
 /** Pressure-wave travel time (s) between two nodes. */
 export function delay(i: number, j: number, c = 1000): number {
   return (alongPipeDistance(i, j) * 1000) / c;
-}
-export function delayKm(km: number, c = 1000): number {
-  return (km * 1000) / c;
 }
 
 /** Nominal pressure profile (bar). Pump stations boost the line back to 55 bar. */

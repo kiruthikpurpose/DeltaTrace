@@ -102,7 +102,6 @@ export class Simulation {
   eventQueue: SimEvent[] = [];
   private prevCls: TrustClass[] = Array(NCH).fill('GOOD');
   private hiddenSet = new Set<number>();
-  private lastSkewCfg = 0;
   version = 0;
   private cachedSnap: Snapshot | null = null;
   private cachedVersion = -1;
@@ -178,7 +177,6 @@ export class Simulation {
     if (this.faults.faults.some((f) => f.spec.type === 'skew' && f.started)) return;
     const a = this.cfg.clockSkew;
     for (let i = 0; i < this.faults.skews.length; i++) this.faults.skews[i] = a ? Math.round(this.rng.range(-a, a) * 10) / 10 : 0;
-    this.lastSkewCfg = a;
   }
 
   /** Schedule a scenario's steps on top of the running simulation. */
