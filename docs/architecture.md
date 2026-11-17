@@ -34,3 +34,15 @@ All randomness comes from a seeded generator, so `(scenario, seed, configuration
 ## Safety invariants
 
 Implemented in `aggregator.ts` and verified in `tests/safety.test.ts`: critical alarms lead headlines and are never demoted, every raw alarm is linked, demotion requires low trust and low corroboration, fail-open passes alarms through, and no engine source contains a control-command path.
+
+## Launch screen and start-up
+
+`public/splash.js` and inline CSS in `index.html` draw the launch animation before the application bundle loads. `src/splash.ts` loads the first route and signals readiness. The runner waits for the `deltatrace:splash-done` event before it starts ticking, so the animation has the main thread to itself. The mark flies into `#brand-logo` (`#brand-logo-m` on phones).
+
+## Persistence
+
+`src/state/persist.ts` wraps `localStorage` with a `deltatrace.v1.` prefix and guards every access, so the application works when storage is blocked.
+
+## Performance
+
+Initial JavaScript is about 86 kB gzip (budget 400 kB, enforced by `npm run check:bundle`). Pages are lazy-loaded. Canvases read ring buffers directly instead of re-rendering React components.

@@ -28,7 +28,7 @@ This repository is a complete browser application with a built-in process simula
 
 ## Contents
 
-[Why](#why) · [Motivation](#why-this-problem) · [Functions](#functions) · [Applications](#applications-and-use-cases) · [Architecture](#architecture) · [Alarm decisions](#alarm-decisions) · [Safety rules](#safety-rules) · [Screens](#screens) · [Getting started](#getting-started) · [Testing and CI](#testing-and-ci) · [Deployment](#deployment) · [Reports](#reports) · [Project layout](#project-layout) · [Configuration](#configuration) · [Roadmap](#future-improvements) · [Limitations](#limitations) · [Contributing](#contributing) · [License](#license)
+[Why](#why) · [Motivation](#why-this-problem) · [Highlights](#highlights) · [Functions](#functions) · [How it works](#how-it-works) · [Applications](#applications-and-use-cases) · [Architecture](#architecture) · [Alarm decisions](#alarm-decisions) · [Safety rules](#safety-rules) · [Screens](#screens) · [Scenarios](#scenarios-and-experiments) · [Getting started](#getting-started) · [Testing and CI](#testing-and-ci) · [Deployment](#deployment) · [Reports](#reports) · [Project layout](#project-layout) · [Configuration](#configuration) · [Documentation](#documentation) · [FAQ](#faq) · [Roadmap](#future-improvements) · [Limitations](#limitations) · [Contributing](#contributing) · [License](#license)
 
 ## Why
 
@@ -46,6 +46,18 @@ I chose alarm handling on pipelines for four reasons.
 - **Trust and alarms are linked.** A sensor that lies produces alarms that should not be believed, and a flood of alarms from one event hides which sensors are failing. Treating trust, grouping and tuning as one loop is more useful than solving each alone.
 - **It can be done safely.** The design keeps the existing system in charge: read-only inputs, no control commands, every raw alarm retained, fail-open behaviour, and operator approval for every setting change. That makes it adoptable in a safety-conscious environment.
 
+## Highlights
+
+| | |
+|---|---|
+| Alarm reduction | Dozens of raw alarms from one event become one ranked incident with a likely origin. |
+| Explainable | Every incident, trust score and demotion shows the evidence and rule behind it. |
+| Safe by construction | Read-only inputs, no control commands, every raw alarm retained, fail-open, operator approval for every change. |
+| Provable | Nine scenarios, seven experiments and a safety test across many seeds, with PDF reports. |
+| Reproducible | Seeded simulation: same seed, settings and injections give the same run. |
+| Self-contained | Static site, no network requests at runtime, no chart or PDF library. |
+| Accessible | Keyboard operable, WCAG AA contrast, light and dark themes, reduced-motion support, responsive down to phones. |
+
 ## Functions
 
 | Function | What it does | Page |
@@ -55,6 +67,15 @@ I chose alarm handling on pipelines for four reasons.
 | **Trust-gated replay tuner** | Replays candidate thresholds, deadbands and delays on stored data from trusted sensors only and recommends the best safe setting for approval. | Alarm Tuner |
 
 The three feed each other: trust improves grouping, grouping produces labelled events, labelled events improve tuning, and tuning reduces false alarms, which cleans the data trust relies on.
+
+## How it works
+
+1. **Sample.** Every second the simulator computes true pressures and flows, applies faults and sensor noise, and updates what each RTU reports.
+2. **Scan.** Every 5 simulated seconds the engine runs one scan: baseline SCADA alarms, trust scores, grouping, classification, safety checks, write-back.
+3. **Present.** The console shows the existing alarm list next to the DeltaTrace operator view, so the difference is visible at a glance.
+4. **Tune.** On demand, the tuner replays candidate alarm settings on six hours of labelled history, ignoring untrusted sensors, and proposes the best safe one.
+
+Detailed write-ups: [trust engine](docs/trust-engine.md), [incident grouping](docs/incident-grouping.md), [alarm tuner](docs/alarm-tuner.md).
 
 ## Applications and use cases
 
@@ -134,6 +155,24 @@ Enforced in code, checked live in the UI and covered by `tests/safety.test.ts`.
   </tr>
 </table>
 
+## Scenarios and experiments
+
+Nine scenarios (30 simulated minutes each) with ground truth, and seven experiments, run from the Benchmarks page or headless in tests.
+
+| ID | Scenario | ID | Experiment |
+|---|---|---|---|
+| S0 | Normal operation | E1 | Trust discrimination: event against fault |
+| S1 | Pump trip cascade | E2 | Delay-based grouping against a fixed 60 s window |
+| S2 | Small leak | E3 | Safety: zero hidden critical alarms |
+| S3 | Single stuck transmitter | E4 | Clock-skew robustness |
+| S4 | Spoofed transmitter | E5 | Tuner with and without trust gating |
+| S5 | False-injection fake leak | E6 | Closed-loop tuning iterations |
+| S6 | Communications outage plus leak | E7 | Robustness to each fault type |
+| S7 | Batch interface | | |
+| S8 | Mixed stress | | |
+
+Results are reported honestly, including cases where the method gives no advantage. See [docs/scenarios.md](docs/scenarios.md).
+
 ## Getting started
 
 Requires Node 18 or newer.
@@ -212,7 +251,7 @@ src/
   utils/        Formatting, PDF writer, report builders, accessibility helpers
 tests/          Vitest suites
 scripts/        Diagram generator, bundle-size check
-docs/           README images and architecture notes
+docs/           Guides, architecture notes, README images
 ```
 
 More detail: [docs/architecture.md](docs/architecture.md).
@@ -248,6 +287,34 @@ The simulation is reproducible: the same seed, configuration and injection timel
 | Integration | Read-only OPC UA and historian connectors, a signed write-back interface and an approval workflow integrated with management of change. |
 | Performance | Move the engine into a Web Worker or a service for larger networks and long histories. |
 | Quality | Property-based tests for more safety invariants, load tests, and an accessibility audit with assistive technology. |
+
+## Documentation
+
+| Document | Contents |
+|---|---|
+| [User guide](docs/user-guide.md) | Every page, controls, fault injection, themes, accessibility, saved data |
+| [Architecture](docs/architecture.md) | Layers, engine modules, data flow, determinism, safety invariants |
+| [Trust engine](docs/trust-engine.md) | Score formula, smoothing, classes, fault labels |
+| [Incident grouping](docs/incident-grouping.md) | Linking rule, lifecycle, classification, demotion, origin estimate |
+| [Alarm tuner](docs/alarm-tuner.md) | Candidate grid, gating, objective, approval |
+| [Scenarios](docs/scenarios.md) | S0 to S8, fault catalogue, experiments E1 to E7 |
+| [Development guide](docs/development.md) | Commands, stack, engine rules, extending the system, CI, releasing |
+| [FAQ](docs/faq.md) | Common questions and troubleshooting |
+| [Glossary](docs/glossary.md) | Terms and abbreviations |
+
+## FAQ
+
+**Does it replace SCADA alarms?** No. It runs beside them and falls back to the unchanged raw list when switched off.
+
+**Can it hide a critical alarm?** No. Safety-critical alarms are never demoted, and this is tested.
+
+**Does it need a server?** No. It is a static site that works offline.
+
+More in [docs/faq.md](docs/faq.md).
+
+## Browser support
+
+Current versions of Chrome, Edge, Firefox and Safari, on desktop and phone.
 
 ## Limitations
 
