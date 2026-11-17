@@ -51,8 +51,14 @@ export function TrustHeatmap({ height = 330 }: { height?: number }) {
       ctx.clip();
       for (let i = 0; i <= COLS; i++) {
         const sidx = scan0 + i;
-        if (sidx < 0 || sidx >= sim.scanCount) continue;
+        if (sidx >= sim.scanCount) continue;
         const x = LABEL_W + (i - frac) * cw;
+        if (sidx < 0) {
+          // no history yet: faint placeholder cells keep the grid readable
+          ctx.fillStyle = 'rgba(128,138,150,0.10)';
+          for (let ch = 0; ch < NCH; ch++) ctx.fillRect(x, ch * rowH + 1, cw + 0.6, rowH - 1.5);
+          continue;
+        }
         for (let ch = 0; ch < NCH; ch++) {
           const t = sim.trustAt(sidx, ch);
           const [r, g, b] = trustRgb(t);

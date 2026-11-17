@@ -46,7 +46,7 @@ export function TopBar() {
           </button>
         </Tooltip>
         <span className="sim-clock" aria-label="Simulation clock">{clock(snap.t)}</span>
-        <Popover label="Seed" trigger={<><Dice5 size={14} aria-hidden /> <span className="mono">{seed}</span></>}>
+        <span className="seed-pop"><Popover label="Seed" trigger={<><Dice5 size={14} aria-hidden /> <span className="mono">{seed}</span></>}>
           <div className="stack">
             <b>Random seed</b>
             <p className="muted">The same seed, config and injection timeline reproduce the same run.</p>
@@ -55,7 +55,7 @@ export function TopBar() {
               <button className="btn sm primary" onClick={() => runner.reset(Number(seedDraft) || 1)}>Apply &amp; reset</button>
             </div>
           </div>
-        </Popover>
+        </Popover></span>
       </div>
       <div className="top-spacer" />
       <div className="live-chips" aria-label="Live indicators">

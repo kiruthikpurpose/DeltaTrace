@@ -167,7 +167,8 @@
 .crumb {
   display: flex;
   flex-direction: column;
-  min-width: 120px;
+  min-width: 170px;
+  white-space: nowrap;
 }
 .crumb small {
   color: var(--text-muted);
@@ -278,3 +279,6 @@
 
 .brand-logo-m{display:none;width:auto;flex:none}
 @media (max-width:820px){.brand-logo-m{display:block}}
+
+.seed-pop { display: contents; }
+@media (max-width: 520px) { .seed-pop { display: none; } }

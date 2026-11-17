@@ -15,9 +15,10 @@ interface ToastState {
 export const useToastStore = create<ToastState>((set, get) => ({
   items: [],
   push: (text, kind = 'info') => {
+    if (get().items.some((t) => t.text === text)) return;
     const id = nid++;
-    set({ items: [...get().items.slice(-3), { id, text, kind }] });
-    setTimeout(() => get().dismiss(id), 4500);
+    set({ items: [...get().items.slice(-1), { id, text, kind }] });
+    setTimeout(() => get().dismiss(id), 3500);
   },
   dismiss: (id) => set({ items: get().items.filter((t) => t.id !== id) }),
 }));

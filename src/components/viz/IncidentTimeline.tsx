@@ -4,7 +4,7 @@ import { NODE_KM } from '../../engine';
 /** Position (km) vs time with the expected wavefront (slope = 1/c). On-line alarms corroborate; outliers are ringed. */
 export function IncidentTimeline({ incident, alarms, c, tol, height = 260 }: { incident: Incident; alarms: RawAlarm[]; c: number; tol: number; height?: number }) {
   const pts = alarms.filter((a) => a.source === 'scada' && a.type !== 'FLAT');
-  if (!pts.length) return null;
+  if (!pts.length) return <p className="muted" style={{ margin: 0 }}>No position-time evidence for this incident: it is based on derived data-quality alarms, not pressure-wave arrivals.</p>;
   const W = 640;
   const L = 56;
   const R = 14;
