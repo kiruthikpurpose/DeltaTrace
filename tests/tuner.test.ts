@@ -31,7 +31,7 @@ describe('tuner', () => {
     const r = await runTuner(ts, 'roc', DEFAULT_CONFIG);
     expect(r.proposal).toBeTruthy();
     const sim = new Simulation(DEFAULT_CONFIG, 1);
-    sim.setConfig(applyProposal(sim.cfg, r.proposal!));
+    sim.setConfig(applyProposal(r.proposal!));
     expect(sim.cfg.alarms.roc.limit).toBe(r.proposal!.new.limit);
     expect(DEFAULT_CONFIG.alarms.roc.limit).toBe(0.8);
   });

@@ -204,8 +204,8 @@ export class SimulationRunner {
 
   approve(p: ChangeProposal, persist = true): ChangeRecord {
     const before = { ...p.old };
-    this.sim.setConfig(applyProposal(this.sim.cfg, p));
-    useConfigStore.getState().patch(applyProposal(this.sim.cfg, p), persist);
+    this.sim.setConfig(applyProposal(p));
+    useConfigStore.getState().patch(applyProposal(p), persist);
     const meta = TUNER_CLASSES.find((c) => c.id === p.cls)!;
     const rec: ChangeRecord = {
       id: this.nextChangeId++,

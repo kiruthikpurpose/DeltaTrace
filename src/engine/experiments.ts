@@ -303,7 +303,7 @@ export async function runLoopIterations(n: number, seed: number): Promise<LoopIt
     for (const c of TUNER_CLASSES) {
       const r = await runTuner(ts, c.id, cfg, { gate: true });
       if (r.proposal) {
-        cfg = mergeConfig(cfg, applyProposal(cfg, r.proposal));
+        cfg = mergeConfig(cfg, applyProposal(r.proposal));
         applied.push(`${c.label} ${r.proposal.new.limit.toFixed(2)}`);
       }
     }

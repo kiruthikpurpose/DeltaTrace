@@ -422,7 +422,7 @@ export function evaluateSetting(ts: TrainingSet, cls: TunerClassId, cfg: Config,
   return { J: objective(m, missed), missed, alarmsPer10: m.alarmsPer10, falseAlarms: m.falseAlarms, meanDelay: m.meanDelay };
 }
 
-export function applyProposal(cfg: Config, p: ChangeProposal): Partial<Config> {
+export function applyProposal(p: ChangeProposal): Partial<Config> {
   const key = TUNER_CLASSES.find((c) => c.id === p.cls)!.key;
   return { alarms: { [key]: { ...p.new } } as any };
 }
