@@ -151,8 +151,8 @@ export default function Benchmarks() {
               rowKey={(r) => r.id}
               columns={[
                 { key: 'id', header: 'Scenario', render: (r) => <><b>{r.id}</b> <span className="muted">{r.name}</span></> },
-                { key: 'peak', header: 'Peak alarms / 10 min (raw → DT)', render: (r) => <span className="num">{r.baseline.peak10.toFixed(0)} → <b>{r.deltatrace.peak10.toFixed(0)}</b></span>, className: 'r' },
-                { key: 'flood', header: '% time in flood', render: (r) => <span className="num">{r.baseline.pctFlood.toFixed(0)}% → <b>{r.deltatrace.pctFlood.toFixed(0)}%</b></span>, className: 'r' },
+                { key: 'peak', header: 'Peak / 10 min', render: (r) => <span className="num">{r.baseline.peak10.toFixed(0)} → <b>{r.deltatrace.peak10.toFixed(0)}</b></span>, className: 'r' },
+                { key: 'flood', header: 'Time in flood', render: (r) => <span className="num">{r.baseline.pctFlood.toFixed(0)}% → <b>{r.deltatrace.pctFlood.toFixed(0)}%</b></span>, className: 'r' },
                 { key: 'ph', header: 'Alarms / hour', render: (r) => <span className="num">{r.baseline.perHour.toFixed(0)}</span>, className: 'r' },
                 { key: 'items', header: 'Operator items', render: (r) => <span className="num">{r.baseline.items.toFixed(0)} → <b>{r.deltatrace.items.toFixed(0)}</b></span>, className: 'r' },
                 { key: 'sup', header: 'Suppression', render: (r) => <span className="num">{r.suppression.toFixed(0)}%</span>, className: 'r' },

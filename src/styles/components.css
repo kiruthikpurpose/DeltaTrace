@@ -258,7 +258,9 @@ table.tbl {
   padding: 7px 10px;
   border-bottom: 1px solid var(--border-strong);
   z-index: 1;
-  white-space: nowrap;
+  white-space: normal;
+  line-height: 1.25;
+  vertical-align: bottom;
 }
 .tbl th button {
   all: unset;
@@ -276,7 +278,7 @@ table.tbl {
   background: var(--brand-soft);
 }
 .tbl td:first-child { white-space: nowrap; }
-.tbl td.note-col { min-width: 260px; }
+.tbl td.note-col { min-width: 180px; white-space: normal; }
 .tbl tr.clickable {
   cursor: pointer;
 }
@@ -535,3 +537,5 @@ kbd {
   pointer-events: none; box-shadow: var(--shadow-2); z-index: 5; white-space: nowrap;
 }
 @media (max-width: 720px) { .tbl .hide-sm { display: none; } }
+.tbl td.num-col, .tbl td.r { white-space: nowrap; }
+.tbl th { min-width: 64px; }

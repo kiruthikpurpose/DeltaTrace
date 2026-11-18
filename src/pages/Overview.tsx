@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { SafetyRuleList } from '../components/domain/SafetyRules';
 import { Card } from '../components/ui/Card';
 import { Ticker } from '../components/ui/Ticker';
+import { PipelineStrip } from '../components/viz/PipelineStrip';
 import { LoopDiagram } from '../components/viz/LoopDiagram';
 import { useLogStore } from '../state/logStore';
 import { useSimStore } from '../state/simStore';
@@ -84,6 +85,15 @@ export default function Overview() {
           </div>
         </div>
       </section>
+
+      <Card title="Pipeline now" sub="12 sensor nodes along 200 km: colour is trust, ring is an active alarm, shaded span is an open incident">
+        <PipelineStrip snap={snap} />
+        <div className="strip-legend">
+          <span><i style={{ background: 'var(--ok)' }} /> GOOD</span>
+          <span><i style={{ background: 'var(--warn)' }} /> UNCERTAIN</span>
+          <span><i style={{ background: 'var(--bad)' }} /> BAD</span>
+        </div>
+      </Card>
 
       <div className="three-col">
         <Card accent="trust" className="innov">
