@@ -25,6 +25,8 @@ import { TRUST_COLOR } from '../utils/colors';
 import { incId } from '../utils/format';
 import { EmptyState } from '../components/ui/EmptyState';
 import { Waves } from 'lucide-react';
+import { QUICK_FAULTS, injectQuick } from '../components/domain/FaultInjector';
+import { load, save } from '../state/persist';
 
 const PT_COLORS = ['var(--brand)', 'var(--c-trust)', 'var(--c-tune)', 'var(--c-group)', 'var(--info)', 'var(--bad)'];
 
@@ -59,8 +61,28 @@ export default function Console({ embedded }: { embedded?: boolean } = {}) {
   const incidents = snap.openIncidents;
   const criticalHidden = snap.criticalHidden;
   const items = snap.opTotal;
+  const [coachOff, setCoachOff] = useState(() => load<boolean>('coach', false));
+  const showCoach = !embedded && !coachOff && snap.rawTotal === 0 && snap.faults.length === 0;
+  const dismissCoach = () => {
+    setCoachOff(true);
+    save('coach', true);
+  };
   return (
     <div className="page">
+      {showCoach && (
+        <section className="coach" aria-label="Try it">
+          <div>
+            <b>Try it: break something and watch the operator view.</b>
+            <span className="muted"> One event normally sends dozens of alarms. Pick a fault and compare the two panels below.</span>
+          </div>
+          <div className="row">
+            {(['Pump trip', 'Leak', 'Frozen sensor'] as const).map((label, i) => (
+              <button key={label} className="btn" onClick={() => injectQuick(QUICK_FAULTS[i])}><kbd>{i + 1}</kbd> {label}</button>
+            ))}
+            <button className="btn ghost" onClick={dismissCoach}>Dismiss</button>
+          </div>
+        </section>
+      )}
       {!embedded && (
         <PageHeader
         title="Live Console"

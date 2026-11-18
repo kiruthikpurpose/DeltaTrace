@@ -288,10 +288,12 @@ export const PipelineSchematic = memo(function PipelineSchematic({ snap, explain
       incX.set(it.id, it.x1);
     }
   }
+  // with nothing above the pipe to show, give the unused headroom back
+  const calm = !snap.openIncidents.length && !explain && !showTruth;
   const desc = `Pipeline schematic, 200 km west to east with 12 sensor nodes. ${snap.openIncidents.length} open incident(s); ${snap.activeAlarms.length} active raw alarm(s); trust: ${snap.trust.filter((t) => t.cls === 'GOOD').length} good, ${snap.trust.filter((t) => t.cls === 'UNCERTAIN').length} uncertain, ${snap.trust.filter((t) => t.cls === 'BAD').length} bad.`;
 
   return (
-    <div ref={wrap} style={{ position: 'relative', width: '100%' }} onMouseLeave={() => setTip(null)}>
+    <div ref={wrap} style={{ position: 'relative', width: '100%', marginTop: calm ? -64 : 0, transition: 'margin-top 400ms var(--ease)' }} onMouseLeave={() => setTip(null)}>
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" role="img" aria-label={desc} style={{ display: 'block' }}>
         {/* pipe */}
         <rect x={X0 - 8} y={PY - 13} width={KMX * 200 + 16} height={26} rx={13} fill="var(--pipe)" />
