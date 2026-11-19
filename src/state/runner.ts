@@ -53,10 +53,16 @@ export class SimulationRunner {
   start() {
     if (this.started) return;
     this.started = true;
-    const go = () => { this.last = performance.now(); raf(this.loop); };
+    let looping = false;
+    const go = () => {
+      if (looping) return; // the splash event and the fallback timer must not start two loops
+      looping = true;
+      this.last = performance.now();
+      raf(this.loop);
+    };
     if (typeof document !== 'undefined' && document.documentElement.classList.contains('splash-on')) {
       window.addEventListener('deltatrace:splash-done', go, { once: true });
-      setTimeout(() => { if (this.last === 0) go(); }, 12000);
+      setTimeout(go, 12000);
     } else go();
   }
 
@@ -87,7 +93,7 @@ export class SimulationRunner {
 
   /** Continuous time for smooth animation. */
   visualTime(): number {
-    return this.sim.t + (this.running ? this.acc : 0);
+    return this.sim.t + (this.running ? Math.min(this.acc, 1) : 0);
   }
 
   private push(force = false) {
@@ -137,6 +143,7 @@ export class SimulationRunner {
     this.push(true);
   }
   reset(seed?: number) {
+    if (this.replay) this.speed = this.replay.speedBefore;
     this.replay = null;
     const st = useConfigStore.getState();
     if (seed !== undefined) st.setSeed(seed);
@@ -148,32 +155,38 @@ export class SimulationRunner {
     this.push(true);
   }
   inject(spec: FaultSpec): number {
+    this.endReplayForLiveAction();
     const id = this.sim.injectFault(spec);
     this.push(true);
     return id;
   }
   runScenario(sc: Scenario) {
+    this.endReplayForLiveAction();
     if (sc.clockSkew) this.setConfig({ clockSkew: sc.clockSkew });
     this.sim.runScenario(sc);
     toast(`Scenario ${sc.id} “${sc.name}” scripted`, 'info');
     this.push(true);
   }
   clearFault(id: number) {
+    this.endReplayForLiveAction();
     this.sim.clearFault(id);
     this.push(true);
   }
   clearAll() {
+    this.endReplayForLiveAction();
     this.sim.clearAllFaults();
     this.push(true);
   }
   /** Runtime engine config (also persisted unless it is a transient toggle). */
   setConfig(patch: Partial<Config>) {
+    this.endReplayForLiveAction();
     this.sim.setConfig(patch);
     const transient = Object.keys(patch).every((k) => ['engineEnabled', 'clockSkew', 'groupingMode', 'trustGating'].includes(k));
     useConfigStore.getState().patch(patch, !transient);
     this.push(true);
   }
   emergencyReset() {
+    this.endReplayForLiveAction();
     this.sim.clearAllFaults();
     if (!this.sim.cfg.engineEnabled || this.sim.cfg.clockSkew) this.setConfig({ engineEnabled: true, clockSkew: 0 });
     this.speed = 1;
@@ -185,6 +198,7 @@ export class SimulationRunner {
   /* ----------------------------------------------------------- operator ops */
 
   disposition(incId: number, d: Disposition) {
+    this.endReplayForLiveAction();
     useLogStore.getState().setDisposition(incId, d);
     const inc = this.sim.agg.find(incId);
     if (inc) {
@@ -197,12 +211,14 @@ export class SimulationRunner {
     this.push(true);
   }
   restoreAdvisory(id: number) {
+    this.endReplayForLiveAction();
     this.sim.agg.restoreAdvisory(id);
     this.sim.version++;
     this.push(true);
   }
 
   approve(p: ChangeProposal, persist = true): ChangeRecord {
+    this.endReplayForLiveAction();
     const before = { ...p.old };
     this.sim.setConfig(applyProposal(p));
     useConfigStore.getState().patch(applyProposal(p), persist);
@@ -231,6 +247,7 @@ export class SimulationRunner {
   }
 
   revert(rec: ChangeRecord) {
+    this.endReplayForLiveAction();
     this.sim.setConfig(revertSetting(rec.cls, rec.before));
     useConfigStore.getState().patch(revertSetting(rec.cls, rec.before));
     useLogStore.getState().markReverted(rec.id);
@@ -254,6 +271,10 @@ export class SimulationRunner {
   }
 
   /* --------------------------------------------------------- replay (0.25×) */
+
+  private endReplayForLiveAction() {
+    if (this.replay) this.finishReplay();
+  }
 
   canReplay(): boolean {
     return this.sim.t > 30 && this.sim.timeline.some((e) => e.kind === 'fault');

@@ -89,16 +89,14 @@ export default function Demo() {
     if (!started) return;
     const id = window.setInterval(() => {
       if (!auto) return;
-      setLeft((l) => {
-        if (l <= 1) {
-          if (i < stepRef.current.length - 1) setTimeout(() => go(i + 1), 0);
-          return 0;
-        }
-        return l - 1;
-      });
+      setLeft((l) => Math.max(0, l - 1));
     }, 1000 / Math.max(1, speed));
     return () => clearInterval(id);
-  }, [started, auto, i, go, speed]);
+  }, [started, auto, speed]);
+  // advance exactly once when the countdown reaches zero (no side effects inside the state updater)
+  useEffect(() => {
+    if (started && auto && left === 0 && i < stepRef.current.length - 1) go(i + 1);
+  }, [started, auto, left, i, go]);
   useEffect(
     () => () => {
       timers.current.forEach(clearTimeout);

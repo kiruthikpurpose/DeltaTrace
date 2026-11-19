@@ -3,7 +3,9 @@ import { C, PdfDoc, hex, savePdf } from './pdf';
 import { clock, mmss } from './format';
 
 const stamp = () => new Date().toISOString().slice(0, 16).replace('T', ' ') + ' UTC';
-const file = (n: string) => `deltatrace-${n}-${new Date().toISOString().slice(0, 10)}.pdf`;
+/** File names use the viewer's local date (a UTC date is a day off near midnight in many time zones). */
+const localDate = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const file = (n: string) => `deltatrace-${n}-${localDate()}.pdf`;
 const CLS: Record<string, string> = { 'process-event': 'Process event', 'instrument-fault': 'Instrument fault', 'data-integrity': 'Data integrity', 'needs-review': 'Needs review' };
 const f1 = (n: number | null | undefined) => (n === null || n === undefined || !Number.isFinite(n) ? '-' : n.toFixed(1));
 const f0 = (n: number | null | undefined) => (n === null || n === undefined || !Number.isFinite(n) ? '-' : n.toFixed(0));

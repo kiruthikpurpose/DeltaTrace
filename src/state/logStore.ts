@@ -9,6 +9,10 @@ export interface SavedRun {
   at: number;
   timeline: unknown[];
 }
+// saved data may be corrupted or from an older version: never let it crash start-up
+const asArray = <T,>(v: T[]): T[] => (Array.isArray(v) ? v : []);
+const asObject = <T extends object>(v: T): T => (v && typeof v === 'object' && !Array.isArray(v) ? v : ({} as T));
+
 interface LogState {
   changeLog: ChangeRecord[];
   dispositions: Record<number, Disposition>;
@@ -20,9 +24,9 @@ interface LogState {
   clear: () => void;
 }
 export const useLogStore = create<LogState>((set, get) => ({
-  changeLog: load<ChangeRecord[]>('changeLog', []),
-  dispositions: load<Record<number, Disposition>>('dispositions', {}),
-  savedRuns: load<SavedRun[]>('savedRuns', []),
+  changeLog: asArray(load<ChangeRecord[]>('changeLog', [])),
+  dispositions: asObject(load<Record<number, Disposition>>('dispositions', {})),
+  savedRuns: asArray(load<SavedRun[]>('savedRuns', [])),
   addChange: (c) => {
     const changeLog = [c, ...get().changeLog].slice(0, 200);
     save('changeLog', changeLog);

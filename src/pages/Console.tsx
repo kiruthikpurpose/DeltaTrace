@@ -43,7 +43,13 @@ export default function Console({ embedded }: { embedded?: boolean } = {}) {
   const replaying = useSimStore((s) => s.replaying);
   const narrow = useMedia('(max-width: 720px)');
   const ui = useUiStore();
-  const open = ui.selectedIncident !== null ? [...snap.openIncidents, ...snap.recentClosed].find((i) => i.id === ui.selectedIncident) ?? null : null;
+  // the drawer opens only from this page; a selection made on the Incidents page must not pop it open here
+  const [drawerId, setDrawerId] = useState<number | null>(null);
+  const openDrawer = (id: number) => {
+    setDrawerId(id);
+    ui.set({ selectedIncident: id });
+  };
+  const open = drawerId !== null ? [...snap.openIncidents, ...snap.recentClosed].find((i) => i.id === drawerId) ?? null : null;
   const stripSeries = useMemo(() => ui.stripChannels.map((ch, i) => ({ id: `pt${ch}`, label: CHANNELS[ch].tag, ch, color: PT_COLORS[i % PT_COLORS.length] })), [ui.stripChannels]);
   const flowSeries = useMemo(
     () => [
@@ -152,9 +158,9 @@ export default function Console({ embedded }: { embedded?: boolean } = {}) {
               <div className="inc-list" aria-label="Open incidents" aria-live="polite">
                 {incidents.length === 0 && <EmptyState icon={<Waves />} title="No open incidents">Inject a fault to create one.</EmptyState>}
                 {incidents.map((i) => (
-                  <IncidentCard key={i.id} inc={i} selected={ui.selectedIncident === i.id} onOpen={(id) => ui.set({ selectedIncident: id })} />
+                  <IncidentCard key={i.id} inc={i} selected={ui.selectedIncident === i.id} onOpen={openDrawer} />
                 ))}
-                {incidents.length === 0 && snap.recentClosed.slice(0, 2).map((i) => <IncidentCard key={i.id} inc={i} onOpen={(id) => ui.set({ selectedIncident: id })} />)}
+                {incidents.length === 0 && snap.recentClosed.slice(0, 2).map((i) => <IncidentCard key={i.id} inc={i} onOpen={openDrawer} />)}
               </div>
               <AdvisoryShelf advisories={snap.advisories} />
             </>
@@ -202,7 +208,7 @@ export default function Console({ embedded }: { embedded?: boolean } = {}) {
         </div>
       </Card>
 
-      <Drawer open={open !== null} wide onClose={() => ui.set({ selectedIncident: null })} title={open ? `Incident ${incId(open.id)}` : 'Incident'}>
+      <Drawer open={open !== null} wide onClose={() => setDrawerId(null)} title={open ? `Incident ${incId(open.id)}` : 'Incident'}>
         {open && <IncidentDetail inc={open} compact />}
       </Drawer>
     </div>

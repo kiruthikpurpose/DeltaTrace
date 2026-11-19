@@ -53,7 +53,9 @@ export function AppShell() {
         useUiStore.getState().set({ paletteOpen: !useUiStore.getState().paletteOpen });
         return;
       }
-      if (isTyping(e) || e.ctrlKey || e.metaKey || e.altKey) return;
+      if (isTyping(e) || e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
+      // single-key shortcuts must not act behind a modal dialog or the palette (side drawers are fine)
+      if (document.querySelector('.modal[aria-modal="true"], .palette')) return;
       const k = e.key;
       if (k === ' ') {
         if ((e.target as HTMLElement).tagName === 'BUTTON') return;
@@ -92,7 +94,7 @@ export function AppShell() {
           <span>DeltaTrace Live</span>
         </footer>
       </div>
-            <FaultDrawer />
+      <FaultDrawer />
       <CommandPalette />
       <ToastHost />
       <Modal open={shortcuts} onClose={() => useUiStore.getState().set({ shortcutsOpen: false })} title="Keyboard shortcuts" footer={<button className="btn primary" onClick={() => useUiStore.getState().set({ shortcutsOpen: false })}>Close</button>}>
@@ -114,12 +116,15 @@ export function AppShell() {
 
 function ReplayBanner() {
   const caption = useSimStore((s) => s.caption);
-  useSimStore((s) => s.tick);
-  runner.replayCaption();
+  const tick = useSimStore((s) => s.tick);
+  // advance the narration after render, never by updating the store during render
+  useEffect(() => {
+    runner.replayCaption();
+  }, [tick]);
   return (
     <div className="replay-banner" role="status">
       <b>REPLAY 0.25×</b>
-      <span className="grow">{useSimStore.getState().caption || caption}</span>
+      <span className="grow">{caption}</span>
       <button className="btn sm" onClick={() => runner.stopReplay()}>Stop replay</button>
     </div>
   );

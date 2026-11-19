@@ -3,7 +3,6 @@ import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { CHANNELS, type Disposition, type Incident } from '../../engine';
 import { runner } from '../../state/runner';
-import { useLogStore } from '../../state/logStore';
 import { alarmId, fmt, incId, mmss } from '../../utils/format';
 import { incidentReport } from '../../utils/reports';
 import { ClassBadge } from '../ui/Badge';
@@ -20,7 +19,8 @@ const DISP: { id: Disposition; label: string; icon: JSX.Element }[] = [
 
 export function IncidentDetail({ inc, compact }: { inc: Incident; compact?: boolean }) {
   const sim = runner.sim;
-  const disposition = useLogStore((s) => s.dispositions[inc.id]) ?? inc.disposition;
+  // the live incident carries its own label; saved labels are keyed by number, which restarts every run
+  const disposition = inc.disposition;
   const alarms = useMemo(() => inc.alarmIds.map((id) => sim.agg.alarms.get(id)!).filter(Boolean), [inc.alarmIds.length, inc.id, sim]);
   const cfg = sim.cfg;
   const base = `ns=2;s=DeltaTrace.Incident.${String(inc.id).padStart(3, '0')}`;

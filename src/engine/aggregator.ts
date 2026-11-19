@@ -35,6 +35,7 @@ export class Aggregator {
   reset() {
     this.open = [];
     this.archive = [];
+    this.pendingCls.clear();
     this.advisories = [];
     this.alarms.clear();
     this.nextId = 1;
@@ -210,6 +211,7 @@ export class Aggregator {
     into.openedAt = Math.min(into.openedAt, other.openedAt);
     into.lastAlarmAt = Math.max(into.lastAlarmAt, other.lastAlarmAt);
     this.open = this.open.filter((x) => x !== other);
+    this.pendingCls.delete(other.id);
     this.hooks.audit('DeltaTrace', 'merge', `${incLabel(other.id)} merged into ${incLabel(into.id)}`, incLabel(into.id));
   }
 
@@ -230,6 +232,7 @@ export class Aggregator {
   private close(inc: Incident, t: number, reason: string) {
     inc.status = 'closed';
     inc.closedAt = t;
+    this.pendingCls.delete(inc.id);
     inc.version++;
     this.open = this.open.filter((x) => x !== inc);
     this.archive.unshift(inc);

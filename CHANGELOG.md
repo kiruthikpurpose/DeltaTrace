@@ -4,6 +4,18 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+### Fixed
+- Operator labels (dispositions) were looked up by incident number, which restarts at INC-001 every run, so an old label could appear on a new, unrelated incident. The detail view now shows the live incident's own label.
+- Corrupted or outdated saved data in the browser could stop the app from starting. Saved settings, seed and logs are now validated key by key and fall back to defaults.
+- Actions taken during a replay (injecting a fault, approving a setting, labelling an incident, changing settings) went into the temporary replay copy and were lost. They now end the replay and apply to the live run. Resetting during a replay also restores the previous speed.
+- The simulation loop could start twice (double speed) if the launch screen finished after the start-up fallback timer.
+- Guided Demo could skip a step at high speed because the step advance ran inside a state update.
+- Single-key shortcuts fired behind modal dialogs; holding a key repeated fault injections.
+- Selecting an incident on the Incidents page made the Live Console open its incident drawer on arrival.
+- The replay banner updated the store while rendering.
+- Smooth-time animation could run up to 30 s ahead of the engine on slow devices.
+- PDF file names used the UTC date, which is a day off near midnight in many time zones.
+
 ### Changed
 - Project named "DeltaTrace: Trust-Aware Alarm Grouping and Tuning for Pipelines"; README gains motivation, applications and roadmap sections.
 
