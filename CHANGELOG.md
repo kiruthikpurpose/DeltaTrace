@@ -5,6 +5,8 @@ All notable changes to this project are documented here.
 ## [Unreleased]
 
 ### Fixed
+- The engine kept every raw alarm in memory for the whole session; alarms of evicted incidents and advisories are now released.
+- Benchmark results are kept when you leave the page, so returning is instant instead of re-running every scenario.
 - Operator labels (dispositions) were looked up by incident number, which restarts at INC-001 every run, so an old label could appear on a new, unrelated incident. The detail view now shows the live incident's own label.
 - Corrupted or outdated saved data in the browser could stop the app from starting. Saved settings, seed and logs are now validated key by key and fall back to defaults.
 - Actions taken during a replay (injecting a fault, approving a setting, labelling an incident, changing settings) went into the temporary replay copy and were lost. They now end the replay and apply to the live run. Resetting during a replay also restores the previous speed.

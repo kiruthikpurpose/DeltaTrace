@@ -138,7 +138,10 @@ export class Aggregator {
         version: 0,
       };
       this.advisories.push(adv);
-      if (this.advisories.length > 600) this.advisories.shift();
+      if (this.advisories.length > 600) {
+        const gone = this.advisories.shift();
+        if (gone) this.alarms.delete(gone.alarmId); // keep the alarm index bounded on long runs
+      }
       a.role = 'advisory';
       a.advisoryId = adv.id;
       this.advisoryTimes.push(t);
@@ -236,7 +239,10 @@ export class Aggregator {
     inc.version++;
     this.open = this.open.filter((x) => x !== inc);
     this.archive.unshift(inc);
-    if (this.archive.length > 200) this.archive.pop();
+    if (this.archive.length > 200) {
+      const gone = this.archive.pop();
+      if (gone) for (const id of gone.alarmIds) this.alarms.delete(id); // evicted incidents release their alarms
+    }
     this.hooks.wb(`DeltaTrace.Incident.${String(inc.id).padStart(3, '0')}.Status`, 'closed', 'incident');
     this.hooks.audit('DeltaTrace', 'incident-close', `${incLabel(inc.id)} closed (${reason}); ${inc.alarmIds.length} alarms retained`, incLabel(inc.id));
     this.hooks.event('incident-close', `Incident ${incLabel(inc.id)} closed`, inc.id);

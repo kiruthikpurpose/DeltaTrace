@@ -73,13 +73,19 @@ function Confusion({ m }: { m: BenchResult['confusion'] }) {
   );
 }
 
+// results survive navigation, so returning to the page is instant instead of re-running every scenario
+let cache: { seeds: number; res: BenchResult | null; exps: Record<string, ExperimentResult> } = { seeds: 5, res: null, exps: {} };
+
 export default function Benchmarks() {
-  const [seeds, setSeeds] = useState(5);
+  const [seeds, setSeeds] = useState(cache.seeds);
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState(0);
   const [label, setLabel] = useState('');
-  const [res, setRes] = useState<BenchResult | null>(null);
-  const [exps, setExps] = useState<Record<string, ExperimentResult>>({});
+  const [res, setRes] = useState<BenchResult | null>(cache.res);
+  const [exps, setExps] = useState<Record<string, ExperimentResult>>(cache.exps);
+  useEffect(() => {
+    cache = { seeds, res, exps };
+  }, [seeds, res, exps]);
   const [expBusy, setExpBusy] = useState<string | null>(null);
 
   const run = async () => {
@@ -95,7 +101,7 @@ export default function Benchmarks() {
   // show real results on first visit instead of an empty card
   const auto = useRef(false);
   useEffect(() => {
-    if (auto.current || import.meta.env.MODE === 'test') return;
+    if (auto.current || cache.res || import.meta.env.MODE === 'test') return;
     auto.current = true;
     void run();
   }, []);
